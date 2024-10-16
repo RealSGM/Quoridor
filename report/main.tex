@@ -1,0 +1,49 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Created by Pierre Chardaire. Updated by Rudy Lapeer
+% Last update: 10/2024
+% Change the option between square brackets
+% depending on the document you have to write:
+%
+% review      for the literature review + plan
+% progress    for the progress report
+% final       for the final report
+% 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\documentclass[review]{cmpreport}
+
+\usepackage{rotating}
+\usepackage{subfloat}
+\usepackage{color}
+\usepackage{pdfpages}
+
+%\setkeys{Gin}{draft}
+
+\title{AI for playing classical strategy games}
+
+\author{Ace Shyjan}
+
+\registration{100390438}
+\supervisor{Dr Michal Mackiewicz}
+
+\ccode{CMP-6013Y}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{document}
+
+\section{Literature Review}
+
+A report was done by \cite{josequoridor} exploring possible algorithms for Quoridor and they investigated the performance and efficiency of three Reinforcement Learning Algorithms against a minimax algorithm as a control/baseline.
+The three algorithms were:
+\begin{itemize}
+    \item Deep Q Network
+    \item Genetic Algorithm
+    \item Monte Carlo Tree Search (Neural Network)
+
+They found that Quoridor was too large and complex to find a terminal solution, so instead they made use of a limited depth to calculate states for the near future. This meant that the algorithm wasn't able to play as well as a human, but it allowed for a starting point for future work.
+\end{itemize}
+
+A minimax algorithm finds the best next move for the current player, assuming that both players play optimally, using an evaluation function. The evaluation function they used was the difference in distance for the pawns to their winning side, using a Breadth-First Search, which was found to be better than a random and greedy player.
+
+\bibliography{reportbib}
+
+\end{document}
