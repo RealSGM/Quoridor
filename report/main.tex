@@ -28,104 +28,104 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{document}
-
-\section{Introduction}
-
-\subsection{Quoridor Rules}
-Quoridor is a classical two-player board game. It is played on a 9x9 tiled board, where each player controls a singular pawn with the end goal being to reach the opponent's starting line. On a player's turn, they are able to do one of 2 actions: move their pawn, or place a fence. Both player's have each 10 fences, which are two tiles wide. Once a fence is placed, it cannot be moved. Fences can be placed on the boundary of any tiles, but must be placed in a position which allows both player's to be able to reach their respective target location. Pawns are allowed to move one tile on their turn, this movement is limited to forwards and backwards, both horizontally and vertically. However, if two pawns are facing adjacent, the pawn in play is allowed to jump over the player, provided that there is no wall in the way, essentially allowing them to jump two tiles in one round, instead of one. 
-
-\subsection{Development}
-For this project, I will be utilizing the Godot Engine, to manage both the game's interface and core gameplay mechanics. For the back-end development, I will be using C\#. Godot does offer its own native scripting language, GDScript, and whilst the language is more tightly integrated and faster when using its regular built-in functions, C\# is more suitable. C\# has access to many libraries due to its popularity, compared to Godot's limited amount of plugins. In addition, C\#'s performance is far superior to GDScript which is necessary for handling complex computations, such as implementing search tree algorithms. Other tools that will be likely used is Aseprite - a graphical sprite editor, which will be used for creating sprites and the user interface.
-
-\subsection{Objectives}
-For this project, my main aim is to create a functioning game of Quoridor in 2D. The user should be able to play against a computer. Some potential features would be to let the user adjust their gameplay experience. Ideas in mind would be: adjusting the border size, computer's difficulty, number of players and adding multiplayer. Some research that will need to be done is on suitable algorithms for the computer to use.
-
-\noindent The primary aim of this project is to develop a functional 2D implementation of Quoridor, where the user can play against a computer opponent. Additional features may include options for users to customize their gameplay experience by adjusting variables such as the \textbf{board size}, the computer's \textbf{difficulty}, the \textbf{number of players}, and possibly incorporating \textbf{multiplayer} functionality. A key aspect of this project will involve researching and implementing suitable algorithms for the computer to effectively simulate intelligent gameplay as well as measuring their performance in game, as multiple players and a higher board size will increase the total calculation time.
-
-\section{Critical Review}
-This critical review will look into several AI algorithms which can be applied to Quoridor. Some algorithms I will be looking into will be: Minimax Algorithm, Monte-Carlo Tree Search (MCTS), and a Genetic Algorithm. The review will be looking into the performances of these algorithms as Quoridor is a dual-objective game - placing fences and moving the pawn.
-
-\subsection{Minimax Algorithm with Alpha-Beta Pruning}
-A minimax algorithm, such as covered in \cite{plaat1996best} finds the best next move for the current player. Its aim is to minimize the possible loss for a worst-case scenario whilst maximizing the name the player's own gain (hence \textit{minimax}).
-
-\noindent The algorithm builds a \textbf{Game Tree} which represents all possible moves that the player could do and the outcomes, for the current state of the game. Each node of the tree would represent a possible future game state. In the tree, the leaf nodes use an \textbf{evaluation function} to assign them a score to indicate how favourable that outcome is. In \cite{josequoridor}, the evaluation function they used was the difference in distance for the pawns to their winning side, using a Breadth-First Search, which was found to be better than a random and greedy player.
-
-\noindent Since Quoridor has no terminal solution, due to its complex nature, optimisations will have to be done. In \cite{josequoridor}, they made use of a limited depth to calculate states for the near future. This meant that the algorithm wasn't able to play as well as a human, but it allowed for a starting point for future work. They used made use of an \textbf{alpha-beta pruning} algorithm. This is a form of optimisation where we prune/remove branches of the \textit{Game Tree} which we know to be irrelevant for the final decision. This allows for the skipping of unnecessary evaluations which improves the efficiency of the search.
-
-\subsection{Genetic Algorithms}
-"Genetic Algorithms are a family of computational models inspired by evolution" \cite{mathew2012genetic}. They can be used when the solution space is vast, such as for Quoridor and work by simulating the process of evolution by generating a population of possible solutions and evolving them over time to find the best/most optimal solution. A set of candidate solutions (\textbf{chromosomes}) act as the population, where each chromosome represents a possible solution. A \textbf{fitness function} evaluates how \textit{fit} each solution is and assigns it a score. There is a \textbf{selection} process, which determines the population for the next stage, in here, the "fitter" chromosomes are more likely to be selected. There is a \textbf{crossover} process where two parent chromosomes create an offspring. This is a mimic of biological reproduction. Another process involved with genetic algorithms is \textbf{mutation}, where a random change in the chromosome occurs, this allows for genetic diversity allowing for the algorithm to explore further by introducing new possibilities. Theses processes are repeated across multiple generations to find a sufficient fitness score.
-
-\noindent In \cite{josequoridor}, they were exploring and comparing possible algorithms for Quoridor AI. They used a minimax algorithm as a baseline and one of the algorithms they looked into was a \textit{Genetic Algorithm}.
-They adopted the minimax algorithm and established a set of heuristic situation evaluation functions, one for the player and opponent: Manhattan distance, Perpendicular Pawn Distance, Breadth-First Search (BFS), Dijkstra's Shortest Path. They found that the Genetic Algorithm was an effective algorithm as it could evolve potential problems over multiple generations. However, it struggled with more strategic plays, such as wall placements due to Quoridor's complexity.
-
-\subsection{Monte-Carlo Tree Search}
-One paper by \cite{respall2018monte} dedicated the MCTS algorithm for Quoridor. 
-MCTS works by simulating random play-outs from possible moves. It selects moves that lead to the most successful outcomes. A search tree is built where nodes represent game states and edges mean actions. MCTS cycles through four stages: \textbf{Selection}, \textbf{Expansion}, \textbf{Simulation} and \textbf{Backpropagration}.
-
-\subsubsection{Selection}
-In this stage, the tree is traversed, going from the root node, to the leaf nodes. When traversing, we try to balance exploration and exploitation (favouring paths that would yield better results).
-
-\subsubsection{Expansion}
-When a leaf node is reached, one or more child nodes are added to the tree (if it's not a terminal state). Expansion allows for more possible future game states and hence more future outcomes. 
-
-\subsubsection{Simulation}
-Here, with the newly added node(s), we perform a random play-out/simulation of the game until a terminal state is reached. This involves making random possible moves.
-
-\subsection{Backpropagration}
-Then, we update the nodes long the tree path, up to the root. Each node in the path has its visit count updated and its total reward - depending on if it was a win, loss or draw. 
-
-\noindent Since Quoridor is a dual-objective game, the paper by \cite{respall2018monte} found that it was a promising approach as it offered flexibility in navigating its decision space, however improvements in simulation strategies and efficiency is required for optimal performance.
-
-\subsection{Summary}
-In all the reports, the minimax algorithm was consistently used as a baseline for comparison. MCTS, however, demonstrated the most promising results, largely due to its adaptability in handling Quoridor's dual-objective nature. On the other hand, the Genetic Algorithm struggled with this duality, as it was unable to develop strategic play. Nonetheless, implementing and comparing it could offer valuable insights and potentially introduce some interesting dynamics.
-
-\bibliography{reportbib}
-
-\appendix
-\section{Risk Analysis}
-
-\centering
-\resizebox{\textwidth}{!}{
-\begin{tabular}{|p{5cm}|p{2cm}|p{2cm}|p{6cm}|}
-\hline
-\textbf{Risk} & \textbf{Likelihood} & \textbf{Impact} & \textbf{Mitigation Plan} \\ \hline
-Challenges in AI decision-making (dual objectives) & Medium & High & Focus on early AI testing with small-scale prototypes, adjust complexity gradually, and implement simpler fallback logic for AI if needed. \\ \hline
-Difficulty in generating effective AI opponents using Genetic Algorithm & Low & Medium & Use pre-tested libraries or frameworks for Genetic Algorithm, run extensive test cases to ensure quality of opponents, and consider reducing GA scope if issues arise. \\ \hline
-Loss of data or project files & Low & High & Use GitHub regularly \\ \hline
-Bugs with Godot Engine & Medium & Low & Find a workaround or edit the engine as it is open source \\ \hline
-Scope Creep & High & Low & Prioritise each feature and ensure the most important features are added first. \\ \hline
-\end{tabular}
-}
-\newpage
-\section{Gantt Chart for Quoridor Development} \label{ApB}
-\begin{cmpfigure}[htb]{Quoridor Development Gantt Chart \label{pplan}}
-\begin{sideways}
-\newganttchartelement{voidbar}{
-voidbar/.style={
-draw=black,
-top color=black!25,
-bottom color=black!23
-}}
-\begin{ganttchart}[x unit=0.4cm, y unit chart = 2.0cm, y unit title=0.5cm, title height=1.0, vgrid, title label font=\scriptsize,
-canvas/.style={draw=black, dotted},
-/pgfgantt/milestone left shift = 0,
-/pgfgantt/milestone right shift = 0
-]{4}{24}
-\gantttitle{Project schedule for Quoridor development}{24} \\
-\gantttitlelist{4,...,24}{1}\\
-\ganttbar{Literature review}{4}{6}    \\  % elem1 
-\ganttbar{Design phase}{7}{9}       \\  % elem2
-\ganttbar{Coding}{10}{21}     \\  % elem3
-\ganttbar{Testing and Refinement}{21}{22} \\  % elem4
-\ganttbar{Final Adjustments}{23}{24}  \\ % elem5
-
-% Links between the elements
-\ganttlink{elem0}{elem1} 
-\ganttlink{elem1}{elem2} 
-\ganttlink{elem2}{elem3}
-\ganttlink{elem3}{elem4} 
-\end{ganttchart}
-\end{sideways}
-\end{cmpfigure}
-
+	
+	\section{Introduction}
+	
+	\subsection{Quoridor Rules}
+	Quoridor is a classical two-player board game. It is played on a 9x9 tiled board, where each player controls a singular pawn with the end goal being to reach the opponent's starting line. On a player's turn, they are able to do one of 2 actions: move their pawn, or place a fence. Both player's have each 10 fences, which are two tiles wide. Once a fence is placed, it cannot be moved. Fences can be placed on the boundary of any tiles, but must be placed in a position which allows both player's to be able to reach their respective target location. Pawns are allowed to move one tile on their turn, this movement is limited to forwards and backwards, both horizontally and vertically. However, if two pawns are facing adjacent, the pawn in play is allowed to jump over the player, provided that there is no wall in the way, essentially allowing them to jump two tiles in one round, instead of one. 
+	
+	\subsection{Development}
+	For this project, I will be utilizing the Godot Engine, to manage both the game's interface and core gameplay mechanics. For the back-end development, I will be using both C\# and GDScript. I shall be using C\# for the main algorithms due to superior performance to GDScript. I will be using GDScript for the general code as it is tightly integrated with Godot and it is faster when using built-in functions. Other tools that will be likely used is Aseprite - a graphical sprite editor, which will be used for creating sprites and the user interface.
+	
+	\subsection{Objectives}
+	For this project, my main aim is to create a functioning game of Quoridor in 2D. The user should be able to play against a computer. Some potential features would be to let the user adjust their gameplay experience. Ideas in mind would be: adjusting the border size, computer's difficulty, number of players and adding multiplayer. Some research that will need to be done is on suitable algorithms for the computer to use.
+	
+	\noindent The primary aim of this project is to develop a functional 2D implementation of Quoridor, where the user can play against a computer opponent. Additional features may include options for users to customize their gameplay experience by adjusting variables such as the \textbf{board size}, the computer's \textbf{difficulty}, the \textbf{number of players}, and possibly incorporating \textbf{multiplayer} functionality. A key aspect of this project will involve researching and implementing suitable algorithms for the computer to effectively simulate intelligent gameplay as well as measuring their performance in game, as multiple players and a higher board size will increase the total calculation time.
+	
+	\section{Critical Review}
+	This critical review will look into several AI algorithms which can be applied to Quoridor. Some algorithms I will be looking into will be: Minimax Algorithm, Monte-Carlo Tree Search (MCTS), and a Genetic Algorithm. The review will be looking into the performances of these algorithms as Quoridor is a dual-objective game - placing fences and moving the pawn.
+	
+	\subsection{Minimax Algorithm with Alpha-Beta Pruning}
+	A minimax algorithm, such as covered in \cite{plaat1996best} finds the best next move for the current player. Its aim is to minimize the possible loss for a worst-case scenario whilst maximizing the name the player's own gain (hence \textit{minimax}).
+	
+	\noindent The algorithm builds a \textbf{Game Tree} which represents all possible moves that the player could do and the outcomes, for the current state of the game. Each node of the tree would represent a possible future game state. In the tree, the leaf nodes use an \textbf{evaluation function} to assign them a score to indicate how favourable that outcome is. In \cite{josequoridor}, the evaluation function they used was the difference in distance for the pawns to their winning side, using a Breadth-First Search, which was found to be better than a random and greedy player.
+	
+	\noindent Since Quoridor has no terminal solution, due to its complex nature, optimisations will have to be done. In \cite{josequoridor}, they made use of a limited depth to calculate states for the near future. This meant that the algorithm wasn't able to play as well as a human, but it allowed for a starting point for future work. They used made use of an \textbf{alpha-beta pruning} algorithm. This is a form of optimisation where we prune/remove branches of the \textit{Game Tree} which we know to be irrelevant for the final decision. This allows for the skipping of unnecessary evaluations which improves the efficiency of the search.
+	
+	\subsection{Genetic Algorithms}
+	"Genetic Algorithms are a family of computational models inspired by evolution" \cite{mathew2012genetic}. They can be used when the solution space is vast, such as for Quoridor and work by simulating the process of evolution by generating a population of possible solutions and evolving them over time to find the best/most optimal solution. A set of candidate solutions (\textbf{chromosomes}) act as the population, where each chromosome represents a possible solution. A \textbf{fitness function} evaluates how \textit{fit} each solution is and assigns it a score. There is a \textbf{selection} process, which determines the population for the next stage, in here, the "fitter" chromosomes are more likely to be selected. There is a \textbf{crossover} process where two parent chromosomes create an offspring. This is a mimic of biological reproduction. Another process involved with genetic algorithms is \textbf{mutation}, where a random change in the chromosome occurs, this allows for genetic diversity allowing for the algorithm to explore further by introducing new possibilities. Theses processes are repeated across multiple generations to find a sufficient fitness score.
+	
+	\noindent In \cite{josequoridor}, they were exploring and comparing possible algorithms for Quoridor AI. They used a minimax algorithm as a baseline and one of the algorithms they looked into was a \textit{Genetic Algorithm}.
+	They adopted the minimax algorithm and established a set of heuristic situation evaluation functions, one for the player and opponent: Manhattan distance, Perpendicular Pawn Distance, Breadth-First Search (BFS), Dijkstra's Shortest Path. They found that the Genetic Algorithm was an effective algorithm as it could evolve potential problems over multiple generations. However, it struggled with more strategic plays, such as wall placements due to Quoridor's complexity.
+	
+	\subsection{Monte-Carlo Tree Search}
+	One paper by \cite{respall2018monte} dedicated the MCTS algorithm for Quoridor. 
+	MCTS works by simulating random play-outs from possible moves. It selects moves that lead to the most successful outcomes. A search tree is built where nodes represent game states and edges mean actions. MCTS cycles through four stages: \textbf{Selection}, \textbf{Expansion}, \textbf{Simulation} and \textbf{Backpropagration}.
+	
+	\subsubsection{Selection}
+	In this stage, the tree is traversed, going from the root node, to the leaf nodes. When traversing, we try to balance exploration and exploitation (favouring paths that would yield better results).
+	
+	\subsubsection{Expansion}
+	When a leaf node is reached, one or more child nodes are added to the tree (if it's not a terminal state). Expansion allows for more possible future game states and hence more future outcomes. 
+	
+	\subsubsection{Simulation}
+	Here, with the newly added node(s), we perform a random play-out/simulation of the game until a terminal state is reached. This involves making random possible moves.
+	
+	\subsection{Backpropagration}
+	Then, we update the nodes long the tree path, up to the root. Each node in the path has its visit count updated and its total reward - depending on if it was a win, loss or draw. 
+	
+	\noindent Since Quoridor is a dual-objective game, the paper by \cite{respall2018monte} found that it was a promising approach as it offered flexibility in navigating its decision space, however improvements in simulation strategies and efficiency is required for optimal performance.
+	
+	\subsection{Summary}
+	In all the reports, the minimax algorithm was consistently used as a baseline for comparison. MCTS, however, demonstrated the most promising results, largely due to its adaptability in handling Quoridor's dual-objective nature. On the other hand, the Genetic Algorithm struggled with this duality, as it was unable to develop strategic play. Nonetheless, implementing and comparing it could offer valuable insights and potentially introduce some interesting dynamics.
+	
+	\bibliography{reportbib}
+	
+	\appendix
+	\section{Risk Analysis}
+	
+	\centering
+	\resizebox{\textwidth}{!}{
+		\begin{tabular}{|p{5cm}|p{2cm}|p{2cm}|p{6cm}|}
+			\hline
+			\textbf{Risk} & \textbf{Likelihood} & \textbf{Impact} & \textbf{Mitigation Plan} \\ \hline
+			Challenges in AI decision-making (dual objectives) & Medium & High & Focus on early AI testing with small-scale prototypes, adjust complexity gradually, and implement simpler fallback logic for AI if needed. \\ \hline
+			Difficulty in generating effective AI opponents using Genetic Algorithm & Low & Medium & Use pre-tested libraries or frameworks for Genetic Algorithm, run extensive test cases to ensure quality of opponents, and consider reducing GA scope if issues arise. \\ \hline
+			Loss of data or project files & Low & High & Use GitHub regularly \\ \hline
+			Bugs with Godot Engine & Medium & Low & Find a workaround or edit the engine as it is open source \\ \hline
+			Scope Creep & High & Low & Prioritise each feature and ensure the most important features are added first. \\ \hline
+		\end{tabular}
+	}
+	\newpage
+	\section{Gantt Chart for Quoridor Development} \label{ApB}
+	\begin{cmpfigure}[htb]{Quoridor Development Gantt Chart \label{pplan}}
+		\begin{sideways}
+			\newganttchartelement{voidbar}{
+				voidbar/.style={
+					draw=black,
+					top color=black!25,
+					bottom color=black!23
+			}}
+			\begin{ganttchart}[x unit=0.4cm, y unit chart = 2.0cm, y unit title=0.5cm, title height=1.0, vgrid, title label font=\scriptsize,
+				canvas/.style={draw=black, dotted},
+				/pgfgantt/milestone left shift = 0,
+				/pgfgantt/milestone right shift = 0
+				]{4}{24}
+				\gantttitle{Project schedule for Quoridor development}{24} \\
+				\gantttitlelist{4,...,24}{1}\\
+				\ganttbar{Literature review}{4}{6}    \\  % elem1 
+				\ganttbar{Design phase}{7}{9}       \\  % elem2
+				\ganttbar{Coding}{10}{21}     \\  % elem3
+				\ganttbar{Testing and Refinement}{21}{22} \\  % elem4
+				\ganttbar{Final Adjustments}{23}{24}  \\ % elem5
+				
+				% Links between the elements
+				\ganttlink{elem0}{elem1} 
+				\ganttlink{elem1}{elem2} 
+				\ganttlink{elem2}{elem3}
+				\ganttlink{elem3}{elem4} 
+			\end{ganttchart}
+		\end{sideways}
+	\end{cmpfigure}
+	
 \end{document}
