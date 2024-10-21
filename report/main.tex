@@ -15,8 +15,7 @@
 \usepackage{subfloat}
 \usepackage{color}
 \usepackage{pdfpages}
-
-%\setkeys{Gin}{draft}
+\usepackage{graphicx}
 
 \title{AI for playing classical strategy games - Quoridor}
 
@@ -81,5 +80,52 @@ Then, we update the nodes long the tree path, up to the root. Each node in the p
 In all the reports, the minimax algorithm was consistently used as a baseline for comparison. MCTS, however, demonstrated the most promising results, largely due to its adaptability in handling Quoridor's dual-objective nature. On the other hand, the Genetic Algorithm struggled with this duality, as it was unable to develop strategic play. Nonetheless, implementing and comparing it could offer valuable insights and potentially introduce some interesting dynamics.
 
 \bibliography{reportbib}
+
+\appendix
+\section{Risk Analysis}
+
+\centering
+\resizebox{\textwidth}{!}{
+\begin{tabular}{|p{5cm}|p{2cm}|p{2cm}|p{6cm}|}
+\hline
+\textbf{Risk} & \textbf{Likelihood} & \textbf{Impact} & \textbf{Mitigation Plan} \\ \hline
+Challenges in AI decision-making (dual objectives) & Medium & High & Focus on early AI testing with small-scale prototypes, adjust complexity gradually, and implement simpler fallback logic for AI if needed. \\ \hline
+Difficulty in generating effective AI opponents using Genetic Algorithm & Low & Medium & Use pre-tested libraries or frameworks for Genetic Algorithm, run extensive test cases to ensure quality of opponents, and consider reducing GA scope if issues arise. \\ \hline
+Loss of data or project files & Low & High & Use GitHub regularly \\ \hline
+Bugs with Godot Engine & Medium & Low & Find a workaround or edit the engine as it is open source \\ \hline
+Scope Creep & High & Low & Prioritise each feature and ensure the most important features are added first. \\ \hline
+\end{tabular}
+}
+\newpage
+\section{Gantt Chart for Quoridor Development} \label{ApB}
+\begin{cmpfigure}[htb]{Quoridor Development Gantt Chart \label{pplan}}
+\begin{sideways}
+\newganttchartelement{voidbar}{
+voidbar/.style={
+draw=black,
+top color=black!25,
+bottom color=black!23
+}}
+\begin{ganttchart}[x unit=0.4cm, y unit chart = 2.0cm, y unit title=0.5cm, title height=1.0, vgrid, title label font=\scriptsize,
+canvas/.style={draw=black, dotted},
+/pgfgantt/milestone left shift = 0,
+/pgfgantt/milestone right shift = 0
+]{4}{24}
+\gantttitle{Project schedule for Quoridor development}{24} \\
+\gantttitlelist{4,...,24}{1}\\
+\ganttbar{Literature review}{4}{6}    \\  % elem1 
+\ganttbar{Design phase}{7}{9}       \\  % elem2
+\ganttbar{Coding}{10}{21}     \\  % elem3
+\ganttbar{Testing and Refinement}{21}{22} \\  % elem4
+\ganttbar{Final Adjustments}{23}{24}  \\ % elem5
+
+% Links between the elements
+\ganttlink{elem0}{elem1} 
+\ganttlink{elem1}{elem2} 
+\ganttlink{elem2}{elem3}
+\ganttlink{elem3}{elem4} 
+\end{ganttchart}
+\end{sideways}
+\end{cmpfigure}
 
 \end{document}
