@@ -1,0 +1,114 @@
+[gd_scene load_steps=7 format=3 uid="uid://3pm4tnfcx00r"]
+
+[ext_resource type="Theme" uid="uid://gl4viqpfcsgn" path="res://resources/main_theme.tres" id="1_vt156"]
+[ext_resource type="Script" path="res://scenes/tile/tile.gd" id="2_bfrq8"]
+[ext_resource type="StyleBox" uid="uid://cue3j7ivreusm" path="res://resources/fence/fence_focus.tres" id="3_iayid"]
+[ext_resource type="StyleBox" uid="uid://c6r5krky1pues" path="res://resources/fence/fence_normal.tres" id="3_naqnf"]
+[ext_resource type="StyleBox" uid="uid://8bjcyjmqqxs7" path="res://resources/fence/fence_disabled.tres" id="4_jtt8u"]
+[ext_resource type="StyleBox" uid="uid://ftbivfna5m8m" path="res://resources/fence/fence_hover.tres" id="5_l3x8i"]
+
+[node name="Tile" type="Control" node_paths=PackedStringArray("tile_button", "north_button", "south_button", "east_button", "west_button")]
+custom_minimum_size = Vector2(80, 80)
+layout_mode = 3
+anchors_preset = 0
+offset_right = 64.0
+offset_bottom = 64.0
+theme = ExtResource("1_vt156")
+script = ExtResource("2_bfrq8")
+tile_button = NodePath("TileButton")
+north_button = NodePath("FenceButtons/North")
+south_button = NodePath("FenceButtons/South")
+east_button = NodePath("FenceButtons/East")
+west_button = NodePath("FenceButtons/West")
+
+[node name="TileButton" type="Button" parent="."]
+custom_minimum_size = Vector2(64, 64)
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -4.0
+offset_top = -4.0
+offset_right = 4.0
+offset_bottom = 4.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="FenceButtons" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="North" type="Button" parent="FenceButtons"]
+custom_minimum_size = Vector2(80, 8)
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -40.0
+offset_right = 40.0
+offset_bottom = 8.0
+grow_horizontal = 2
+theme_override_styles/focus = ExtResource("3_iayid")
+theme_override_styles/disabled = ExtResource("4_jtt8u")
+theme_override_styles/hover = ExtResource("5_l3x8i")
+theme_override_styles/normal = ExtResource("3_naqnf")
+
+[node name="South" type="Button" parent="FenceButtons"]
+custom_minimum_size = Vector2(80, 8)
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -40.0
+offset_top = -8.0
+offset_right = 40.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_styles/focus = ExtResource("3_iayid")
+theme_override_styles/disabled = ExtResource("4_jtt8u")
+theme_override_styles/hover = ExtResource("5_l3x8i")
+theme_override_styles/normal = ExtResource("3_naqnf")
+
+[node name="East" type="Button" parent="FenceButtons"]
+custom_minimum_size = Vector2(8, 80)
+layout_mode = 1
+anchors_preset = 6
+anchor_left = 1.0
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_left = -8.0
+offset_top = -40.0
+offset_bottom = 40.0
+grow_horizontal = 0
+grow_vertical = 2
+theme_override_styles/focus = ExtResource("3_iayid")
+theme_override_styles/disabled = ExtResource("4_jtt8u")
+theme_override_styles/hover = ExtResource("5_l3x8i")
+theme_override_styles/normal = ExtResource("3_naqnf")
+
+[node name="West" type="Button" parent="FenceButtons"]
+custom_minimum_size = Vector2(8, 80)
+layout_mode = 1
+anchors_preset = 4
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_top = -40.0
+offset_right = 8.0
+offset_bottom = 40.0
+grow_vertical = 2
+theme_override_styles/focus = ExtResource("3_iayid")
+theme_override_styles/disabled = ExtResource("4_jtt8u")
+theme_override_styles/hover = ExtResource("5_l3x8i")
+theme_override_styles/normal = ExtResource("3_naqnf")
+
+[connection signal="pressed" from="TileButton" to="." method="_on_tile_button_pressed"]
