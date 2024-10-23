@@ -1,3 +1,14 @@
-[gd_resource type="Theme" format=3 uid="uid://gl4viqpfcsgn"]
+[gd_resource type="Theme" load_steps=6 format=3 uid="uid://gl4viqpfcsgn"]
+
+[ext_resource type="StyleBox" uid="uid://xjrxqguwd6gy" path="res://resources/tile/tile_normal.tres" id="1_c0x0w"]
+[ext_resource type="StyleBox" uid="uid://bjh8jjbxy7ek5" path="res://resources/tile/tile_disabled.tres" id="1_i4ac2"]
+[ext_resource type="StyleBox" uid="uid://v1kyd2jp1ujl" path="res://resources/tile/tile_hover.tres" id="1_qg5oe"]
+[ext_resource type="StyleBox" uid="uid://bllty5u7x0nmb" path="res://resources/tile/tile_focus.tres" id="2_mwcma"]
+[ext_resource type="StyleBox" uid="uid://c6l644kbapyt4" path="res://resources/tile/tile_pressed.tres" id="2_pkp3j"]
 
 [resource]
+Button/styles/disabled = ExtResource("1_i4ac2")
+Button/styles/focus = ExtResource("2_mwcma")
+Button/styles/hover = ExtResource("1_qg5oe")
+Button/styles/normal = ExtResource("1_c0x0w")
+Button/styles/pressed = ExtResource("2_pkp3j")
