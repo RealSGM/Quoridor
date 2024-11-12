@@ -1,14 +1,56 @@
-[gd_resource type="Theme" load_steps=6 format=3 uid="uid://gl4viqpfcsgn"]
+[gd_resource type="Theme" load_steps=9 format=3 uid="uid://gl4viqpfcsgn"]
 
-[ext_resource type="StyleBox" uid="uid://xjrxqguwd6gy" path="res://resources/tile/tile_normal.tres" id="1_c0x0w"]
-[ext_resource type="StyleBox" uid="uid://bjh8jjbxy7ek5" path="res://resources/tile/tile_disabled.tres" id="1_i4ac2"]
-[ext_resource type="StyleBox" uid="uid://v1kyd2jp1ujl" path="res://resources/tile/tile_hover.tres" id="1_qg5oe"]
-[ext_resource type="StyleBox" uid="uid://bllty5u7x0nmb" path="res://resources/tile/tile_focus.tres" id="2_mwcma"]
-[ext_resource type="StyleBox" uid="uid://c6l644kbapyt4" path="res://resources/tile/tile_pressed.tres" id="2_pkp3j"]
+[ext_resource type="FontFile" uid="uid://ckckkqwc7krsd" path="res://assets/fonts/Roboto-Thin.ttf" id="1_mrfqh"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_m55hu"]
+bg_color = Color(0.226707, 0.226708, 0.226707, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_mc3wm"]
+bg_color = Color(0.2, 0.2, 0.2, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_28rd0"]
+bg_color = Color(0.219608, 0.219608, 0.219608, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_nl1xb"]
+bg_color = Color(0.180392, 0.180392, 0.180392, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_b4kis"]
+bg_color = Color(0.109804, 0.109804, 0.109804, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_fgkes"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_qnscp"]
+bg_color = Color(0.105882, 0.105882, 0.109804, 1)
 
 [resource]
-Button/styles/disabled = ExtResource("1_i4ac2")
-Button/styles/focus = ExtResource("2_mwcma")
-Button/styles/hover = ExtResource("1_qg5oe")
-Button/styles/normal = ExtResource("1_c0x0w")
-Button/styles/pressed = ExtResource("2_pkp3j")
+Button/font_sizes/font_size = 48
+Button/fonts/font = ExtResource("1_mrfqh")
+Button/styles/disabled = SubResource("StyleBoxFlat_m55hu")
+Button/styles/focus = SubResource("StyleBoxFlat_mc3wm")
+Button/styles/hover = SubResource("StyleBoxFlat_28rd0")
+Button/styles/normal = SubResource("StyleBoxFlat_nl1xb")
+Button/styles/pressed = SubResource("StyleBoxFlat_b4kis")
+Label/font_sizes/font_size = 48
+Label/fonts/font = ExtResource("1_mrfqh")
+OptionButton/font_sizes/font_size = 48
+OptionButton/fonts/font = ExtResource("1_mrfqh")
+OptionButton/icons/arrow = null
+OptionButton/icons/icon = null
+PopupMenu/font_sizes/font_separator_size = 16
+PopupMenu/font_sizes/font_size = 16
+PopupMenu/font_sizes/title_font_size = 16
+PopupMenu/fonts/font = ExtResource("1_mrfqh")
+PopupMenu/icons/checked = null
+PopupMenu/icons/checked_disabled = null
+PopupMenu/icons/close = null
+PopupMenu/icons/close_pressed = null
+PopupMenu/icons/radio_checked = null
+PopupMenu/icons/radio_checked_disabled = null
+PopupMenu/icons/radio_unchecked = null
+PopupMenu/icons/radio_unchecked_disabled = null
+PopupMenu/icons/submenu = null
+PopupMenu/icons/submenu_mirrored = null
+PopupMenu/icons/unchecked = null
+PopupMenu/icons/unchecked_disabled = null
+PopupMenu/styles/hover = SubResource("StyleBoxFlat_fgkes")
+PopupMenu/styles/panel = SubResource("StyleBoxFlat_qnscp")
