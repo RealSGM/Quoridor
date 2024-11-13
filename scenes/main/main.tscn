@@ -1,4 +1,4 @@
-[gd_scene load_steps=7 format=3 uid="uid://c4r5qdtra0728"]
+[gd_scene load_steps=8 format=3 uid="uid://c4r5qdtra0728"]
 
 [ext_resource type="Script" path="res://scenes/main/main.gd" id="1_52hxr"]
 [ext_resource type="Theme" uid="uid://gl4viqpfcsgn" path="res://resources/main_theme.tres" id="1_vniis"]
@@ -11,6 +11,8 @@ expand_margin_top = 8.0
 expand_margin_right = 8.0
 expand_margin_bottom = 8.0
 
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_v2esl"]
+
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ayg4q"]
 bg_color = Color(0.105882, 0.105882, 0.109804, 1)
 
@@ -21,7 +23,7 @@ expand_margin_top = 32.0
 expand_margin_right = 32.0
 expand_margin_bottom = 32.0
 
-[node name="SceneHandler" type="Control" node_paths=PackedStringArray("main_menu", "play_menu", "multiplayer_menu", "board_options_menu", "play_button", "exit_button", "singleplayer_button", "multiplayer_button", "play_back_button", "local_button", "online_button", "multiplayer_back_button", "grid_container")]
+[node name="SceneHandler" type="Control" node_paths=PackedStringArray("main_menu", "play_menu", "multiplayer_menu", "board_options_menu", "play_button", "exit_button", "singleplayer_button", "multiplayer_button", "play_back_button", "local_button", "online_button", "multiplayer_back_button", "start_game_button", "board_options_back_button", "grid_container")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -42,6 +44,8 @@ play_back_button = NodePath("Background/Foreground/PlayMenu/VBC/BackButton")
 local_button = NodePath("Background/Foreground/MultiplayerMenu/VBC/LocalButton")
 online_button = NodePath("Background/Foreground/MultiplayerMenu/VBC/OnlineButton")
 multiplayer_back_button = NodePath("Background/Foreground/MultiplayerMenu/VBC/BackButton")
+start_game_button = NodePath("Background/Foreground/BoardOptionsMenu/VBC/MenuButtonsContainer/VBoxContainer/StartGameButton")
+board_options_back_button = NodePath("Background/Foreground/BoardOptionsMenu/VBC/MenuButtonsContainer/VBoxContainer/BackButton")
 grid_container = NodePath("BoardContainer/GridContainer")
 
 [node name="Background" type="ColorRect" parent="."]
@@ -120,6 +124,7 @@ alignment = 1
 
 [node name="SingleplayerButton" type="Button" parent="Background/Foreground/PlayMenu/VBC"]
 layout_mode = 2
+disabled = true
 text = "Singleplayer"
 
 [node name="MultiplayerButton" type="Button" parent="Background/Foreground/PlayMenu/VBC"]
@@ -166,7 +171,6 @@ layout_mode = 2
 text = "Back"
 
 [node name="BoardOptionsMenu" type="PanelContainer" parent="Background/Foreground"]
-visible = false
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -174,9 +178,9 @@ anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
 offset_left = -205.0
-offset_top = -28.5
+offset_top = -28.0
 offset_right = 205.0
-offset_bottom = 28.5
+offset_bottom = 29.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_55vop")
@@ -184,32 +188,166 @@ theme_override_styles/panel = SubResource("StyleBoxFlat_55vop")
 [node name="VBC" type="VBoxContainer" parent="Background/Foreground/BoardOptionsMenu"]
 custom_minimum_size = Vector2(256, 0)
 layout_mode = 2
-theme_override_constants/separation = 8
+theme_override_constants/separation = 16
 alignment = 1
 
-[node name="HBoxContainer" type="HBoxContainer" parent="Background/Foreground/BoardOptionsMenu/VBC"]
+[node name="BoardOptions" type="PanelContainer" parent="Background/Foreground/BoardOptionsMenu/VBC"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxTexture_v2esl")
+
+[node name="BoardVBC" type="VBoxContainer" parent="Background/Foreground/BoardOptionsMenu/VBC/BoardOptions"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="PlayerOneContainer" type="VBoxContainer" parent="Background/Foreground/BoardOptionsMenu/VBC/BoardOptions/BoardVBC"]
 layout_mode = 2
 
-[node name="Panel" type="PanelContainer" parent="Background/Foreground/BoardOptionsMenu/VBC/HBoxContainer"]
+[node name="PlayerOneName" type="HBoxContainer" parent="Background/Foreground/BoardOptionsMenu/VBC/BoardOptions/BoardVBC/PlayerOneContainer"]
+custom_minimum_size = Vector2(512, 0)
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Panel" type="PanelContainer" parent="Background/Foreground/BoardOptionsMenu/VBC/BoardOptions/BoardVBC/PlayerOneContainer/PlayerOneName"]
+custom_minimum_size = Vector2(320, 0)
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_ayg4q")
 
-[node name="Label" type="Label" parent="Background/Foreground/BoardOptionsMenu/VBC/HBoxContainer/Panel"]
+[node name="Label" type="Label" parent="Background/Foreground/BoardOptionsMenu/VBC/BoardOptions/BoardVBC/PlayerOneContainer/PlayerOneName/Panel"]
 layout_mode = 2
-text = " Board Size "
+text = "Player 1 Name"
+horizontal_alignment = 1
 
-[node name="OptionButton" type="OptionButton" parent="Background/Foreground/BoardOptionsMenu/VBC/HBoxContainer"]
+[node name="LineEdit" type="LineEdit" parent="Background/Foreground/BoardOptionsMenu/VBC/BoardOptions/BoardVBC/PlayerOneContainer/PlayerOneName"]
+custom_minimum_size = Vector2(320, 0)
 layout_mode = 2
+size_flags_horizontal = 3
+text = "Player One"
+
+[node name="PlayerOneColour" type="HBoxContainer" parent="Background/Foreground/BoardOptionsMenu/VBC/BoardOptions/BoardVBC/PlayerOneContainer"]
+custom_minimum_size = Vector2(512, 0)
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Panel" type="PanelContainer" parent="Background/Foreground/BoardOptionsMenu/VBC/BoardOptions/BoardVBC/PlayerOneContainer/PlayerOneColour"]
+custom_minimum_size = Vector2(320, 0)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_ayg4q")
+
+[node name="Label" type="Label" parent="Background/Foreground/BoardOptionsMenu/VBC/BoardOptions/BoardVBC/PlayerOneContainer/PlayerOneColour/Panel"]
+layout_mode = 2
+text = "Player 1 Colour"
+horizontal_alignment = 1
+
+[node name="OptionButton" type="OptionButton" parent="Background/Foreground/BoardOptionsMenu/VBC/BoardOptions/BoardVBC/PlayerOneContainer/PlayerOneColour"]
+custom_minimum_size = Vector2(320, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+selected = 0
+item_count = 4
+popup/item_0/text = "Red"
+popup/item_1/text = "Green"
+popup/item_1/id = 1
+popup/item_2/text = "Blue"
+popup/item_2/id = 2
+popup/item_3/text = " Yellow"
+popup/item_3/id = 3
+script = ExtResource("3_58fea")
+
+[node name="PlayerTwoContainer" type="VBoxContainer" parent="Background/Foreground/BoardOptionsMenu/VBC/BoardOptions/BoardVBC"]
+layout_mode = 2
+
+[node name="PlayerTwoName" type="HBoxContainer" parent="Background/Foreground/BoardOptionsMenu/VBC/BoardOptions/BoardVBC/PlayerTwoContainer"]
+custom_minimum_size = Vector2(512, 0)
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Panel" type="PanelContainer" parent="Background/Foreground/BoardOptionsMenu/VBC/BoardOptions/BoardVBC/PlayerTwoContainer/PlayerTwoName"]
+custom_minimum_size = Vector2(320, 0)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_ayg4q")
+
+[node name="Label" type="Label" parent="Background/Foreground/BoardOptionsMenu/VBC/BoardOptions/BoardVBC/PlayerTwoContainer/PlayerTwoName/Panel"]
+layout_mode = 2
+text = "Player 2 Name"
+horizontal_alignment = 1
+
+[node name="LineEdit" type="LineEdit" parent="Background/Foreground/BoardOptionsMenu/VBC/BoardOptions/BoardVBC/PlayerTwoContainer/PlayerTwoName"]
+custom_minimum_size = Vector2(320, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Player Two"
+placeholder_text = "Name..."
+
+[node name="PlayerTwoColour" type="HBoxContainer" parent="Background/Foreground/BoardOptionsMenu/VBC/BoardOptions/BoardVBC/PlayerTwoContainer"]
+custom_minimum_size = Vector2(512, 0)
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Panel" type="PanelContainer" parent="Background/Foreground/BoardOptionsMenu/VBC/BoardOptions/BoardVBC/PlayerTwoContainer/PlayerTwoColour"]
+custom_minimum_size = Vector2(320, 0)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_ayg4q")
+
+[node name="Label" type="Label" parent="Background/Foreground/BoardOptionsMenu/VBC/BoardOptions/BoardVBC/PlayerTwoContainer/PlayerTwoColour/Panel"]
+layout_mode = 2
+text = "Player 2 Colour"
+horizontal_alignment = 1
+
+[node name="OptionButton" type="OptionButton" parent="Background/Foreground/BoardOptionsMenu/VBC/BoardOptions/BoardVBC/PlayerTwoContainer/PlayerTwoColour"]
+custom_minimum_size = Vector2(320, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+selected = 1
+item_count = 4
+popup/item_0/text = "Red"
+popup/item_1/text = "Green"
+popup/item_1/id = 1
+popup/item_2/text = "Blue"
+popup/item_2/id = 2
+popup/item_3/text = " Yellow"
+popup/item_3/id = 3
+script = ExtResource("3_58fea")
+
+[node name="BoardSizeContainer" type="HBoxContainer" parent="Background/Foreground/BoardOptionsMenu/VBC/BoardOptions/BoardVBC"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Panel" type="PanelContainer" parent="Background/Foreground/BoardOptionsMenu/VBC/BoardOptions/BoardVBC/BoardSizeContainer"]
+custom_minimum_size = Vector2(320, 0)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_ayg4q")
+
+[node name="Label" type="Label" parent="Background/Foreground/BoardOptionsMenu/VBC/BoardOptions/BoardVBC/BoardSizeContainer/Panel"]
+layout_mode = 2
+text = "Board Size"
+horizontal_alignment = 1
+
+[node name="OptionButton" type="OptionButton" parent="Background/Foreground/BoardOptionsMenu/VBC/BoardOptions/BoardVBC/BoardSizeContainer"]
+custom_minimum_size = Vector2(320, 0)
+layout_mode = 2
+size_flags_horizontal = 3
 selected = 1
 item_count = 3
-popup/item_0/text = "  7 * 7"
-popup/item_1/text = "  9 * 9"
+popup/item_0/text = "7 * 7"
+popup/item_1/text = "9 * 9"
 popup/item_1/id = 1
 popup/item_2/text = "11 * 11"
 popup/item_2/id = 2
 script = ExtResource("3_58fea")
 
-[node name="BackButton" type="Button" parent="Background/Foreground/BoardOptionsMenu"]
+[node name="MenuButtonsContainer" type="PanelContainer" parent="Background/Foreground/BoardOptionsMenu/VBC"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_55vop")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Background/Foreground/BoardOptionsMenu/VBC/MenuButtonsContainer"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="StartGameButton" type="Button" parent="Background/Foreground/BoardOptionsMenu/VBC/MenuButtonsContainer/VBoxContainer"]
+layout_mode = 2
+text = "Start Game"
+
+[node name="BackButton" type="Button" parent="Background/Foreground/BoardOptionsMenu/VBC/MenuButtonsContainer/VBoxContainer"]
 layout_mode = 2
 text = "Back"
 

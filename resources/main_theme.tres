@@ -6,7 +6,7 @@
 bg_color = Color(0.226707, 0.226708, 0.226707, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_mc3wm"]
-bg_color = Color(0.2, 0.2, 0.2, 1)
+bg_color = Color(0.180392, 0.180392, 0.180392, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_28rd0"]
 bg_color = Color(0.219608, 0.219608, 0.219608, 1)
@@ -32,6 +32,8 @@ Button/styles/normal = SubResource("StyleBoxFlat_nl1xb")
 Button/styles/pressed = SubResource("StyleBoxFlat_b4kis")
 Label/font_sizes/font_size = 48
 Label/fonts/font = ExtResource("1_mrfqh")
+LineEdit/font_sizes/font_size = 48
+LineEdit/fonts/font = ExtResource("1_mrfqh")
 OptionButton/font_sizes/font_size = 48
 OptionButton/fonts/font = ExtResource("1_mrfqh")
 OptionButton/icons/arrow = null

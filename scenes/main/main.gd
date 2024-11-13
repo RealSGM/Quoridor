@@ -22,6 +22,10 @@ extends Control
 @export var online_button: Button
 @export var multiplayer_back_button: Button
 
+@export_category("Board Options")
+@export var start_game_button: Button
+@export var board_options_back_button: Button
+
 @export_category("Board")
 @export var grid_container: GridContainer
 
@@ -46,9 +50,20 @@ func setup_menus() -> void:
 	multiplayer_button.pressed.connect(_on_menu_button_pressed.bind(multiplayer_menu))
 	play_back_button.pressed.connect(_on_back_button_pressed)
 	
-	#local_button.pressed
 	#online_button.pressed
+	local_button.pressed.connect(_on_menu_button_pressed.bind(board_options_menu))
 	multiplayer_back_button.pressed.connect(_on_back_button_pressed)
+	
+	start_game_button.pressed.connect(_on_start_game_pressed)
+	board_options_back_button.pressed.connect(_on_back_button_pressed)
+
+
+func setup_board() -> void:
+	grid_container.columns = board_size
+	for i: int in range(board_size * board_size):
+		var tile: Tile = tile_resource.instantiate()
+		tile.set_disabled(true)
+		grid_container.add_child(tile, true)
 
 
 func _on_menu_button_pressed(menu: PanelContainer) -> void:
@@ -62,9 +77,6 @@ func _on_back_button_pressed() -> void:
 	menu_stack.pop_back()
 	menu_stack.back().show()
 
-func setup_board() -> void:
-	grid_container.columns = board_size
-	for i: int in range(board_size * board_size):
-		var tile: Tile = tile_resource.instantiate()
-		tile.set_disabled(true)
-		grid_container.add_child(tile, true)
+
+func _on_start_game_pressed() -> void:
+	pass
