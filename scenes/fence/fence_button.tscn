@@ -1,0 +1,20 @@
+[gd_scene load_steps=5 format=3 uid="uid://rfqpiq385m6l"]
+
+[ext_resource type="StyleBox" uid="uid://cue3j7ivreusm" path="res://resources/fence/fence_focus.tres" id="1_yvjva"]
+[ext_resource type="StyleBox" uid="uid://8bjcyjmqqxs7" path="res://resources/fence/fence_disabled.tres" id="2_2flaf"]
+[ext_resource type="StyleBox" uid="uid://ftbivfna5m8m" path="res://resources/fence/fence_hover.tres" id="3_12f5i"]
+[ext_resource type="StyleBox" uid="uid://c6r5krky1pues" path="res://resources/fence/fence_normal.tres" id="4_dqfgy"]
+
+[node name="FenceButton" type="Button"]
+custom_minimum_size = Vector2(16, 16)
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = -1136.0
+offset_bottom = -632.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/focus = ExtResource("1_yvjva")
+theme_override_styles/disabled = ExtResource("2_2flaf")
+theme_override_styles/hover = ExtResource("3_12f5i")
+theme_override_styles/normal = ExtResource("4_dqfgy")

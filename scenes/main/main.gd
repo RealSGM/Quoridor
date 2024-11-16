@@ -1,7 +1,5 @@
 extends Control
 
-@export var board_size: int = 9
-
 @export_category("Menus")
 @export var main_menu: PanelContainer
 @export var play_menu: PanelContainer
@@ -25,19 +23,21 @@ extends Control
 @export_category("Board Options")
 @export var start_game_button: Button
 @export var board_options_back_button: Button
-
-@export_category("Board")
-@export var grid_container: GridContainer
+@export var size_option_button: OptionButton
+@export var size_options: Array[int] = [7, 9, 11]
 
 var menu_stack: Array = []
+var board: Board
 
 @onready var menus: Array[PanelContainer] = [main_menu, play_menu, multiplayer_menu, board_options_menu]
-@onready var tile_resource: Resource = Resources.get_resource('tile')
- 
+
+
 func _ready() -> void:
 	setup_menus()
 
 
+## Setup the menus, ensure all panels are hidden on launch
+## Connect all buttons to appropriate signals
 func setup_menus() -> void:
 	menus.map(func(menu: PanelContainer): menu.hide())
 	main_menu.show()
@@ -56,27 +56,36 @@ func setup_menus() -> void:
 	
 	start_game_button.pressed.connect(_on_start_game_pressed)
 	board_options_back_button.pressed.connect(_on_back_button_pressed)
+	
+	setup_board_sizes()
 
 
-func setup_board() -> void:
-	grid_container.columns = board_size
-	for i: int in range(board_size * board_size):
-		var tile: Tile = tile_resource.instantiate()
-		tile.set_disabled(true)
-		grid_container.add_child(tile, true)
+## Setup the option button for the board sizes
+func setup_board_sizes() -> void:
+	for board_size_option: int in size_options:
+		size_option_button.add_item(str(board_size_option) + " * " + str(board_size_option))
+	size_option_button.selected = 1
+	size_option_button.clear_radio_boxes()
 
+# Signals ----------------------------------------------------------------------
 
+## Hide previous menu, add new panel to stack
 func _on_menu_button_pressed(menu: PanelContainer) -> void:
 	menu_stack.back().hide()
 	menu_stack.append(menu)
 	menu.show()
 
 
+## Hide current menu, pop stack and reveal last shown
 func _on_back_button_pressed() -> void:
 	menu_stack.back().hide()
 	menu_stack.pop_back()
 	menu_stack.back().show()
 
 
+## Generate the board
 func _on_start_game_pressed() -> void:
-	pass
+	board_options_menu.hide()
+	board = Resources.get_resource("board").instantiate()
+	board.setup_board(size_options[size_option_button.selected])
+	add_child(board, true)

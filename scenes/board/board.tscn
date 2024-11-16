@@ -1,0 +1,59 @@
+[gd_scene load_steps=3 format=3 uid="uid://g12um5raoqio"]
+
+[ext_resource type="Script" path="res://scenes/board/board.gd" id="1_u3jtc"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_pufkf"]
+bg_color = Color(0.105882, 0.105882, 0.109804, 1)
+expand_margin_left = 32.0
+expand_margin_top = 32.0
+expand_margin_right = 32.0
+expand_margin_bottom = 32.0
+
+[node name="Board" type="Control" node_paths=PackedStringArray("tile_container", "fence_button_container")]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_u3jtc")
+tile_container = NodePath("BoardContainer/TileContainer")
+fence_button_container = NodePath("FenceButtonContainer")
+
+[node name="BoardContainer" type="PanelContainer" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -20.0
+offset_top = -20.0
+offset_right = 20.0
+offset_bottom = 20.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_pufkf")
+
+[node name="TileContainer" type="GridContainer" parent="BoardContainer"]
+layout_mode = 2
+theme_override_constants/h_separation = 32
+theme_override_constants/v_separation = 32
+columns = 9
+
+[node name="FenceButtonContainer" type="GridContainer" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -20.0
+offset_top = -20.0
+offset_right = 20.0
+offset_bottom = 20.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/h_separation = 80
+theme_override_constants/v_separation = 80
+columns = 9

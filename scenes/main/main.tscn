@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=3 uid="uid://c4r5qdtra0728"]
+[gd_scene load_steps=7 format=3 uid="uid://c4r5qdtra0728"]
 
 [ext_resource type="Script" path="res://scenes/main/main.gd" id="1_52hxr"]
 [ext_resource type="Theme" uid="uid://gl4viqpfcsgn" path="res://resources/main_theme.tres" id="1_vniis"]
@@ -16,14 +16,7 @@ expand_margin_bottom = 8.0
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ayg4q"]
 bg_color = Color(0.105882, 0.105882, 0.109804, 1)
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_pufkf"]
-bg_color = Color(0.105882, 0.105882, 0.109804, 1)
-expand_margin_left = 32.0
-expand_margin_top = 32.0
-expand_margin_right = 32.0
-expand_margin_bottom = 32.0
-
-[node name="SceneHandler" type="Control" node_paths=PackedStringArray("main_menu", "play_menu", "multiplayer_menu", "board_options_menu", "play_button", "exit_button", "singleplayer_button", "multiplayer_button", "play_back_button", "local_button", "online_button", "multiplayer_back_button", "start_game_button", "board_options_back_button", "grid_container")]
+[node name="SceneHandler" type="Control" node_paths=PackedStringArray("main_menu", "play_menu", "multiplayer_menu", "board_options_menu", "play_button", "exit_button", "singleplayer_button", "multiplayer_button", "play_back_button", "local_button", "online_button", "multiplayer_back_button", "start_game_button", "board_options_back_button", "size_option_button")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -46,7 +39,7 @@ online_button = NodePath("Background/Foreground/MultiplayerMenu/VBC/OnlineButton
 multiplayer_back_button = NodePath("Background/Foreground/MultiplayerMenu/VBC/BackButton")
 start_game_button = NodePath("Background/Foreground/BoardOptionsMenu/VBC/MenuButtonsContainer/VBoxContainer/StartGameButton")
 board_options_back_button = NodePath("Background/Foreground/BoardOptionsMenu/VBC/MenuButtonsContainer/VBoxContainer/BackButton")
-grid_container = NodePath("BoardContainer/GridContainer")
+size_option_button = NodePath("Background/Foreground/BoardOptionsMenu/VBC/BoardOptions/BoardVBC/BoardSizeContainer/SizeOptionButton")
 
 [node name="Background" type="ColorRect" parent="."]
 layout_mode = 1
@@ -171,6 +164,7 @@ layout_mode = 2
 text = "Back"
 
 [node name="BoardOptionsMenu" type="PanelContainer" parent="Background/Foreground"]
+visible = false
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -322,17 +316,11 @@ layout_mode = 2
 text = "Board Size"
 horizontal_alignment = 1
 
-[node name="OptionButton" type="OptionButton" parent="Background/Foreground/BoardOptionsMenu/VBC/BoardOptions/BoardVBC/BoardSizeContainer"]
+[node name="SizeOptionButton" type="OptionButton" parent="Background/Foreground/BoardOptionsMenu/VBC/BoardOptions/BoardVBC/BoardSizeContainer"]
 custom_minimum_size = Vector2(320, 0)
 layout_mode = 2
 size_flags_horizontal = 3
 selected = 1
-item_count = 3
-popup/item_0/text = "7 * 7"
-popup/item_1/text = "9 * 9"
-popup/item_1/id = 1
-popup/item_2/text = "11 * 11"
-popup/item_2/id = 2
 script = ExtResource("3_58fea")
 
 [node name="MenuButtonsContainer" type="PanelContainer" parent="Background/Foreground/BoardOptionsMenu/VBC"]
@@ -350,25 +338,3 @@ text = "Start Game"
 [node name="BackButton" type="Button" parent="Background/Foreground/BoardOptionsMenu/VBC/MenuButtonsContainer/VBoxContainer"]
 layout_mode = 2
 text = "Back"
-
-[node name="BoardContainer" type="PanelContainer" parent="."]
-visible = false
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -20.0
-offset_top = -20.0
-offset_right = 20.0
-offset_bottom = 20.0
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_pufkf")
-
-[node name="GridContainer" type="GridContainer" parent="BoardContainer"]
-layout_mode = 2
-theme_override_constants/h_separation = 32
-theme_override_constants/v_separation = 32
-columns = 9

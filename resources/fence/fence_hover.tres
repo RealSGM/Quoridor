@@ -2,4 +2,8 @@
 
 [resource]
 bg_color = Color(0.835294, 0.490196, 0.290196, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
 anti_aliasing = false
