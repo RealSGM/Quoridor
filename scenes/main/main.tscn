@@ -16,7 +16,7 @@ expand_margin_bottom = 8.0
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ayg4q"]
 bg_color = Color(0.105882, 0.105882, 0.109804, 1)
 
-[node name="SceneHandler" type="Control" node_paths=PackedStringArray("main_menu", "play_menu", "multiplayer_menu", "board_options_menu", "play_button", "exit_button", "singleplayer_button", "multiplayer_button", "play_back_button", "local_button", "online_button", "multiplayer_back_button", "start_game_button", "board_options_back_button", "size_option_button")]
+[node name="SceneHandler" type="Control" node_paths=PackedStringArray("main_menu", "play_menu", "multiplayer_menu", "board_options_menu", "foreground", "play_button", "exit_button", "singleplayer_button", "multiplayer_button", "play_back_button", "local_button", "online_button", "multiplayer_back_button", "start_game_button", "board_options_back_button", "size_option_button")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -29,6 +29,7 @@ main_menu = NodePath("Background/Foreground/MainMenu")
 play_menu = NodePath("Background/Foreground/PlayMenu")
 multiplayer_menu = NodePath("Background/Foreground/MultiplayerMenu")
 board_options_menu = NodePath("Background/Foreground/BoardOptionsMenu")
+foreground = NodePath("Background/Foreground")
 play_button = NodePath("Background/Foreground/MainMenu/VBC/PlayButton")
 exit_button = NodePath("Background/Foreground/MainMenu/VBC/ExitButton")
 singleplayer_button = NodePath("Background/Foreground/PlayMenu/VBC/SingleplayerButton")
@@ -320,7 +321,6 @@ horizontal_alignment = 1
 custom_minimum_size = Vector2(320, 0)
 layout_mode = 2
 size_flags_horizontal = 3
-selected = 1
 script = ExtResource("3_58fea")
 
 [node name="MenuButtonsContainer" type="PanelContainer" parent="Background/Foreground/BoardOptionsMenu/VBC"]

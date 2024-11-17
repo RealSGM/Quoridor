@@ -1,10 +1,13 @@
 extends Control
 
+const SCALE_STEP: float = 0.25
+
 @export_category("Menus")
 @export var main_menu: PanelContainer
 @export var play_menu: PanelContainer
 @export var multiplayer_menu: PanelContainer
 @export var board_options_menu: PanelContainer
+@export var foreground: ColorRect
 
 @export_category("Main Menu Buttons")
 @export var play_button: Button
@@ -87,5 +90,8 @@ func _on_back_button_pressed() -> void:
 func _on_start_game_pressed() -> void:
 	board_options_menu.hide()
 	board = Resources.get_resource("board").instantiate()
+	
+	var scale_size: Vector2 = Vector2.ONE * ((1 - size_option_button.selected) * SCALE_STEP + 1)
+	board.scale = scale_size
 	board.setup_board(size_options[size_option_button.selected])
-	add_child(board, true)
+	foreground.add_child(board, true)

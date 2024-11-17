@@ -20,6 +20,7 @@ func instance_tiles(board_size) -> void:
 		tile.set_disabled(true)
 		tile_container.add_child(tile, true)
 
+
 ## Set the fence container size and instance the fence buttons under the 
 ## container
 func instance_fence_buttons(fence_size) -> void:
