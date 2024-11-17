@@ -10,15 +10,16 @@ class_name Board extends Control
 @onready var dir_buttons: Array[Button] = [horizontal_button, vertical_button]
 var selected_fence_button: FenceButton = null
 
+
+func _ready() -> void:
+	_on_directional_button_pressed()
+
+
 ## Setup the board with the selected size
 func setup_board(board_size: int) -> void:
 	instance_tiles(board_size)
 	instance_fence_buttons(board_size - 1)
 	tile_container.columns = board_size
-	
-	Global.dir_index = 0
-	horizontal_button.disabled = true
-	vertical_button.disabled = false
 
 
 ## Set the grid container size and instance the tiles under the grid
@@ -40,17 +41,23 @@ func instance_fence_buttons(fence_size) -> void:
 		fence_button_container.add_child(fence_button, true)
 
 
-func _on_fence_button_pressed(fence_button: FenceButton) -> void:
+func set_selected_fence(selected_fence: FenceButton) -> void:
 	if selected_fence_button:
 		selected_fence_button.clear_fences()
-	
-	selected_fence_button = fence_button
+	selected_fence_button = selected_fence
+
+
+# Signals ----------------------------------------------------------------------
+
+func _on_fence_button_pressed(fence_button: FenceButton) -> void:
+	set_selected_fence(fence_button)
 	fence_button.h_fence.visible = Global.dir_index == 0
 	fence_button.v_fence.visible = Global.dir_index != 0
 
 
 ## Flip the rotation of the fence
 func _on_directional_button_pressed() -> void:
+	set_selected_fence(null)
 	dir_buttons[Global.dir_index].disabled = false
 	Global.dir_index = 1 - Global.dir_index
 	dir_buttons[Global.dir_index].disabled = true

@@ -1,4 +1,4 @@
 extends Node
 
-var dir_index: int = 0
+var dir_index: int = 1
 var board: Board
