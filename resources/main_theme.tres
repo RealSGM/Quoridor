@@ -2,20 +2,20 @@
 
 [ext_resource type="FontFile" uid="uid://ckckkqwc7krsd" path="res://assets/fonts/Roboto-Thin.ttf" id="1_mrfqh"]
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_m55hu"]
-bg_color = Color(0.226707, 0.226708, 0.226707, 1)
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_o64v4"]
+bg_color = Color(0.368627, 0.368627, 0.368627, 1)
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_mc3wm"]
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hb4nq"]
+bg_color = Color(0.368627, 0.368627, 0.368627, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_toy7k"]
+bg_color = Color(0.290196, 0.290196, 0.290196, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_d1377"]
 bg_color = Color(0.180392, 0.180392, 0.180392, 1)
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_28rd0"]
-bg_color = Color(0.219608, 0.219608, 0.219608, 1)
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_nl1xb"]
-bg_color = Color(0.180392, 0.180392, 0.180392, 1)
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_b4kis"]
-bg_color = Color(0.109804, 0.109804, 0.109804, 1)
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ceue7"]
+bg_color = Color(0.101961, 0.101961, 0.101961, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_fgkes"]
 
@@ -25,11 +25,11 @@ bg_color = Color(0.105882, 0.105882, 0.109804, 1)
 [resource]
 Button/font_sizes/font_size = 48
 Button/fonts/font = ExtResource("1_mrfqh")
-Button/styles/disabled = SubResource("StyleBoxFlat_m55hu")
-Button/styles/focus = SubResource("StyleBoxFlat_mc3wm")
-Button/styles/hover = SubResource("StyleBoxFlat_28rd0")
-Button/styles/normal = SubResource("StyleBoxFlat_nl1xb")
-Button/styles/pressed = SubResource("StyleBoxFlat_b4kis")
+Button/styles/disabled = SubResource("StyleBoxFlat_o64v4")
+Button/styles/focus = SubResource("StyleBoxFlat_hb4nq")
+Button/styles/hover = SubResource("StyleBoxFlat_toy7k")
+Button/styles/normal = SubResource("StyleBoxFlat_d1377")
+Button/styles/pressed = SubResource("StyleBoxFlat_ceue7")
 Label/font_sizes/font_size = 48
 Label/fonts/font = ExtResource("1_mrfqh")
 LineEdit/font_sizes/font_size = 48

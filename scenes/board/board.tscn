@@ -1,5 +1,6 @@
-[gd_scene load_steps=3 format=3 uid="uid://g12um5raoqio"]
+[gd_scene load_steps=4 format=3 uid="uid://g12um5raoqio"]
 
+[ext_resource type="Theme" uid="uid://gl4viqpfcsgn" path="res://resources/main_theme.tres" id="1_4ctk5"]
 [ext_resource type="Script" path="res://scenes/board/board.gd" id="1_u3jtc"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_pufkf"]
@@ -9,20 +10,36 @@ expand_margin_top = 32.0
 expand_margin_right = 32.0
 expand_margin_bottom = 32.0
 
-[node name="Board" type="Control" node_paths=PackedStringArray("tile_container", "fence_button_container")]
+[node name="Board" type="Control" node_paths=PackedStringArray("board_anchor", "tile_container", "fence_button_container", "horizontal_button", "vertical_button")]
 layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("1_4ctk5")
+script = ExtResource("1_u3jtc")
+board_anchor = NodePath("BoardAnchor")
+tile_container = NodePath("BoardAnchor/BoardContainer/TileContainer")
+fence_button_container = NodePath("BoardAnchor/FenceButtonContainer")
+horizontal_button = NodePath("DirectionVBC/HorizontalButton")
+vertical_button = NodePath("DirectionVBC/VerticalButton")
+
+[node name="BoardAnchor" type="Control" parent="."]
+layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
+offset_left = -20.0
+offset_top = -20.0
+offset_right = 20.0
+offset_bottom = 20.0
 grow_horizontal = 2
 grow_vertical = 2
-script = ExtResource("1_u3jtc")
-tile_container = NodePath("BoardContainer/TileContainer")
-fence_button_container = NodePath("FenceButtonContainer")
 
-[node name="BoardContainer" type="PanelContainer" parent="."]
+[node name="BoardContainer" type="PanelContainer" parent="BoardAnchor"]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -37,13 +54,13 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_pufkf")
 
-[node name="TileContainer" type="GridContainer" parent="BoardContainer"]
+[node name="TileContainer" type="GridContainer" parent="BoardAnchor/BoardContainer"]
 layout_mode = 2
 theme_override_constants/h_separation = 32
 theme_override_constants/v_separation = 32
 columns = 9
 
-[node name="FenceButtonContainer" type="GridContainer" parent="."]
+[node name="FenceButtonContainer" type="GridContainer" parent="BoardAnchor"]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -59,3 +76,37 @@ grow_vertical = 2
 theme_override_constants/h_separation = 80
 theme_override_constants/v_separation = 80
 columns = 9
+
+[node name="DirectionVBC" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = -1
+offset_left = 32.0
+offset_top = 32.0
+offset_right = 381.0
+offset_bottom = 219.0
+theme_override_constants/separation = 8
+
+[node name="HorizontalButton" type="Button" parent="DirectionVBC"]
+layout_mode = 2
+text = "Horizontal Fence"
+
+[node name="VerticalButton" type="Button" parent="DirectionVBC"]
+layout_mode = 2
+text = "Vertical Fence"
+
+[node name="Confirm" type="Button" parent="."]
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 32.0
+offset_top = -57.0
+offset_right = 349.0
+offset_bottom = -32.0
+grow_vertical = 0
+text = "Confirm
+"
+
+[connection signal="pressed" from="DirectionVBC/HorizontalButton" to="." method="_on_directional_button_pressed"]
+[connection signal="pressed" from="DirectionVBC/VerticalButton" to="." method="_on_directional_button_pressed"]
+[connection signal="pressed" from="Confirm" to="." method="_on_confirm_pressed"]

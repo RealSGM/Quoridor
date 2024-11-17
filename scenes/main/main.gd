@@ -88,10 +88,13 @@ func _on_back_button_pressed() -> void:
 
 ## Generate the board
 func _on_start_game_pressed() -> void:
-	board_options_menu.hide()
-	board = Resources.get_resource("board").instantiate()
-	
 	var scale_size: Vector2 = Vector2.ONE * ((1 - size_option_button.selected) * SCALE_STEP + 1)
-	board.scale = scale_size
+	board_options_menu.hide()
+	
+	board = Resources.get_resource("board").instantiate()
+	Global.board = board
+	board.board_anchor.scale = scale_size
 	board.setup_board(size_options[size_option_button.selected])
+	
 	foreground.add_child(board, true)
+	
