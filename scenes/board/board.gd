@@ -1,14 +1,32 @@
 class_name Board extends Control
 
+# TODO - Add connections for each tile when it spawns
+# TODO - Add the connections for each fence, both vertical and horizontal
+# TODO - Disable fence buttons depending if it has a horizontal / vertical button
+
 @export_category("Board")
 @export var board_anchor: Control
 @export var tile_container: GridContainer
 @export var fence_button_container: GridContainer
+
+@export_category("User Interface")
 @export var horizontal_button: Button
 @export var vertical_button: Button
+@export var confirm_button: Button
+
+var fence_buttons: Array[FenceButton] = []
 
 @onready var dir_buttons: Array[Button] = [horizontal_button, vertical_button]
-var selected_fence_button: FenceButton = null
+@onready var selected_fence_button: FenceButton = null:
+	set(val):
+		if selected_fence_button:
+			selected_fence_button.clear_fences()
+		selected_fence_button = val
+		set_confirm_button(val, null) # TODO Replace null with the current selected tile
+# TODO Future - Pawn Movement
+@onready var selected_pawn_tile: Tile = null:
+	set(val):
+		selected_pawn_tile = val
 
 
 func _ready() -> void:
@@ -23,7 +41,7 @@ func setup_board(board_size: int) -> void:
 
 
 ## Set the grid container size and instance the tiles under the grid
-func instance_tiles(board_size) -> void:
+func instance_tiles(board_size: int) -> void:
 	var tile_resource: Resource  = Resources.get_resource('tile')
 	for i: int in range(board_size * board_size):
 		var tile: Tile = tile_resource.instantiate()
@@ -33,35 +51,42 @@ func instance_tiles(board_size) -> void:
 
 ## Set the fence container size and instance the fence buttons under the 
 ## container
-func instance_fence_buttons(fence_size) -> void:
+func instance_fence_buttons(fence_size: int) -> void:
 	fence_button_container.columns = fence_size
 	var fence_button_resource: Resource  = Resources.get_resource('fence_button')
 	for i: int in range(fence_size * fence_size):
 		var fence_button: Button = fence_button_resource.instantiate()
+		fence_buttons.append(fence_button)
 		fence_button_container.add_child(fence_button, true)
 
 
-func set_selected_fence(selected_fence: FenceButton) -> void:
-	if selected_fence_button:
-		selected_fence_button.clear_fences()
-	selected_fence_button = selected_fence
+func set_confirm_button(fence_button: FenceButton, tile_button: Tile) -> void:
+	confirm_button.disabled = !(fence_button || tile_button)
 
 
 # Signals ----------------------------------------------------------------------
 
 func _on_fence_button_pressed(fence_button: FenceButton) -> void:
-	set_selected_fence(fence_button)
+	selected_fence_button = fence_button
 	fence_button.h_fence.visible = Global.dir_index == 0
 	fence_button.v_fence.visible = Global.dir_index != 0
 
 
 ## Flip the rotation of the fence
 func _on_directional_button_pressed() -> void:
-	set_selected_fence(null)
+	selected_fence_button = null
 	dir_buttons[Global.dir_index].disabled = false
 	Global.dir_index = 1 - Global.dir_index
 	dir_buttons[Global.dir_index].disabled = true
+	
+	# TODO Loop through all fence buttons and check if with the current direction
+	# whether it should be disabled or not
 
 
 func _on_confirm_pressed() -> void:
-	pass # Replace with function body.
+	if selected_fence_button:
+		selected_fence_button.fence_placed = true
+		selected_fence_button = null
+		# TODO Null the tile connections for the fence being placed
+	elif selected_pawn_tile:
+		pass
