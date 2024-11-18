@@ -1,6 +1,5 @@
 class_name Board extends Control
 
-# TODO - Add connections for each tile when it spawns
 # TODO - Add the connections for each fence, both vertical and horizontal
 # TODO - Disable fence buttons depending if it has a horizontal / vertical button
 
@@ -15,6 +14,7 @@ class_name Board extends Control
 @export var confirm_button: Button
 
 var fence_buttons: Array[FenceButton] = []
+var tile_buttons: Array[Tile] = []
 
 @onready var dir_buttons: Array[Button] = [horizontal_button, vertical_button]
 @onready var selected_fence_button: FenceButton = null:
@@ -47,6 +47,10 @@ func instance_tiles(board_size: int) -> void:
 		var tile: Tile = tile_resource.instantiate()
 		tile.set_disabled(true)
 		tile_container.add_child(tile, true)
+		tile_buttons.append(tile)
+	
+	# TODO - Add connections for each tile when it spawns
+	# Loop through all tiles
 
 
 ## Set the fence container size and instance the fence buttons under the 
