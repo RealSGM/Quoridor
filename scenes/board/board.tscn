@@ -10,7 +10,7 @@ expand_margin_top = 32.0
 expand_margin_right = 32.0
 expand_margin_bottom = 32.0
 
-[node name="Board" type="Control" node_paths=PackedStringArray("board_anchor", "tile_container", "fence_button_container", "horizontal_button", "vertical_button", "confirm_button")]
+[node name="Board" type="Control" node_paths=PackedStringArray("board_anchor", "tile_container", "fence_button_container", "horizontal_button", "vertical_button", "confirm_button", "exit_button")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -24,7 +24,8 @@ tile_container = NodePath("BoardAnchor/BoardContainer/TileContainer")
 fence_button_container = NodePath("BoardAnchor/FenceButtonContainer")
 horizontal_button = NodePath("DirectionVBC/HorizontalButton")
 vertical_button = NodePath("DirectionVBC/VerticalButton")
-confirm_button = NodePath("Confirm")
+confirm_button = NodePath("ConfirmButton")
+exit_button = NodePath("ExitButton")
 
 [node name="BoardAnchor" type="Control" parent="."]
 layout_mode = 1
@@ -96,7 +97,7 @@ text = "Horizontal Fence"
 layout_mode = 2
 text = "Vertical Fence"
 
-[node name="Confirm" type="Button" parent="."]
+[node name="ConfirmButton" type="Button" parent="."]
 layout_mode = 1
 anchors_preset = -1
 anchor_top = 1.0
@@ -109,6 +110,18 @@ grow_vertical = 0
 text = "Confirm
 "
 
+[node name="ExitButton" type="Button" parent="."]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -257.0
+offset_top = 32.0
+offset_right = -32.0
+offset_bottom = 57.0
+grow_horizontal = 0
+text = "Exit to Menu"
+
 [connection signal="pressed" from="DirectionVBC/HorizontalButton" to="." method="_on_directional_button_pressed"]
 [connection signal="pressed" from="DirectionVBC/VerticalButton" to="." method="_on_directional_button_pressed"]
-[connection signal="pressed" from="Confirm" to="." method="_on_confirm_pressed"]
+[connection signal="pressed" from="ConfirmButton" to="." method="_on_confirm_pressed"]

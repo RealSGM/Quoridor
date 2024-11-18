@@ -12,6 +12,7 @@ class_name Board extends Control
 @export var horizontal_button: Button
 @export var vertical_button: Button
 @export var confirm_button: Button
+@export var exit_button: Button
 
 var fence_buttons: Array[FenceButton] = []
 var tile_buttons: Array[Tile] = []
@@ -31,7 +32,7 @@ var tile_buttons: Array[Tile] = []
 
 func _ready() -> void:
 	_on_directional_button_pressed()
-
+	exit_button.pressed.connect(SignalManager.exit_pressed.emit)
 
 ## Setup the board with the selected size
 func setup_board(board_size: int) -> void:

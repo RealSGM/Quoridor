@@ -21,6 +21,10 @@ Resources="*res://autoload/resources.tscn"
 SignalManager="*res://autoload/signal_manager.gd"
 Global="*res://autoload/global.gd"
 
+[debug]
+
+gdscript/warnings/unused_signal=0
+
 [display]
 
 window/size/viewport_width=1920

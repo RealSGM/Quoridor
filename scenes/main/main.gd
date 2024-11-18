@@ -37,14 +37,14 @@ var board: Board
 
 func _ready() -> void:
 	setup_menus()
+	SignalManager.exit_pressed.connect(_on_exit_button_pressed)
 
 
 ## Setup the menus, ensure all panels are hidden on launch
 ## Connect all buttons to appropriate signals
 func setup_menus() -> void:
 	menus.map(func(menu: PanelContainer): menu.hide())
-	main_menu.show()
-	menu_stack.append(main_menu)
+	show_main_menu()
 	
 	play_button.pressed.connect(_on_menu_button_pressed.bind(play_menu))
 	exit_button.pressed.connect(get_tree().quit)
@@ -70,8 +70,13 @@ func setup_board_sizes() -> void:
 	size_option_button.selected = 1
 	size_option_button.clear_radio_boxes()
 
-# Signals ----------------------------------------------------------------------
 
+func show_main_menu() -> void:
+	menu_stack.clear()
+	main_menu.show()
+	menu_stack.append(main_menu)
+
+# Signals ----------------------------------------------------------------------
 ## Hide previous menu, add new panel to stack
 func _on_menu_button_pressed(menu: PanelContainer) -> void:
 	menu_stack.back().hide()
@@ -97,4 +102,8 @@ func _on_start_game_pressed() -> void:
 	board.setup_board(size_options[size_option_button.selected])
 	
 	foreground.add_child(board, true)
-	
+
+
+func _on_exit_button_pressed() -> void:
+	board.queue_free()
+	show_main_menu()

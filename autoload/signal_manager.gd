@@ -1,6 +1,8 @@
 extends Node
 ## Simple Signal Manager, allows for signals to be connected globally across the project
 
+signal exit_pressed
+
 
 ## Helper connect function for when a nodepath is the same as the script
 func connect_signal(signal_name: String, nodepath: Object, method: String) -> void:
