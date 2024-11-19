@@ -38,6 +38,7 @@ func _ready() -> void:
 func setup_board(board_size: int) -> void:
 	instance_tiles(board_size)
 	instance_fence_buttons(board_size - 1)
+	spawn_pawns(board_size)
 
 
 ## Set the grid container size and instance the tiles under the grid
@@ -102,11 +103,16 @@ func update_fence_buttons() -> void:
 	# TODO Implement illegal fence check
 
 
-func spawn_pawns() -> void:
-	var player_1: Pawn = Resources.get_resource("pawn").instantiate()
-	var player_2: Pawn = Resources.get_resource("pawn").instantiate()
-	
+func spawn_pawns(board_size: int) -> void:
+	spawn_pawn(Global.player_one["name"], Global.player_one["color"], board_size / 2)
+	spawn_pawn(Global.player_two["name"], Global.player_two["color"], board_size * (board_size - 0.5))
 
+
+func spawn_pawn(p_name: String, color: Color, pos_index: int) -> void:
+	var pawn: Pawn = Resources.get_resource("pawn").instantiate()
+	pawn.colour = color
+	pawn.player_name = p_name
+	tile_buttons[pos_index].add_child(pawn, true)
 
 # Signals ----------------------------------------------------------------------
 func _on_fence_button_pressed(fence_button: FenceButton) -> void:

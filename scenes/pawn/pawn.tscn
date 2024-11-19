@@ -8,9 +8,9 @@ corner_radius_top_left = 30
 corner_radius_top_right = 30
 corner_radius_bottom_right = 30
 corner_radius_bottom_left = 30
-anti_aliasing = false
 
 [node name="Pawn" type="Panel"]
+modulate = Color(0.847474, 0.847474, 0.847474, 1)
 custom_minimum_size = Vector2(60, 60)
 anchors_preset = 8
 anchor_left = 0.5

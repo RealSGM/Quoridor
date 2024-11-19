@@ -108,6 +108,11 @@ func _on_back_button_pressed() -> void:
 func _on_start_game_pressed() -> void:
 	board_options_menu.hide()
 	
+	Global.player_one['color'] = Global.COLORS[p_one_colours.selected]
+	Global.player_one['name'] = player_one_name.text
+	Global.player_two['color'] = Global.COLORS[p_two_colours.selected]
+	Global.player_two['name'] = player_two_name.text
+	
 	board = Resources.get_resource("board").instantiate()
 	Global.board = board
 	board.board_anchor.scale = Vector2.ONE * ((1 - size_option_button.selected) * SCALE_STEP + 1)
@@ -115,15 +120,13 @@ func _on_start_game_pressed() -> void:
 	
 	foreground.add_child(board, true)
 	
-	Global.player_one['color'] = Global.COLORS[p_one_colours.selected]
-	Global.player_one['name'] = player_one_name.text
-	Global.player_two['color'] = Global.COLORS[p_two_colours.selected]
-	Global.player_two['name'] = player_two_name.text
+	
 
 
 func _on_exit_button_pressed() -> void:
 	board.queue_free()
 	show_main_menu()
+
 
 ## Ensure both players cannot be the same colour.
 func _on_colour_selected(index: int, prev_index: int, other_button: OptionButton) -> void:

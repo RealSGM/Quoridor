@@ -1,10 +1,10 @@
 extends Node
 
 const COLORS: Array[Color] = [
-	Color.RED,
-	Color.GREEN,
-	Color.BLUE,
-	Color.YELLOW,
+	Color.LIGHT_CORAL,
+	Color.LIGHT_GREEN,
+	Color.CORNFLOWER_BLUE,
+	Color.LIGHT_GOLDENROD,
 ]
 
 ## O is horizontal, 1 is vertical
