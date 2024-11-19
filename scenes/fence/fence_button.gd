@@ -1,9 +1,12 @@
 class_name FenceButton extends Button
 
-@export var v_fence: Panel
 @export var h_fence: Panel
+@export var v_fence: Panel
 
 var fence_placed: bool = false
+var dir_is_disabled: Array[bool] = [false, false]
+
+var connections: Array[FenceButton] = [null, null, null, null]
 
 func _ready() -> void:
 	pressed.connect(Global.board._on_fence_button_pressed.bind(self))

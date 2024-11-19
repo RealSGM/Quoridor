@@ -10,7 +10,7 @@
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ym2v4"]
 
-[node name="FenceButton" type="Button" node_paths=PackedStringArray("v_fence", "h_fence")]
+[node name="FenceButton" type="Button" node_paths=PackedStringArray("h_fence", "v_fence")]
 custom_minimum_size = Vector2(16, 16)
 anchors_preset = 8
 anchor_left = 0.5
@@ -28,8 +28,8 @@ theme_override_styles/disabled = ExtResource("2_2flaf")
 theme_override_styles/hover = ExtResource("3_12f5i")
 theme_override_styles/normal = ExtResource("4_dqfgy")
 script = ExtResource("5_3cfjt")
-v_fence = NodePath("VerticalFence")
 h_fence = NodePath("HorizontalFence")
+v_fence = NodePath("VerticalFence")
 
 [node name="HorizontalFence" type="Panel" parent="."]
 layout_mode = 1
@@ -60,5 +60,3 @@ offset_bottom = 80.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_ym2v4")
-
-[connection signal="pressed" from="." to="." method="_on_pressed"]
