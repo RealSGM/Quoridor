@@ -24,8 +24,6 @@ var tile_buttons: Array[Tile] = []
 			selected_fence_button.clear_fences()
 		selected_fence_button = val
 		set_confirm_button(val, null) # TODO Replace null with the current selected tile
-
-
 @onready var selected_pawn_tile: Tile = null:
 	set(val):
 		selected_pawn_tile = val
@@ -102,6 +100,12 @@ func update_fence_buttons() -> void:
 		# Disable mouse filter if the button is disabled
 		fence_button.mouse_filter = Control.MOUSE_FILTER_IGNORE if fence_button.disabled else Control.MOUSE_FILTER_STOP
 	# TODO Implement illegal fence check
+
+
+func spawn_pawns() -> void:
+	var player_1: Pawn = Resources.get_resource("pawn").instantiate()
+	var player_2: Pawn = Resources.get_resource("pawn").instantiate()
+	
 
 
 # Signals ----------------------------------------------------------------------

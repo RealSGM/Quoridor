@@ -27,7 +27,12 @@ const SCALE_STEP: float = 0.25
 @export var start_game_button: Button
 @export var board_options_back_button: Button
 @export var size_option_button: OptionButton
+@export var p_one_colours: OptionButton
+@export var p_two_colours: OptionButton
+@export var player_one_name: LineEdit
+@export var player_two_name: LineEdit
 @export var size_options: Array[int] = [7, 9, 11]
+
 
 var menu_stack: Array = []
 var board: Board
@@ -40,6 +45,7 @@ func _ready() -> void:
 	SignalManager.exit_pressed.connect(_on_exit_button_pressed)
 
 
+## TODO Refactor into scene, make it flexible with other gamemodes
 ## Setup the menus, ensure all panels are hidden on launch
 ## Connect all buttons to appropriate signals
 func setup_menus() -> void:
@@ -59,6 +65,12 @@ func setup_menus() -> void:
 	
 	start_game_button.pressed.connect(_on_start_game_pressed)
 	board_options_back_button.pressed.connect(_on_back_button_pressed)
+	
+	# Setup colour option buttons
+	p_one_colours.item_selected.connect(_on_colour_selected.bind(p_one_colours.selected,  p_two_colours,))
+	p_two_colours.item_selected.connect(_on_colour_selected.bind(p_two_colours.selected, p_one_colours))
+	p_one_colours.select(0)
+	p_two_colours.select(1)
 	
 	setup_board_sizes()
 
@@ -102,8 +114,20 @@ func _on_start_game_pressed() -> void:
 	board.setup_board(size_options[size_option_button.selected])
 	
 	foreground.add_child(board, true)
+	
+	Global.player_one['color'] = Global.COLORS[p_one_colours.selected]
+	Global.player_one['name'] = player_one_name.text
+	Global.player_two['color'] = Global.COLORS[p_two_colours.selected]
+	Global.player_two['name'] = player_two_name.text
 
 
 func _on_exit_button_pressed() -> void:
 	board.queue_free()
 	show_main_menu()
+
+## Ensure both players cannot be the same colour.
+func _on_colour_selected(index: int, prev_index: int, other_button: OptionButton) -> void:
+	# Disable the selected colour in the other option button
+	other_button.set_item_disabled(index, true)
+	# Re-enabled the previously selected colour in the other option button
+	other_button.set_item_disabled(prev_index, false)

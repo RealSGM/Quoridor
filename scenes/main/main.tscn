@@ -16,7 +16,7 @@ expand_margin_bottom = 8.0
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ayg4q"]
 bg_color = Color(0.105882, 0.105882, 0.109804, 1)
 
-[node name="SceneHandler" type="Control" node_paths=PackedStringArray("main_menu", "play_menu", "multiplayer_menu", "board_options_menu", "foreground", "play_button", "exit_button", "singleplayer_button", "multiplayer_button", "play_back_button", "local_button", "online_button", "multiplayer_back_button", "start_game_button", "board_options_back_button", "size_option_button")]
+[node name="Main" type="Control" node_paths=PackedStringArray("main_menu", "play_menu", "multiplayer_menu", "board_options_menu", "foreground", "play_button", "exit_button", "singleplayer_button", "multiplayer_button", "play_back_button", "local_button", "online_button", "multiplayer_back_button", "start_game_button", "board_options_back_button", "size_option_button", "p_one_colours", "p_two_colours", "player_one_name", "player_two_name")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -41,6 +41,10 @@ multiplayer_back_button = NodePath("Background/Foreground/MultiplayerMenu/VBC/Ba
 start_game_button = NodePath("Background/Foreground/BoardOptionsMenu/VBC/MenuButtonsContainer/VBoxContainer/StartGameButton")
 board_options_back_button = NodePath("Background/Foreground/BoardOptionsMenu/VBC/MenuButtonsContainer/VBoxContainer/BackButton")
 size_option_button = NodePath("Background/Foreground/BoardOptionsMenu/VBC/BoardOptions/BoardVBC/BoardSizeContainer/SizeOptionButton")
+p_one_colours = NodePath("Background/Foreground/BoardOptionsMenu/VBC/BoardOptions/BoardVBC/PlayerOneContainer/PlayerOneColour/PlayerOneColourOption")
+p_two_colours = NodePath("Background/Foreground/BoardOptionsMenu/VBC/BoardOptions/BoardVBC/PlayerTwoContainer/PlayerTwoColour/PlayerTwoColourOption")
+player_one_name = NodePath("Background/Foreground/BoardOptionsMenu/VBC/BoardOptions/BoardVBC/PlayerOneContainer/PlayerOneName/LineEdit")
+player_two_name = NodePath("Background/Foreground/BoardOptionsMenu/VBC/BoardOptions/BoardVBC/PlayerTwoContainer/PlayerTwoName/LineEdit")
 
 [node name="Background" type="ColorRect" parent="."]
 layout_mode = 1
@@ -165,7 +169,6 @@ layout_mode = 2
 text = "Back"
 
 [node name="BoardOptionsMenu" type="PanelContainer" parent="Background/Foreground"]
-visible = false
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -233,7 +236,7 @@ layout_mode = 2
 text = "Player 1 Colour"
 horizontal_alignment = 1
 
-[node name="OptionButton" type="OptionButton" parent="Background/Foreground/BoardOptionsMenu/VBC/BoardOptions/BoardVBC/PlayerOneContainer/PlayerOneColour"]
+[node name="PlayerOneColourOption" type="OptionButton" parent="Background/Foreground/BoardOptionsMenu/VBC/BoardOptions/BoardVBC/PlayerOneContainer/PlayerOneColour"]
 custom_minimum_size = Vector2(320, 0)
 layout_mode = 2
 size_flags_horizontal = 3
@@ -242,6 +245,7 @@ item_count = 4
 popup/item_0/text = "Red"
 popup/item_1/text = "Green"
 popup/item_1/id = 1
+popup/item_1/disabled = true
 popup/item_2/text = "Blue"
 popup/item_2/id = 2
 popup/item_3/text = " Yellow"
@@ -288,13 +292,14 @@ layout_mode = 2
 text = "Player 2 Colour"
 horizontal_alignment = 1
 
-[node name="OptionButton" type="OptionButton" parent="Background/Foreground/BoardOptionsMenu/VBC/BoardOptions/BoardVBC/PlayerTwoContainer/PlayerTwoColour"]
+[node name="PlayerTwoColourOption" type="OptionButton" parent="Background/Foreground/BoardOptionsMenu/VBC/BoardOptions/BoardVBC/PlayerTwoContainer/PlayerTwoColour"]
 custom_minimum_size = Vector2(320, 0)
 layout_mode = 2
 size_flags_horizontal = 3
 selected = 1
 item_count = 4
 popup/item_0/text = "Red"
+popup/item_0/disabled = true
 popup/item_1/text = "Green"
 popup/item_1/id = 1
 popup/item_2/text = "Blue"
