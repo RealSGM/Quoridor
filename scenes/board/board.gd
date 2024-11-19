@@ -1,5 +1,8 @@
 class_name Board extends Control
 
+# TODO Spawn pawns onto board
+# TODO Move pawn
+
 @export_category("Board")
 @export var board_anchor: Control
 @export var tile_container: GridContainer
@@ -31,6 +34,7 @@ var tile_buttons: Array[Tile] = []
 func _ready() -> void:
 	_on_directional_button_pressed()
 	exit_button.pressed.connect(SignalManager.exit_pressed.emit)
+
 
 ## Setup the board with the selected size
 func setup_board(board_size: int) -> void:
@@ -95,6 +99,7 @@ func set_confirm_button(fence_button: FenceButton, tile_button: Tile) -> void:
 func update_fence_buttons() -> void:
 	for fence_button: FenceButton in fence_buttons:
 		fence_button.disabled = fence_button.dir_is_disabled[Global.dir_index]
+	# TODO Implement illegal fence check
 
 
 # Signals ----------------------------------------------------------------------
@@ -115,7 +120,6 @@ func _on_directional_button_pressed() -> void:
 
 func _on_confirm_pressed() -> void:
 	if selected_fence_button:
-		
 		# Flip the index (for NESW adjustment)
 		var flipped_index: int = 1 - Global.dir_index
 		# Get the adjacent directionals
@@ -125,11 +129,11 @@ func _on_confirm_pressed() -> void:
 		for indexes: int in disabled_indexes:
 			if selected_fence_button.connections[indexes]:
 				selected_fence_button.connections[indexes].dir_is_disabled[Global.dir_index] = true
-		
-		update_fence_buttons()
 		selected_fence_button.fence_placed = true
 		selected_fence_button = null
 	
 	# TODO Implemement pawn movement
 	elif selected_pawn_tile:
 		pass
+	
+	update_fence_buttons()
