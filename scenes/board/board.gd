@@ -44,15 +44,29 @@ func setup_board(board_size: int) -> void:
 ## Set the grid container size and instance the tiles under the grid
 func instance_tiles(board_size: int) -> void:
 	var tile_resource: Resource  = Resources.get_resource('tile')
-	for i: int in range(board_size * board_size):
+	var total_tiles: int = board_size * board_size
+	
+	for i: int in range(total_tiles):
 		var tile: Tile = tile_resource.instantiate()
 		tile.set_disabled(true)
 		tile_container.add_child(tile, true)
 		tile_buttons.append(tile)
 	
-	# TODO - Add connections for each tile when it spawns
-	# Loop through all tiles
-
+	for index: int in range(total_tiles):
+		var curr_tile: Tile = tile_buttons[index]
+		
+		# Check for North Tile
+		if index >= board_size:
+			curr_tile.connections[0] = tile_buttons[index - board_size]
+		# Check for East Tile
+		if (index + 1) % board_size != 0:
+			curr_tile.connections[1] = tile_buttons[index + 1]
+		# Check for South Tile
+		if index < total_tiles - board_size:
+			curr_tile.connections[2] = tile_buttons[index + board_size]
+		# Check for West Tile
+		if index % board_size != 0:
+			curr_tile.connections[3] = tile_buttons[index - 1]
 
 ## Set the fence container size and instance the fence buttons under the 
 ## container

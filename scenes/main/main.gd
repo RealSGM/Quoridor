@@ -76,6 +76,7 @@ func show_main_menu() -> void:
 	main_menu.show()
 	menu_stack.append(main_menu)
 
+
 # Signals ----------------------------------------------------------------------
 ## Hide previous menu, add new panel to stack
 func _on_menu_button_pressed(menu: PanelContainer) -> void:
