@@ -63,6 +63,7 @@ anchor_right = 0.5
 anchor_bottom = 0.5
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
 theme_override_constants/h_separation = 80
 theme_override_constants/v_separation = 80
 columns = 9

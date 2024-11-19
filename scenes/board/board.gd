@@ -50,7 +50,7 @@ func instance_tiles(board_size: int) -> void:
 	
 	for i: int in range(total_tiles):
 		var tile: Tile = tile_resource.instantiate()
-		tile.set_disabled(true)
+		#tile.set_disabled(true)
 		tile_container.add_child(tile, true)
 		tile_buttons.append(tile)
 	
@@ -99,6 +99,8 @@ func set_confirm_button(fence_button: FenceButton, tile_button: Tile) -> void:
 func update_fence_buttons() -> void:
 	for fence_button: FenceButton in fence_buttons:
 		fence_button.disabled = fence_button.dir_is_disabled[Global.dir_index]
+		# Disable mouse filter if the button is disabled
+		fence_button.mouse_filter = Control.MOUSE_FILTER_IGNORE if fence_button.disabled else Control.MOUSE_FILTER_STOP
 	# TODO Implement illegal fence check
 
 
