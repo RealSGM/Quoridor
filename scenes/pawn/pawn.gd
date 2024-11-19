@@ -1,4 +1,4 @@
-class_name Pawn extends Panel
+class_name Pawn extends Button
 
 var player_name: String = ''
 

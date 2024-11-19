@@ -5,7 +5,6 @@ class_name FenceButton extends Button
 
 var fence_placed: bool = false
 var dir_is_disabled: Array[bool] = [false, false]
-
 var connections: Array[FenceButton] = [null, null, null, null]
 
 func _ready() -> void:

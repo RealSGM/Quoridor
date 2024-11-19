@@ -1,7 +1,13 @@
 class_name Board extends Control
 
-# TODO Spawn pawns onto board
-# TODO Move pawn
+# TODO Disable the tile that the pawn is currently on
+# TODO Spawn "ghost" pawns for both players on every tile
+
+# TODO Pawn Movement
+# - Clicking the pawn shows all possible tiles it can move to
+# - Clicking adjacent tile show translucent pawn on tile
+# - Click confirm to move the pawn
+# - Clicking a fence button or the pawn again (instead of confirm) cancels it
 
 @export_category("Board")
 @export var board_anchor: Control
@@ -103,6 +109,8 @@ func update_fence_buttons() -> void:
 	# TODO Implement illegal fence check
 
 
+@warning_ignore("integer_division")
+@warning_ignore("narrowing_conversion")
 func spawn_pawns(board_size: int) -> void:
 	spawn_pawn(Global.player_one["name"], Global.player_one["color"], board_size / 2)
 	spawn_pawn(Global.player_two["name"], Global.player_two["color"], board_size * (board_size - 0.5))

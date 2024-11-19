@@ -33,7 +33,6 @@ const SCALE_STEP: float = 0.25
 @export var player_two_name: LineEdit
 @export var size_options: Array[int] = [7, 9, 11]
 
-
 var menu_stack: Array = []
 var board: Board
 
@@ -119,8 +118,6 @@ func _on_start_game_pressed() -> void:
 	board.setup_board(size_options[size_option_button.selected])
 	
 	foreground.add_child(board, true)
-	
-	
 
 
 func _on_exit_button_pressed() -> void:
