@@ -1,7 +1,7 @@
 class_name Board extends Control
 
-# TODO Disable the tile that the pawn is currently on
 # TODO Spawn "ghost" pawns for both players on every tile
+# TODO Disable the tile that the pawn is currently on
 
 # TODO Pawn Movement
 # - Clicking the pawn shows all possible tiles it can move to
