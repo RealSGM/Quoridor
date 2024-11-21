@@ -1,8 +1,8 @@
 [gd_scene load_steps=5 format=3 uid="uid://3pm4tnfcx00r"]
 
 [ext_resource type="Script" path="res://scenes/tile/tile.gd" id="2_bfrq8"]
-[ext_resource type="StyleBox" path="res://resources/tile/tile_pressed.tres" id="3_gqe45"]
-[ext_resource type="StyleBox" path="res://resources/tile/tile_hover.tres" id="4_wtdyf"]
+[ext_resource type="StyleBox" uid="uid://c6l644kbapyt4" path="res://resources/tile/tile_pressed.tres" id="3_gqe45"]
+[ext_resource type="StyleBox" uid="uid://v1kyd2jp1ujl" path="res://resources/tile/tile_hover.tres" id="4_wtdyf"]
 [ext_resource type="StyleBox" uid="uid://xjrxqguwd6gy" path="res://resources/tile/tile_normal.tres" id="5_a6of6"]
 
 [node name="TileButton" type="Button"]

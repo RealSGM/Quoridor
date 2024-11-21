@@ -1,5 +1,7 @@
 class_name Board extends Control
 
+# TODO Add UI Button for Pawn Movement
+# TODO Convert H/V Buttons to Toggle Button
 # TODO Fence block pawn movement
 
 @export_category("Board")

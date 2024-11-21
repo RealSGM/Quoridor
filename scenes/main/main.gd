@@ -44,7 +44,7 @@ func _ready() -> void:
 	SignalManager.exit_pressed.connect(_on_exit_button_pressed)
 
 
-## TODO Refactor into scene, make it flexible with other gamemodes
+# TODO Refactor into scene, make it flexible with other gamemodes
 ## Setup the menus, ensure all panels are hidden on launch
 ## Connect all buttons to appropriate signals
 func setup_menus() -> void:
