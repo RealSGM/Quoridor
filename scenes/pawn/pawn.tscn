@@ -1,13 +1,9 @@
-[gd_scene load_steps=7 format=3 uid="uid://b06lx81t8jb2d"]
+[gd_scene load_steps=3 format=3 uid="uid://b06lx81t8jb2d"]
 
-[ext_resource type="StyleBox" uid="uid://bg1r7h5djva5g" path="res://resources/pawn/pawn_normal.tres" id="1_8g4co"]
-[ext_resource type="StyleBox" uid="uid://cyrk4l4lfbskl" path="res://resources/pawn/pawn_focused.tres" id="1_jm4jr"]
+[ext_resource type="StyleBox" uid="uid://bg1r7h5djva5g" path="res://resources/pawn.tres" id="1_8g4co"]
 [ext_resource type="Script" path="res://scenes/pawn/pawn.gd" id="1_yg714"]
-[ext_resource type="StyleBox" uid="uid://bp8csbpbwmaea" path="res://resources/pawn/pawn_hover.tres" id="2_0yx2e"]
-[ext_resource type="StyleBox" uid="uid://dnl3gq2fy3qf7" path="res://resources/pawn/pawn_disabled.tres" id="2_kdtxq"]
-[ext_resource type="StyleBox" uid="uid://et7xkwkfr7y7" path="res://resources/pawn/pawn_pressed.tres" id="4_p68l8"]
 
-[node name="Pawn" type="Button"]
+[node name="Pawn" type="Panel"]
 modulate = Color(0.847474, 0.847474, 0.847474, 1)
 custom_minimum_size = Vector2(60, 60)
 anchors_preset = 8
@@ -21,9 +17,5 @@ offset_right = 30.0
 offset_bottom = 30.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_styles/focus = ExtResource("1_jm4jr")
-theme_override_styles/disabled = ExtResource("2_kdtxq")
-theme_override_styles/hover = ExtResource("2_0yx2e")
-theme_override_styles/pressed = ExtResource("4_p68l8")
-theme_override_styles/normal = ExtResource("1_8g4co")
+theme_override_styles/panel = ExtResource("1_8g4co")
 script = ExtResource("1_yg714")
