@@ -1,7 +1,15 @@
 class_name Board extends Control
 
 # TODO Add UI Button for Pawn Movement
-# TODO Convert H/V Buttons to Toggle Button
+# - Disable all tiles (don't darken)
+# Move Pawn Setup
+	# - Enable adjacent tiles
+	# - Darken the non-adjacent tiles
+	
+# TODO UI 
+# - Show current player's Turn
+# - Move History
+	
 # TODO Fence block pawn movement
 
 @export_category("Board")
@@ -10,8 +18,9 @@ class_name Board extends Control
 @export var fence_button_container: GridContainer
 
 @export_category("User Interface")
-@export var horizontal_button: Button
-@export var vertical_button: Button
+@export var toggle_direction_button: Button
+@export var move_pawn_button: Button
+@export var place_fence_button: Button
 @export var confirm_button: Button
 @export var exit_button: Button
 
@@ -22,8 +31,6 @@ var tile_buttons: Array[Tile] = []
 var current_tiles: Array[Tile] = [null, null]
 var current_player: int = 0
 
-
-@onready var dir_buttons: Array[Button] = [horizontal_button, vertical_button]
 @onready var selected_fence_button: FenceButton = null:
 	set(val):
 		if selected_fence_button:
@@ -46,6 +53,7 @@ var current_player: int = 0
 
 func _ready() -> void:
 	_on_directional_button_pressed()
+	
 	exit_button.pressed.connect(SignalManager.exit_pressed.emit)
 	SignalManager.tile_pressed.connect(_on_tile_pressed)
 
@@ -55,6 +63,7 @@ func setup_board(board_size: int) -> void:
 	instance_tiles(board_size)
 	instance_fence_buttons(board_size - 1)
 	spawn_pawns(board_size)
+	reset_board()
 
 
 ## Set the grid container size and instance the tiles under the grid
@@ -129,16 +138,12 @@ func spawn_pawns(board_size: int) -> void:
 		tile_buttons[index].pawns[0] = player_one
 		tile_buttons[index].pawns[1] = player_two
 	
-	# Show the current player TODO Rework
 	current_tiles[0] = tile_buttons[board_size * (board_size - 0.5)]
 	current_tiles[1] = tile_buttons[board_size / 2]
 	
 	# Show both pawns
 	current_tiles[0].pawns[0].show()
 	current_tiles[1].pawns[1].show()
-	
-	# Simulate player one's turn
-	set_non_adjacent_tiles(current_tiles[current_player], true)
 
 
 func spawn_pawn(p_name: String, color: Color, pos_index: int) -> Pawn:
@@ -151,16 +156,32 @@ func spawn_pawn(p_name: String, color: Color, pos_index: int) -> Pawn:
 	return pawn
 
 
+func set_fence_buttons(color: Color) -> void:
+	fence_button_container.get_children().map(func(x: FenceButton): x.self_modulate = color)
+
+
+func reset_board() -> void:
+	tile_buttons.map(func(tile: Tile): 
+		tile.disabled = true
+		tile.modulate = Color.WHITE
+	)
+	set_fence_buttons(Color.TRANSPARENT)
+
+
 @warning_ignore('incompatible_ternary')
 func set_non_adjacent_tiles(current_tile: Tile, set_disabled: bool) -> void:
 	for tile: Tile in tile_buttons:
-		# Non-Adjacent Tile
-		if tile in current_tile.connections:
-			continue
-		
-		tile.modulate = Color(0.7, 0.7, 0.7) if set_disabled else Color.WHITE
-		tile.disabled = set_disabled
-		tile.focus_mode = Control.FOCUS_NONE if set_disabled else Control.FOCUS_CLICK
+		# Disable the current tile, but do not darken
+		if tile == current_tile:
+			tile.disabled = true
+		# Enable the current tiles
+		elif tile in current_tile.connections:
+			tile.disabled = false
+			tile.modulate = Color.WHITE
+		else:
+			tile.modulate = Color(0.7, 0.7, 0.7) if set_disabled else Color.WHITE
+			tile.disabled = set_disabled
+			tile.focus_mode = Control.FOCUS_NONE if set_disabled else Control.FOCUS_CLICK
 
 
 # Signals ----------------------------------------------------------------------
@@ -174,18 +195,26 @@ func _on_fence_button_pressed(fence_button: FenceButton) -> void:
 ## Flip the rotation of the fence
 func _on_directional_button_pressed() -> void:
 	selected_fence_button = null
-	selected_pawn_tile = null
-	
-	dir_buttons[Global.dir_index].disabled = false
 	Global.dir_index = 1 - Global.dir_index
-	dir_buttons[Global.dir_index].disabled = true
+	toggle_direction_button.text = 'Horizontal' if Global.dir_index == 0 else 'Vertical'
 	update_fence_buttons()
 
 
-func _on_confirm_pressed() -> void:
-	
-	# Reset tiles
+func _on_move_pawn_pressed() -> void:
+	set_non_adjacent_tiles(current_tiles[current_player], true)
+	set_fence_buttons(Color.TRANSPARENT)
+	selected_fence_button = null
+
+
+func _on_place_fence_pressed() -> void:
 	set_non_adjacent_tiles(current_tiles[current_player], false)
+	set_fence_buttons(Color.WHITE)
+	selected_pawn_tile = null
+
+
+func _on_confirm_pressed() -> void:
+	# Reset Board
+	reset_board()
 	
 	if selected_fence_button:
 		# Flip the index (for NESW adjustment)
@@ -216,7 +245,7 @@ func _on_confirm_pressed() -> void:
 	
 	# Switch to next player
 	current_player = 1 - current_player
-	set_non_adjacent_tiles(current_tiles[current_player], true)
+
 
 func _on_tile_pressed(tile: Tile) -> void:
 	selected_pawn_tile = tile
