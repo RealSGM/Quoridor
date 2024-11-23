@@ -63,7 +63,7 @@ func setup_board(board_size: int) -> void:
 	instance_tiles(board_size)
 	instance_fence_buttons(board_size - 1)
 	spawn_pawns(board_size)
-	reset_board()
+	reset_board(Color.TRANSPARENT)
 
 
 ## Set the grid container size and instance the tiles under the grid
@@ -96,6 +96,7 @@ func instance_tiles(board_size: int) -> void:
 func instance_fence_buttons(fence_size: int) -> void:
 	var fence_button_resource: Resource  = Resources.get_resource('fence_button')
 	var total_fences: int = fence_size * fence_size
+	var board_size: int = fence_size + 1
 	fence_button_container.columns = fence_size
 	
 	for i: int in range(fence_size * fence_size):
@@ -114,6 +115,15 @@ func instance_fence_buttons(fence_size: int) -> void:
 			curr_fence.connections[2] = fence_buttons[index + fence_size]
 		if index % fence_size != 0: # Check for West Tile
 			curr_fence.connections[3] = fence_buttons[index - 1]
+	
+		# Left Horizontal
+		curr_fence.tile_connections[0][0] = [tile_buttons[index], tile_buttons[index + board_size]]
+		# Right Horizontal
+		curr_fence.tile_connections[0][1] = [tile_buttons[index + 1], tile_buttons[index + 1 + board_size]]
+		# Top Vertical
+		curr_fence.tile_connections[1][0] = [tile_buttons[index + 1], tile_buttons[index + 1]]
+		# Bottom Vertical
+		curr_fence.tile_connections[1][1] = [tile_buttons[index + board_size], tile_buttons[index + board_size + 1]]
 
 
 func set_confirm_button(fence_button: FenceButton, tile_button: Tile) -> void:
@@ -160,12 +170,12 @@ func set_fence_buttons(color: Color) -> void:
 	fence_button_container.get_children().map(func(x: FenceButton): x.self_modulate = color)
 
 
-func reset_board() -> void:
+func reset_board(color: Color) -> void:
 	tile_buttons.map(func(tile: Tile): 
 		tile.disabled = true
 		tile.modulate = Color.WHITE
 	)
-	set_fence_buttons(Color.TRANSPARENT)
+	set_fence_buttons(color)
 
 
 @warning_ignore('incompatible_ternary')
@@ -208,13 +218,13 @@ func _on_move_pawn_pressed() -> void:
 
 func _on_place_fence_pressed() -> void:
 	set_non_adjacent_tiles(current_tiles[current_player], false)
-	set_fence_buttons(Color.WHITE)
+	reset_board(Color.WHITE)
 	selected_pawn_tile = null
 
 
 func _on_confirm_pressed() -> void:
 	# Reset Board
-	reset_board()
+	reset_board(Color.TRANSPARENT)
 	
 	if selected_fence_button:
 		# Flip the index (for NESW adjustment)
@@ -226,6 +236,19 @@ func _on_confirm_pressed() -> void:
 		for indexes: int in disabled_indexes:
 			if selected_fence_button.connections[indexes]:
 				selected_fence_button.connections[indexes].dir_is_disabled[Global.dir_index] = true
+		
+		# Check which tile connnections should be removed
+		var connections: Array[Array] = selected_fence_button.tile_connections
+		
+		# Loop through the connections in the directed fence index
+		for connection: Array in connections[Global.dir_index]:
+			for index: int in connection.size():
+				var tile: Tile = connection[index]
+				var inverted_index: int = 1 - index
+				var tile_to_remove: Tile = connection[inverted_index]
+				var replace_index: int =  tile.connections.find(tile_to_remove)
+				tile.connections[replace_index] = null
+		
 		selected_fence_button.fence_placed = true
 		selected_fence_button = null
 	

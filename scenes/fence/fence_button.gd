@@ -7,6 +7,9 @@ var fence_placed: bool = false
 var dir_is_disabled: Array[bool] = [false, false]
 var connections: Array[FenceButton] = [null, null, null, null]
 
+## Stores tile connections as [[Horizontal Fence], [Vertical Fence]]
+var tile_connections: Array[Array] = [[[],[]], [[],[]]]
+
 func _ready() -> void:
 	pressed.connect(Global.board._on_fence_button_pressed.bind(self))
 	h_fence.hide()
