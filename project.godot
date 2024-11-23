@@ -38,3 +38,7 @@ window/stretch/aspect="keep_height"
 [dotnet]
 
 project/assembly_name="Quoridor"
+
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/wakatime/plugin.cfg")
