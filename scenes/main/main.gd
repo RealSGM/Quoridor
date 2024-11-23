@@ -1,7 +1,5 @@
 extends Control
 
-const SCALE_STEP: float = 0.25
-
 @export_category("Menus")
 @export var main_menu: PanelContainer
 @export var play_menu: PanelContainer
@@ -31,10 +29,11 @@ const SCALE_STEP: float = 0.25
 @export var p_two_colours: OptionButton
 @export var player_one_name: LineEdit
 @export var player_two_name: LineEdit
+
 @export var size_options: Array[int] = [7, 9, 11]
+@export var board_dimensions: float = 800
 
 var menu_stack: Array = []
-var board: Board
 
 @onready var menus: Array[PanelContainer] = [main_menu, play_menu, multiplayer_menu, board_options_menu]
 
@@ -112,16 +111,15 @@ func _on_start_game_pressed() -> void:
 	Global.player_two['color'] = Global.COLORS[p_two_colours.selected]
 	Global.player_two['name'] = player_two_name.text
 	
-	board = Resources.get_resource("board").instantiate()
+	var board: Board = Resources.get_resource("board").instantiate()
 	Global.board = board
-	board.board_anchor.scale = Vector2.ONE * ((1 - size_option_button.selected) * SCALE_STEP + 1)
-	board.setup_board(size_options[size_option_button.selected])
 	
+	board.setup_board(size_options[size_option_button.selected])
 	foreground.add_child(board, true)
-
+	board.board_anchor.scale = Vector2.ONE * float(board_dimensions) / float(board.board_container.size.x)
 
 func _on_exit_button_pressed() -> void:
-	board.queue_free()
+	Global.board.queue_free()
 	show_main_menu()
 
 

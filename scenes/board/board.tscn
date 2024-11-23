@@ -20,7 +20,7 @@ expand_margin_bottom = 8.0
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_dms26"]
 bg_color = Color(0.105882, 0.105882, 0.109804, 1)
 
-[node name="Board" type="Control" node_paths=PackedStringArray("board_anchor", "tile_container", "fence_button_container", "toggle_direction_button", "move_pawn_button", "place_fence_button", "confirm_button", "exit_button")]
+[node name="Board" type="Control" node_paths=PackedStringArray("board_anchor", "tile_container", "board_container", "fence_button_container", "toggle_direction_button", "move_pawn_button", "place_fence_button", "confirm_button", "exit_button")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -31,10 +31,11 @@ theme = ExtResource("1_4ctk5")
 script = ExtResource("1_u3jtc")
 board_anchor = NodePath("BoardAnchor")
 tile_container = NodePath("BoardAnchor/BoardContainer/TileContainer")
+board_container = NodePath("BoardAnchor/BoardContainer")
 fence_button_container = NodePath("BoardAnchor/FenceButtonContainer")
-toggle_direction_button = NodePath("PanelContainer/ActionsVBC/TogglePanel/DirectionContainer/ToggleDirection")
-move_pawn_button = NodePath("PanelContainer/ActionsVBC/MovePawn")
-place_fence_button = NodePath("PanelContainer/ActionsVBC/PlaceFence")
+toggle_direction_button = NodePath("UserInterface/ActionsVBC/TogglePanel/DirectionContainer/ToggleDirection")
+move_pawn_button = NodePath("UserInterface/ActionsVBC/MovePawn")
+place_fence_button = NodePath("UserInterface/ActionsVBC/PlaceFence")
 confirm_button = NodePath("ConfirmButton")
 exit_button = NodePath("ExitButton")
 
@@ -104,7 +105,7 @@ offset_bottom = 57.0
 grow_horizontal = 0
 text = "Exit to Menu"
 
-[node name="PanelContainer" type="PanelContainer" parent="."]
+[node name="UserInterface" type="PanelContainer" parent="."]
 layout_mode = 1
 anchors_preset = -1
 offset_left = 40.0
@@ -113,36 +114,36 @@ offset_right = 362.0
 offset_bottom = 187.0
 theme_override_styles/panel = SubResource("StyleBoxFlat_d1llx")
 
-[node name="ActionsVBC" type="VBoxContainer" parent="PanelContainer"]
+[node name="ActionsVBC" type="VBoxContainer" parent="UserInterface"]
 layout_mode = 2
 theme_override_constants/separation = 8
 
-[node name="TogglePanel" type="PanelContainer" parent="PanelContainer/ActionsVBC"]
+[node name="TogglePanel" type="PanelContainer" parent="UserInterface/ActionsVBC"]
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_dms26")
 
-[node name="DirectionContainer" type="HBoxContainer" parent="PanelContainer/ActionsVBC/TogglePanel"]
+[node name="DirectionContainer" type="HBoxContainer" parent="UserInterface/ActionsVBC/TogglePanel"]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="PanelContainer/ActionsVBC/TogglePanel/DirectionContainer"]
+[node name="Label" type="Label" parent="UserInterface/ActionsVBC/TogglePanel/DirectionContainer"]
 layout_mode = 2
 text = "Fence: "
 
-[node name="ToggleDirection" type="Button" parent="PanelContainer/ActionsVBC/TogglePanel/DirectionContainer"]
+[node name="ToggleDirection" type="Button" parent="UserInterface/ActionsVBC/TogglePanel/DirectionContainer"]
 custom_minimum_size = Vector2(212, 57)
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Horizontal"
 
-[node name="PlaceFence" type="Button" parent="PanelContainer/ActionsVBC"]
+[node name="PlaceFence" type="Button" parent="UserInterface/ActionsVBC"]
 layout_mode = 2
 text = "Place Fence"
 
-[node name="MovePawn" type="Button" parent="PanelContainer/ActionsVBC"]
+[node name="MovePawn" type="Button" parent="UserInterface/ActionsVBC"]
 layout_mode = 2
 text = "Move Pawn"
 
 [connection signal="pressed" from="ConfirmButton" to="." method="_on_confirm_pressed"]
-[connection signal="pressed" from="PanelContainer/ActionsVBC/TogglePanel/DirectionContainer/ToggleDirection" to="." method="_on_directional_button_pressed"]
-[connection signal="pressed" from="PanelContainer/ActionsVBC/PlaceFence" to="." method="_on_place_fence_pressed"]
-[connection signal="pressed" from="PanelContainer/ActionsVBC/MovePawn" to="." method="_on_move_pawn_pressed"]
+[connection signal="pressed" from="UserInterface/ActionsVBC/TogglePanel/DirectionContainer/ToggleDirection" to="." method="_on_directional_button_pressed"]
+[connection signal="pressed" from="UserInterface/ActionsVBC/PlaceFence" to="." method="_on_place_fence_pressed"]
+[connection signal="pressed" from="UserInterface/ActionsVBC/MovePawn" to="." method="_on_move_pawn_pressed"]

@@ -1,17 +1,15 @@
 class_name Board extends Control
 
 # TODO UI 
-# - Constant Board Size
 # - Show current player's Turn
-# - Move History
-
 # TODO Player Block Leaping
-# TODO Finalise Gameloop
-# - Winning
+# TODO Win Scenario
+# TODO Illegal Fence Check (C#)
 
 @export_category("Board")
 @export var board_anchor: Control
 @export var tile_container: GridContainer
+@export var board_container: PanelContainer
 @export var fence_button_container: GridContainer
 
 @export_category("User Interface")
