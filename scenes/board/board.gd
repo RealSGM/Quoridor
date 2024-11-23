@@ -1,8 +1,13 @@
 class_name Board extends Control
 
 # TODO UI 
+# - Constant Board Size
 # - Show current player's Turn
 # - Move History
+
+# TODO Player Block Leaping
+# TODO Finalise Gameloop
+# - Winning
 
 @export_category("Board")
 @export var board_anchor: Control
@@ -22,6 +27,7 @@ var tile_buttons: Array[Tile] = []
 ## Stored as [Player One Tile, Player Two Tile]
 var current_tiles: Array[Tile] = [null, null]
 var current_player: int = 0
+var last_choice: Callable
 
 @onready var selected_fence_button: FenceButton = null:
 	set(val):
@@ -52,7 +58,7 @@ var current_player: int = 0
 
 func _ready() -> void:
 	_on_directional_button_pressed()
-	#_on_place_fence_pressed()
+	_on_move_pawn_pressed()
 	
 	exit_button.pressed.connect(SignalManager.exit_pressed.emit)
 	SignalManager.tile_pressed.connect(func(tile: Tile) -> void: selected_pawn_tile = tile)
@@ -234,12 +240,14 @@ func _on_move_pawn_pressed() -> void:
 	set_non_adjacent_tiles(current_tiles[current_player], true)
 	set_fence_buttons(Color.TRANSPARENT)
 	selected_fence_button = null
+	last_choice = _on_move_pawn_pressed
 
 
 func _on_place_fence_pressed() -> void:
 	set_non_adjacent_tiles(current_tiles[current_player], false)
 	reset_board(Color.WHITE)
 	selected_pawn_tile = null
+	last_choice = _on_place_fence_pressed
 
 
 func _on_confirm_pressed() -> void:
@@ -255,3 +263,4 @@ func _on_confirm_pressed() -> void:
 	
 	# Switch to next player
 	current_player = 1 - current_player
+	last_choice.call()

@@ -26,12 +26,21 @@ func set_fence_connections(index: int, fence_size: int, fences: Array[FenceButto
 	if index % fence_size != 0: # Check for West Tile
 		connections[3] = fences[index - 1]
 
-
+@warning_ignore("integer_division")
 func set_tile_connections(index: int, board_size: int, tiles: Array[Tile]) -> void:
-	tile_connections[0][0] = [tiles[index], tiles[index + board_size]] # Left Horizontal
-	tile_connections[0][1] = [tiles[index + 1], tiles[index + 1 + board_size]] # Right Horizontal
-	tile_connections[1][0] = [tiles[index + 1], tiles[index + 1]] # Top Vertical
-	tile_connections[1][1] = [tiles[index + board_size], tiles[index + board_size + 1]] # Bottom Vertical
+	# Match the fence button index to the index of the Top-Left Tile in 2x2 Grid
+	index += (index / (board_size - 1))
+	
+	var TL: Tile = tiles[index]
+	var TR: Tile = tiles[index + 1]
+	var BL: Tile = tiles[index + board_size]
+	var BR: Tile = tiles[index + 1 + board_size]
+	
+	tile_connections[0][0] = [TL, BL] # Left Horizontal Fence
+	tile_connections[0][1] = [TR, BR] # Right Horizontal Fence
+	
+	tile_connections[1][0] = [TL, TR] # Top Vertical Fence
+	tile_connections[1][1] = [BL, BR] # Bottom Vertical Fence
 
 
 func clear_fences() -> void:

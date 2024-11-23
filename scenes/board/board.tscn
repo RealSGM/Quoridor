@@ -20,7 +20,7 @@ expand_margin_bottom = 8.0
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_dms26"]
 bg_color = Color(0.105882, 0.105882, 0.109804, 1)
 
-[node name="Board" type="Control" node_paths=PackedStringArray("board_anchor", "tile_container", "fence_button_container", "toggle_direction_button", "move_pawn_button", "confirm_button", "exit_button")]
+[node name="Board" type="Control" node_paths=PackedStringArray("board_anchor", "tile_container", "fence_button_container", "toggle_direction_button", "move_pawn_button", "place_fence_button", "confirm_button", "exit_button")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -34,6 +34,7 @@ tile_container = NodePath("BoardAnchor/BoardContainer/TileContainer")
 fence_button_container = NodePath("BoardAnchor/FenceButtonContainer")
 toggle_direction_button = NodePath("PanelContainer/ActionsVBC/TogglePanel/DirectionContainer/ToggleDirection")
 move_pawn_button = NodePath("PanelContainer/ActionsVBC/MovePawn")
+place_fence_button = NodePath("PanelContainer/ActionsVBC/PlaceFence")
 confirm_button = NodePath("ConfirmButton")
 exit_button = NodePath("ExitButton")
 
