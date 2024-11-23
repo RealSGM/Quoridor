@@ -87,7 +87,14 @@ func show_main_menu() -> void:
 	menu_stack.append(main_menu)
 
 
-# Signals ----------------------------------------------------------------------
+func set_players_data() -> void:
+	Global.players[0]['name'] = player_one_name.text
+	Global.players[0]['color'] = Global.COLORS[p_one_colours.selected]
+	
+	Global.players[1]['color'] = Global.COLORS[p_two_colours.selected]
+	Global.players[1]['name'] = player_two_name.text
+
+
 ## Hide previous menu, add new panel to stack
 func _on_menu_button_pressed(menu: PanelContainer) -> void:
 	menu_stack.back().hide()
@@ -105,18 +112,14 @@ func _on_back_button_pressed() -> void:
 ## Generate the board
 func _on_start_game_pressed() -> void:
 	board_options_menu.hide()
-	
-	Global.player_one['color'] = Global.COLORS[p_one_colours.selected]
-	Global.player_one['name'] = player_one_name.text
-	Global.player_two['color'] = Global.COLORS[p_two_colours.selected]
-	Global.player_two['name'] = player_two_name.text
+	set_players_data()
 	
 	var board: Board = Resources.get_resource("board").instantiate()
 	Global.board = board
-	
 	board.setup_board(size_options[size_option_button.selected])
 	foreground.add_child(board, true)
 	board.board_anchor.scale = Vector2.ONE * float(board_dimensions) / float(board.board_container.size.x)
+
 
 func _on_exit_button_pressed() -> void:
 	Global.board.queue_free()

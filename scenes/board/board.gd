@@ -1,7 +1,5 @@
 class_name Board extends Control
 
-# TODO UI 
-# - Show current player's Turn
 # TODO Player Block Leaping
 # TODO Win Scenario
 # TODO Illegal Fence Check (C#)
@@ -18,14 +16,14 @@ class_name Board extends Control
 @export var place_fence_button: Button
 @export var confirm_button: Button
 @export var exit_button: Button
+@export var turn_label: Label
 
 var fence_buttons: Array[FenceButton] = []
 var tile_buttons: Array[Tile] = []
 
 ## Stored as [Player One Tile, Player Two Tile]
 var current_tiles: Array[Tile] = [null, null]
-var current_player: int = 0
-var last_choice: Callable
+var last_choice: Callable = _on_move_pawn_pressed
 
 @onready var selected_fence_button: FenceButton = null:
 	set(val):
@@ -36,7 +34,6 @@ var last_choice: Callable
 		# Validate the confirm button
 		selected_fence_button = val
 		set_confirm_button(val, selected_pawn_tile)
-
 
 @onready var selected_pawn_tile: Tile = null:
 	set(val):
@@ -53,10 +50,15 @@ var last_choice: Callable
 			pawn.modulate.a = 0.5
 			pawn.show()
 
+@onready var current_player: int:
+	set(val):
+		current_player = val
+		last_choice.call()
+		turn_label.text = str(Global.players[current_player]["name"]) + "'s Turn"
 
 func _ready() -> void:
 	_on_directional_button_pressed()
-	_on_move_pawn_pressed()
+	current_player = 0
 	
 	exit_button.pressed.connect(SignalManager.exit_pressed.emit)
 	SignalManager.tile_pressed.connect(func(tile: Tile) -> void: selected_pawn_tile = tile)
@@ -184,8 +186,8 @@ func remove_tile_connection(connection: Array, index) -> void:
 func spawn_pawns(board_size: int) -> void:
 	# For each tile, instance a pawn for both players
 	for index: int in range(tile_buttons.size()):
-		tile_buttons[index].pawns[0] = spawn_pawn(Global.player_one["name"], Global.player_one["color"], index)
-		tile_buttons[index].pawns[1] = spawn_pawn(Global.player_two["name"], Global.player_two["color"], index)
+		tile_buttons[index].pawns[0] = spawn_pawn(Global.players[0]["name"], Global.players[0]["color"], index)
+		tile_buttons[index].pawns[1] = spawn_pawn(Global.players[1]["name"], Global.players[1]["color"], index)
 	
 	current_tiles[0] = tile_buttons[board_size * (board_size - 0.5)]
 	current_tiles[1] = tile_buttons[board_size / 2]
@@ -261,4 +263,3 @@ func _on_confirm_pressed() -> void:
 	
 	# Switch to next player
 	current_player = 1 - current_player
-	last_choice.call()
