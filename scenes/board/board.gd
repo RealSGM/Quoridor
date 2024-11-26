@@ -1,6 +1,5 @@
 class_name Board extends Control
 
-# TODO Player Block Leaping
 # TODO Win Scenario
 # TODO Illegal Fence Check (C#)
 
