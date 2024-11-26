@@ -1,6 +1,5 @@
 class_name Board extends Control
 
-# TODO Win Scenario
 # TODO Illegal Fence Check
 # TODO Minimax Algorithm
 
@@ -12,21 +11,27 @@ class_name Board extends Control
 
 @export_category("User Interface")
 @export var toggle_direction_button: Button
-@export var move_pawn_button: Button
-@export var place_fence_button: Button
 @export var confirm_button: Button
 @export var exit_button: Button
 @export var turn_label: Label
 
-var fence_buttons: Array[FenceButton] = []
-var tile_buttons: Array[Tile] = []
+@export_category("Win Screen")
+@export var win_cover: Control
+@export var win_label: Label
+@export var win_exit_button: Button
 
 ## Stored as [Player One Tile, Player Two Tile]
 var current_tiles: Array[Tile] = [null, null]
+## 1D Array containing every fence button
+var fence_buttons: Array[FenceButton] = []
+## 1D Array containing every tile
+var tile_buttons: Array[Tile] = []
+## Stores the adjacent cardinal directions relative to the board
 var directions: Array[int] = []
-var is_override: bool = false
+## Stores the upper and lower bounds for each pawn's finish line
+var win_indexes: Array[Array] = [[], []]
 
-
+## Update the selected fence, and the confirm button
 @onready var selected_fence_button: FenceButton = null:
 	set(val):
 		# Clear current fence
@@ -37,7 +42,7 @@ var is_override: bool = false
 		selected_fence_button = val
 		set_confirm_button(val, selected_pawn_tile)
 
-
+## Update the selected tile, and the confirm button
 @onready var selected_pawn_tile: Tile = null:
 	set(val):
 		# Clear the current pawn
@@ -53,11 +58,11 @@ var is_override: bool = false
 			pawn.modulate.a = 0.5
 			pawn.show()
 
-
+## Update hte
 @onready var current_player: int:
 	set(val):
 		current_player = val
-		reset_board(Color.WHITE)
+		reset_board()
 		set_tiles(current_tiles[current_player], true)
 		turn_label.text = str(Global.players[current_player]["name"]) + "'s Turn"
 
@@ -65,9 +70,13 @@ var is_override: bool = false
 func _ready() -> void:
 	_on_directional_button_pressed()
 	current_player = 0
-	
 	exit_button.pressed.connect(SignalManager.exit_pressed.emit)
+	win_exit_button.pressed.connect(SignalManager.exit_pressed.emit)
 	SignalManager.tile_pressed.connect(_on_tile_pressed)
+	
+	board_anchor.show()
+	win_cover.hide()
+	exit_button.show()
 
 
 ## Setup the board with the selected size
@@ -77,20 +86,24 @@ func setup_board(board_size: int) -> void:
 	instance_tiles(board_size)
 	instance_fence_buttons(board_size - 1)
 	spawn_pawns(board_size)
-	reset_board(Color.TRANSPARENT)
+	reset_board()
 
 
+## Disable the confirm button when neither option is selected
 func set_confirm_button(fence_button: FenceButton, tile_button: Tile) -> void:
 	confirm_button.disabled = !(fence_button || tile_button)
 
 
 ## Disable all tiles, and reset their modulate
-func reset_board(color: Color) -> void:
+func reset_board() -> void:
 	tile_buttons.map(func(tile: Tile): 
 		tile.disabled = true
 		tile.modulate = Color.WHITE
 	)
-	set_fence_buttons(color)
+
+
+func check_win(tile: Tile, bounds: Array) -> bool:
+	return tile_buttons.find(tile) > bounds[0] and tile_buttons.find(tile) < bounds[1]
 
 
 # Tiles ------------------------------------------------------------------------
@@ -110,8 +123,11 @@ func instance_tiles(board_size: int) -> void:
 	for index: int in range(total_tiles):
 		var curr_tile: Tile = tile_buttons[index]
 		curr_tile.set_connections(index, board_size, tile_buttons)
+		
+	win_indexes = [[0, board_size - 1], [total_tiles - board_size - 1, total_tiles -1]]
 
 
+## Set the tiles of the board, based off the current player's turn
 func set_tiles(player_tile: Tile, set_disabled: bool) -> void:
 	var tiles_to_enable: Array[Tile] = []
 	
@@ -155,6 +171,7 @@ func get_adjacent_tiles(player_tile, tile: Tile, set_disabled: bool) -> Array:
 	return get_leaped_tiles(player_index, dir_index, tile)
 
 
+## Disable and darken a tile
 func fully_disable_tile(tile: Tile, set_disabled: bool) -> void:
 	tile.disabled = set_disabled
 	tile.modulate = Color(0.7, 0.7, 0.7) if set_disabled else Color.WHITE
@@ -181,7 +198,7 @@ func get_leaped_tiles(player_index: int, dir_index: int, tile: Tile) -> Array:
 		# Remove the current pawns from being added
 		if tile_connection != current_tiles[current_player]:
 			tiles.append(tile_connection)
-			
+	
 	return tiles
 
 
@@ -213,10 +230,6 @@ func update_fence_buttons() -> void:
 	# TODO Implement illegal fence check
 
 
-func set_fence_buttons(color: Color) -> void:
-	fence_button_container.get_children().map(func(x: FenceButton): x.self_modulate = color)
-
-
 func confirm_place_fence() -> void:
 	# Flip the index (for NESW adjustment)
 	var flipped_index: int = 1 - Global.fence_direction
@@ -234,7 +247,6 @@ func confirm_place_fence() -> void:
 			remove_tile_connection(connection, index)
 	
 	selected_fence_button.fence_placed = true
-	selected_fence_button = null
 
 
 func remove_tile_connection(connection: Array, index) -> void:
@@ -282,7 +294,6 @@ func confirm_move_pawn() -> void:
 	
 	# Reset selected pawn, enabled pawn moved so the new pawn isn't hidden
 	selected_pawn_tile.pawn_moved = true 
-	selected_pawn_tile = null
 
 
 # Signals ----------------------------------------------------------------------
@@ -307,14 +318,26 @@ func _on_directional_button_pressed() -> void:
 
 func _on_confirm_pressed() -> void:
 	# Reset Board
-	reset_board(Color.TRANSPARENT)
+	reset_board()
+	
+	var has_won: bool = false
 	
 	if selected_fence_button:
 		confirm_place_fence()
+		selected_fence_button = null
+		
 	elif selected_pawn_tile:
 		confirm_move_pawn()
-		
+		has_won = check_win(selected_pawn_tile, win_indexes[current_player])
+		selected_pawn_tile = null
+	
 	update_fence_buttons()
 	
+	# Check if the pawn has reached end goal
+	if has_won:
+		win_label.text = Global.players[current_player]["name"] + " Wins!"
+		win_cover.show()
+		exit_button.hide()
 	# Switch to next player
-	current_player = 1 - current_player
+	else:
+		current_player = 1 - current_player
