@@ -1,7 +1,5 @@
 class_name Board extends Control
 
-# TODO Simplify User Controls
-# TODO Diagonal Pawn Movement
 # TODO Win Scenario
 # TODO Illegal Fence Check
 
@@ -24,8 +22,9 @@ var tile_buttons: Array[Tile] = []
 
 ## Stored as [Player One Tile, Player Two Tile]
 var current_tiles: Array[Tile] = [null, null]
-var last_choice: Callable = _on_move_pawn_pressed
 var directions: Array[int] = []
+var is_override: bool = false
+
 
 @onready var selected_fence_button: FenceButton = null:
 	set(val):
@@ -36,6 +35,7 @@ var directions: Array[int] = []
 		# Validate the confirm button
 		selected_fence_button = val
 		set_confirm_button(val, selected_pawn_tile)
+
 
 @onready var selected_pawn_tile: Tile = null:
 	set(val):
@@ -52,10 +52,12 @@ var directions: Array[int] = []
 			pawn.modulate.a = 0.5
 			pawn.show()
 
+
 @onready var current_player: int:
 	set(val):
 		current_player = val
-		last_choice.call()
+		reset_board(Color.WHITE)
+		set_tiles(current_tiles[current_player], true)
 		turn_label.text = str(Global.players[current_player]["name"]) + "'s Turn"
 
 
@@ -64,7 +66,7 @@ func _ready() -> void:
 	current_player = 0
 	
 	exit_button.pressed.connect(SignalManager.exit_pressed.emit)
-	SignalManager.tile_pressed.connect(func(tile: Tile) -> void: selected_pawn_tile = tile)
+	SignalManager.tile_pressed.connect(_on_tile_pressed)
 
 
 ## Setup the board with the selected size
@@ -290,26 +292,16 @@ func _on_fence_button_pressed(fence_button: FenceButton) -> void:
 	fence_button.v_fence.visible = Global.fence_direction != 0
 
 
+func _on_tile_pressed(tile: Tile) -> void:
+	selected_pawn_tile = tile
+	selected_fence_button = null
+
 ## Flip the rotation of the fence
 func _on_directional_button_pressed() -> void:
 	selected_fence_button = null
 	Global.fence_direction = 1 - Global.fence_direction
 	toggle_direction_button.text = 'Horizontal' if Global.fence_direction == 0 else 'Vertical'
 	update_fence_buttons()
-
-
-func _on_move_pawn_pressed() -> void:
-	set_tiles(current_tiles[current_player], true)
-	set_fence_buttons(Color.TRANSPARENT)
-	selected_fence_button = null
-	last_choice = _on_move_pawn_pressed
-
-
-func _on_place_fence_pressed() -> void:
-	set_tiles(current_tiles[current_player], false)
-	reset_board(Color.WHITE)
-	selected_pawn_tile = null
-	last_choice = _on_place_fence_pressed
 
 
 func _on_confirm_pressed() -> void:

@@ -20,7 +20,7 @@ expand_margin_bottom = 8.0
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_dms26"]
 bg_color = Color(0.105882, 0.105882, 0.109804, 1)
 
-[node name="Board" type="Control" node_paths=PackedStringArray("board_anchor", "tile_container", "board_container", "fence_button_container", "toggle_direction_button", "move_pawn_button", "place_fence_button", "confirm_button", "exit_button", "turn_label")]
+[node name="Board" type="Control" node_paths=PackedStringArray("board_anchor", "tile_container", "board_container", "fence_button_container", "toggle_direction_button", "confirm_button", "exit_button", "turn_label")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -34,8 +34,6 @@ tile_container = NodePath("BoardAnchor/BoardContainer/TileContainer")
 board_container = NodePath("BoardAnchor/BoardContainer")
 fence_button_container = NodePath("BoardAnchor/FenceButtonContainer")
 toggle_direction_button = NodePath("UserInterface/ActionsVBC/TogglePanel/DirectionContainer/ToggleDirection")
-move_pawn_button = NodePath("UserInterface/ActionsVBC/MovePawn")
-place_fence_button = NodePath("UserInterface/ActionsVBC/PlaceFence")
 confirm_button = NodePath("UserInterface/ActionsVBC/ConfirmButton")
 exit_button = NodePath("ExitButton")
 turn_label = NodePath("TurnLabel")
@@ -86,8 +84,8 @@ layout_mode = 1
 anchors_preset = -1
 offset_left = 40.0
 offset_top = 40.0
-offset_right = 362.0
-offset_bottom = 187.0
+offset_right = 402.0
+offset_bottom = 162.0
 theme_override_styles/panel = SubResource("StyleBoxFlat_d1llx")
 
 [node name="ActionsVBC" type="VBoxContainer" parent="UserInterface"]
@@ -110,14 +108,6 @@ custom_minimum_size = Vector2(212, 57)
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Horizontal"
-
-[node name="PlaceFence" type="Button" parent="UserInterface/ActionsVBC"]
-layout_mode = 2
-text = "Place Fence"
-
-[node name="MovePawn" type="Button" parent="UserInterface/ActionsVBC"]
-layout_mode = 2
-text = "Move Pawn"
 
 [node name="ConfirmButton" type="Button" parent="UserInterface/ActionsVBC"]
 layout_mode = 2
@@ -149,6 +139,4 @@ grow_vertical = 0
 text = "Exit to Menu"
 
 [connection signal="pressed" from="UserInterface/ActionsVBC/TogglePanel/DirectionContainer/ToggleDirection" to="." method="_on_directional_button_pressed"]
-[connection signal="pressed" from="UserInterface/ActionsVBC/PlaceFence" to="." method="_on_place_fence_pressed"]
-[connection signal="pressed" from="UserInterface/ActionsVBC/MovePawn" to="." method="_on_move_pawn_pressed"]
 [connection signal="pressed" from="UserInterface/ActionsVBC/ConfirmButton" to="." method="_on_confirm_pressed"]
