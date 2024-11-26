@@ -2,6 +2,7 @@ class_name Board extends Control
 
 # TODO Win Scenario
 # TODO Illegal Fence Check
+# TODO Minimax Algorithm
 
 @export_category("Board")
 @export var board_anchor: Control
