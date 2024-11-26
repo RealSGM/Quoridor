@@ -1,7 +1,9 @@
 class_name Board extends Control
 
+# TODO Simplify User Controls
+# TODO Diagonal Pawn Movement
 # TODO Win Scenario
-# TODO Illegal Fence Check (C#)
+# TODO Illegal Fence Check
 
 @export_category("Board")
 @export var board_anchor: Control
@@ -56,6 +58,7 @@ var directions: Array[int] = []
 		last_choice.call()
 		turn_label.text = str(Global.players[current_player]["name"]) + "'s Turn"
 
+
 func _ready() -> void:
 	_on_directional_button_pressed()
 	current_player = 0
@@ -106,44 +109,64 @@ func instance_tiles(board_size: int) -> void:
 		curr_tile.set_connections(index, board_size, tile_buttons)
 
 
-@warning_ignore('incompatible_ternary')
-func set_non_adjacent_tiles(current_tile: Tile, set_disabled: bool) -> void:
+func set_tiles(player_tile: Tile, set_disabled: bool) -> void:
 	var tiles_to_enable: Array[Tile] = []
 	
 	for tile: Tile in tile_buttons:
 		# Disable the current tile, but do not darken
-		if tile == current_tile:
+		if tile == player_tile:
 			tile.disabled = true
 			
-		# Enable the current tiles
-		elif tile in current_tile.connections:
-			# Check if the tile is taken by enemy pawn:
-			if tile == current_tiles[1 - current_player]:
-				fully_disable_tile(tile, set_disabled)
-				# Check if the tile infront is leapable
-				
-				# Get the cardinal direction
-				var player_index: int = tile_buttons.find(current_tile)
-				var index: int = get_direction(player_index, tile)
-				var leaped_tile: Tile
-				
-				if player_index + (directions[index] * 2) < tile_buttons.size():
-					leaped_tile = tile_buttons[player_index + (directions[index] * 2)]
-				
-				# Check if a fence is blocking it and theres a tile to leap
-				if leaped_tile && tile.connections[index] == leaped_tile:
-					tiles_to_enable.append(leaped_tile)
-			else:
-				tiles_to_enable.append(tile)
-				
+		# Search the current tiles connections that are not blocked by a fence
+		elif tile in player_tile.connections:
+			tiles_to_enable.append_array(get_adjacent_tiles(player_tile, tile, set_disabled))
 		else:
 			fully_disable_tile(tile, set_disabled)
 	
-	# Enable all tiles
+	# Enable all selectable tiles that the pawn can move to
 	tiles_to_enable.map(func(tile: Tile):
+		if !tile:
+			return
 		tile.disabled = false
 		tile.modulate = Color.WHITE
 	)
+
+
+func get_adjacent_tiles(player_tile, tile: Tile, set_disabled: bool) -> Array:
+	# Empty tile
+	if tile != current_tiles[1 - current_player]:
+		return [tile]
+	
+	# Current tile is taken by enemy pawn, find adjacent tiles of enemy tile
+	fully_disable_tile(tile, set_disabled)
+	
+	# Get the tile index of the pawn
+	var player_index: int = tile_buttons.find(player_tile)
+	# Get the cardinal direction between the two pawns
+	var dir_index: int = get_direction(player_index, tile)
+	
+	# Check if the leaped index is within the board boundaries
+	if player_index + (directions[dir_index] * 2) > tile_buttons.size():
+		return []
+	
+	return get_leaped_tiles(player_index, dir_index, tile)
+
+
+func get_leaped_tiles(player_index: int, dir_index: int, tile: Tile) -> Array:
+	var leaped_tile: Tile = tile_buttons[player_index + (directions[dir_index] * 2)]
+		
+	# Check if there is no fence blocking it
+	if leaped_tile && tile.connections[dir_index] == leaped_tile:
+		return [leaped_tile]
+		
+	var tiles: Array[Tile] = []
+	# If there is a fence blocking it, add the adjacent positions of the enemy pawn
+	for tile_connection: Tile in tile.connections:
+		# Remove the current pawns from being added
+		if tile_connection != current_tiles[current_player]:
+			tiles.append(tile_connection)
+			
+	return tiles
 
 
 func fully_disable_tile(tile: Tile, set_disabled: bool) -> void:
@@ -181,7 +204,7 @@ func instance_fence_buttons(fence_size: int) -> void:
 
 func update_fence_buttons() -> void:
 	for fence_button: FenceButton in fence_buttons:
-		fence_button.disabled = fence_button.dir_is_disabled[Global.dir_index]
+		fence_button.disabled = fence_button.dir_is_disabled[Global.fence_direction]
 		# Disable mouse filter if the button is disabled
 		fence_button.mouse_filter = Control.MOUSE_FILTER_IGNORE if fence_button.disabled else Control.MOUSE_FILTER_STOP
 	# TODO Implement illegal fence check
@@ -193,17 +216,17 @@ func set_fence_buttons(color: Color) -> void:
 
 func confirm_place_fence() -> void:
 	# Flip the index (for NESW adjustment)
-	var flipped_index: int = 1 - Global.dir_index
+	var flipped_index: int = 1 - Global.fence_direction
 	# Get the adjacent directionals
 	var disabled_indexes: Array[int] = [flipped_index, flipped_index + 2]
 	
 	# Disable the adjacents buttons, for that direction
 	for indexes: int in disabled_indexes:
 		if selected_fence_button.connections[indexes]:
-			selected_fence_button.connections[indexes].dir_is_disabled[Global.dir_index] = true
+			selected_fence_button.connections[indexes].dir_is_disabled[Global.fence_direction] = true
 	
 	# Loop through the connections in the directed fence index
-	for connection: Array in selected_fence_button.tile_connections[Global.dir_index]:
+	for connection: Array in selected_fence_button.tile_connections[Global.fence_direction]:
 		for index: int in connection.size():
 			remove_tile_connection(connection, index)
 	
@@ -263,27 +286,27 @@ func confirm_move_pawn() -> void:
 func _on_fence_button_pressed(fence_button: FenceButton) -> void:
 	selected_fence_button = fence_button
 	selected_pawn_tile = null
-	fence_button.h_fence.visible = Global.dir_index == 0
-	fence_button.v_fence.visible = Global.dir_index != 0
+	fence_button.h_fence.visible = Global.fence_direction == 0
+	fence_button.v_fence.visible = Global.fence_direction != 0
 
 
 ## Flip the rotation of the fence
 func _on_directional_button_pressed() -> void:
 	selected_fence_button = null
-	Global.dir_index = 1 - Global.dir_index
-	toggle_direction_button.text = 'Horizontal' if Global.dir_index == 0 else 'Vertical'
+	Global.fence_direction = 1 - Global.fence_direction
+	toggle_direction_button.text = 'Horizontal' if Global.fence_direction == 0 else 'Vertical'
 	update_fence_buttons()
 
 
 func _on_move_pawn_pressed() -> void:
-	set_non_adjacent_tiles(current_tiles[current_player], true)
+	set_tiles(current_tiles[current_player], true)
 	set_fence_buttons(Color.TRANSPARENT)
 	selected_fence_button = null
 	last_choice = _on_move_pawn_pressed
 
 
 func _on_place_fence_pressed() -> void:
-	set_non_adjacent_tiles(current_tiles[current_player], false)
+	set_tiles(current_tiles[current_player], false)
 	reset_board(Color.WHITE)
 	selected_pawn_tile = null
 	last_choice = _on_place_fence_pressed
