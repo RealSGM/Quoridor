@@ -125,10 +125,13 @@ func set_non_adjacent_tiles(current_tile: Tile, set_disabled: bool) -> void:
 				# Get the cardinal direction
 				var player_index: int = tile_buttons.find(current_tile)
 				var index: int = get_direction(player_index, tile)
-				var leaped_tile: Tile = tile_buttons[player_index + (directions[index] * 2)]
+				var leaped_tile: Tile
 				
-				# Check if a fence is blocking it
-				if tile.connections[index] == leaped_tile:
+				if player_index + (directions[index] * 2) < tile_buttons.size():
+					leaped_tile = tile_buttons[player_index + (directions[index] * 2)]
+				
+				# Check if a fence is blocking it and theres a tile to leap
+				if leaped_tile && tile.connections[index] == leaped_tile:
 					tiles_to_enable.append(leaped_tile)
 			else:
 				tiles_to_enable.append(tile)
