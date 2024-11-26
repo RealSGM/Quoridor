@@ -152,6 +152,19 @@ func get_adjacent_tiles(player_tile, tile: Tile, set_disabled: bool) -> Array:
 	return get_leaped_tiles(player_index, dir_index, tile)
 
 
+func fully_disable_tile(tile: Tile, set_disabled: bool) -> void:
+	tile.disabled = set_disabled
+	tile.modulate = Color(0.7, 0.7, 0.7) if set_disabled else Color.WHITE
+	tile.focus_mode = Control.FOCUS_NONE if set_disabled else Control.FOCUS_CLICK
+
+
+func get_direction(index: int, enemy_tile: Tile) -> int:
+	for i: int in directions.size():
+		if tile_buttons[index + directions[i]] == enemy_tile:
+			return i
+	return -1
+
+
 func get_leaped_tiles(player_index: int, dir_index: int, tile: Tile) -> Array:
 	var leaped_tile: Tile = tile_buttons[player_index + (directions[dir_index] * 2)]
 		
@@ -167,19 +180,6 @@ func get_leaped_tiles(player_index: int, dir_index: int, tile: Tile) -> Array:
 			tiles.append(tile_connection)
 			
 	return tiles
-
-
-func fully_disable_tile(tile: Tile, set_disabled: bool) -> void:
-	tile.disabled = set_disabled
-	tile.modulate = Color(0.7, 0.7, 0.7) if set_disabled else Color.WHITE
-	tile.focus_mode = Control.FOCUS_NONE if set_disabled else Control.FOCUS_CLICK
-
-
-func get_direction(index: int, enemy_tile: Tile) -> int:
-	for i: int in directions.size():
-		if tile_buttons[index + directions[i]] == enemy_tile:
-			return i
-	return -1
 
 
 # Fence Buttons ----------------------------------------------------------------
