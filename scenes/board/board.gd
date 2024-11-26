@@ -24,6 +24,7 @@ var tile_buttons: Array[Tile] = []
 ## Stored as [Player One Tile, Player Two Tile]
 var current_tiles: Array[Tile] = [null, null]
 var last_choice: Callable = _on_move_pawn_pressed
+var directions: Array[int] = []
 
 @onready var selected_fence_button: FenceButton = null:
 	set(val):
@@ -66,6 +67,8 @@ func _ready() -> void:
 
 ## Setup the board with the selected size
 func setup_board(board_size: int) -> void:
+	Global.board_size = board_size
+	directions = [-Global.board_size, 1, Global.board_size, 1]
 	instance_tiles(board_size)
 	instance_fence_buttons(board_size - 1)
 	spawn_pawns(board_size)
@@ -106,18 +109,50 @@ func instance_tiles(board_size: int) -> void:
 
 @warning_ignore('incompatible_ternary')
 func set_non_adjacent_tiles(current_tile: Tile, set_disabled: bool) -> void:
+	var tiles_to_enable: Array[Tile] = []
+	
 	for tile: Tile in tile_buttons:
 		# Disable the current tile, but do not darken
 		if tile == current_tile:
 			tile.disabled = true
+			
 		# Enable the current tiles
 		elif tile in current_tile.connections:
-			tile.disabled = false
-			tile.modulate = Color.WHITE
+			# Check if the tile is taken by enemy pawn:
+			if tile == current_tiles[1 - current_player]:
+				fully_disable_tile(tile, set_disabled)
+				# Check if the tile infront is leapable
+				# Check if a fence is blocking it
+				
+				# Get the cardinal direction
+				var player_index: int = tile_buttons.find(current_tile)
+				var index: int = get_direction(player_index, tile)
+				var leaped_tile: Tile = tile_buttons[player_index + (directions[index] * 2)]
+				tiles_to_enable.append(leaped_tile)
+			else:
+				tiles_to_enable.append(tile)
+				
 		else:
-			tile.disabled = set_disabled
-			tile.modulate = Color(0.7, 0.7, 0.7) if set_disabled else Color.WHITE
-			tile.focus_mode = Control.FOCUS_NONE if set_disabled else Control.FOCUS_CLICK
+			fully_disable_tile(tile, set_disabled)
+	
+	# Enable all tiles
+	tiles_to_enable.map(func(tile: Tile):
+		tile.disabled = false
+		tile.modulate = Color.WHITE
+	)
+
+
+func fully_disable_tile(tile: Tile, set_disabled: bool) -> void:
+	tile.disabled = set_disabled
+	tile.modulate = Color(0.7, 0.7, 0.7) if set_disabled else Color.WHITE
+	tile.focus_mode = Control.FOCUS_NONE if set_disabled else Control.FOCUS_CLICK
+
+
+func get_direction(index: int, enemy_tile: Tile) -> int:
+	for i: int in directions.size():
+		if tile_buttons[index + directions[i]] == enemy_tile:
+			return i
+	return -1
 
 
 # Fence Buttons ----------------------------------------------------------------

@@ -10,6 +10,7 @@ const COLORS: Array[Color] = [
 ## O is horizontal, 1 is vertical
 var dir_index: int = 1
 var board: Board
+var board_size: int
 var main: Control
 
 var players: Array[Dictionary] = [{}, {}]
