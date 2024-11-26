@@ -35,10 +35,6 @@ window/size/window_height_override=540
 window/stretch/mode="canvas_items"
 window/stretch/aspect="keep_height"
 
-[dotnet]
-
-project/assembly_name="Quoridor"
-
 [editor_plugins]
 
 enabled=PackedStringArray("res://addons/wakatime/plugin.cfg")
