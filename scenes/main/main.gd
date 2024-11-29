@@ -130,5 +130,5 @@ func _on_exit_button_pressed() -> void:
 func _on_colour_selected(index: int, prev_index: int, other_button: OptionButton) -> void:
 	# Disable the selected colour in the other option button
 	other_button.set_item_disabled(index, true)
-	# Re-enabled the previously selected colour in the other option button
+	# Re-enable the previously selected colour in the other option button
 	other_button.set_item_disabled(prev_index, false)

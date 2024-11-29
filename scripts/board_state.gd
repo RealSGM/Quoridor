@@ -13,3 +13,18 @@ var directions: Array[int] = []
 var pawn_indexes: Array[int] = [-1, -1]
 ## Stores the upper and lower bounds for each pawn's finish line
 var win_indexes: Array[Array] = [[], []]
+
+
+func place_fence(fence: Fence, direction: int) -> void:
+	# Loop through the connections in the directed fence index
+	for connection: Array in fence.adj_tiles[direction]:
+		for index: int in connection.size():
+			remove_tile_connection(connection, index)
+
+
+func remove_tile_connection(connection: Array, index) -> void:
+	var tile: Tile = connection[index]
+	var inverted_index: int = 1 - index
+	var tile_to_remove: Tile = connection[inverted_index]
+	var replace_index: int =  tile.connections.find(tile_to_remove)
+	tile.connections[replace_index] = null

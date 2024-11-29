@@ -1,9 +1,10 @@
 class_name Fence extends Node
 
-var adj_fences: Array[Fence] = [null, null, null, null]
 ## Stores tile adj_fences as [[Horizontal Fence], [Vertical Fence]]
 var adj_tiles: Array[Array] = [[[],[]], [[],[]]]
 var button: FenceButton
+var adj_fences: Array[Fence] = [null, null, null, null]
+
 
 func set_fence_connections(index: int, fence_size: int, fences: Array[Fence]) -> void:
 	if index >= fence_size: # Check for North Tile

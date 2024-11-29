@@ -1,13 +1,11 @@
 class_name Game extends Control
 
-'''
-	1. Generate all tiles on the board
-	2. Add pawn to each tile
-	3. Generate all fence buttons
-
-	4. Generate game states
-'''
-
+## TODO Cache the directions for fence buttons
+## - Perform DFS to check if the fence in that direction is legal
+## - Store to see if it is disable
+## - Have permanent disabled for when it is placed
+## TODO Illegal Fence check
+## TODO Minimax Algorithm
 
 @export_category("Board")
 @export var board: BoardState
@@ -152,6 +150,7 @@ func set_tiles(pawn_index: int, set_disabled: bool) -> void:
 		tile.modulate = Color.WHITE
 	)
 
+
 ## Returns all adjacent tile buttons
 func get_adjacent_tiles(pawn_tile: Tile, tile: Tile, tile_index: int, set_disabled: bool) -> Array[TileButton]:
 	# Empty tile (not taken by enemy pawn
@@ -228,12 +227,12 @@ func instance_fence_buttons(fence_size: int) -> void:
 
 func update_fence_buttons() -> void:
 	for fence: Fence in board.fences:
-		fence.button.disabled = fence.button.dir_is_disabled[Global.fence_direction] if board.fence_counts[current_player] > 0 else true
+		fence.button.disabled = fence.button.dir_disabled[Global.fence_direction] if board.fence_counts[current_player] > 0 else true
 		# Disable mouse filter if the button is disabled
 		fence.button.mouse_filter = Control.MOUSE_FILTER_IGNORE if fence.button.disabled else Control.MOUSE_FILTER_STOP
 
 
-func confirm_place_fence() -> void:
+func confirm_place_fence(fence_button: FenceButton) -> void:
 	# Flip the index (for NESW adjustment)
 	var flipped_index: int = 1 - Global.fence_direction
 	# Get the adjacent directionals
@@ -241,24 +240,12 @@ func confirm_place_fence() -> void:
 	
 	# Disable the adjacents buttons, for that direction
 	for indexes: int in disabled_indexes:
-		if selected_fence_button.fence.adj_fences[indexes]:
-			selected_fence_button.fence.adj_fences[indexes].button.dir_is_disabled[Global.fence_direction] = true
+		if fence_button.fence.adj_fences[indexes]:
+			fence_button.fence.adj_fences[indexes].button.dir_disabled[Global.fence_direction] = true
 	
-	# Loop through the connections in the directed fence index
-	for connection: Array in selected_fence_button.fence.adj_tiles[Global.fence_direction]:
-		for index: int in connection.size():
-			remove_tile_connection(connection, index)
-	
-	selected_fence_button.fence_placed = true
+	board.place_fence(fence_button.fence, Global.fence_direction)
+	fence_button.fence_placed = true
 	board.fence_counts[current_player] -= 1
-
-
-func remove_tile_connection(connection: Array, index) -> void:
-	var tile: Tile = connection[index]
-	var inverted_index: int = 1 - index
-	var tile_to_remove: Tile = connection[inverted_index]
-	var replace_index: int =  tile.connections.find(tile_to_remove)
-	tile.connections[replace_index] = null
 
 
 func get_illegal_fences(fence_dir: int) -> void:
@@ -269,9 +256,13 @@ func get_illegal_fences(fence_dir: int) -> void:
 		illegals.append(fence_button)
 
 
-func is_fence_legal(_fence_button: FenceButton, _fence_dir: int) -> bool:
+func is_fence_legal(fence_button: FenceButton, _fence_dir: int) -> bool:
+	var fence_index: int = board.fences.find(fence_button)
+	var board_state: BoardState = board.duplicate()
 	var bounds: Array = board.win_indexes[current_player]
-	var _goal_tiles: Array[Tile] = board.tiles.slice(bounds[0], bounds[1])
+	var goal_tiles: Array[Tile] = board.tiles.slice(bounds[0], bounds[1])
+	# Create board state with fence button being placed
+	# Perform DFS to check if from current position there is a possible
 	return true
 
 
@@ -294,7 +285,7 @@ func spawn_pawns(board_size: int) -> void:
 
 func spawn_pawn(p_name: String, color: Color, pos_index: int) -> Pawn:
 	var pawn: Pawn = Resources.get_resource("pawn").instantiate()
-	pawn.colour = color
+	pawn.modulate = color
 	pawn.player_name = p_name
 	board.tiles[pos_index].button.add_child(pawn, true)
 	pawn.current = board.tiles[pos_index].button
@@ -344,7 +335,7 @@ func _on_confirm_pressed() -> void:
 	var has_won: bool = false
 	
 	if selected_fence_button:
-		confirm_place_fence()
+		confirm_place_fence(selected_fence_button)
 		selected_fence_button = null
 		
 	elif selected_pawn_tile:
