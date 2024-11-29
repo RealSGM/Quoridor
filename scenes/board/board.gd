@@ -1,6 +1,5 @@
 class_name Board extends Control
 
-# TODO Max 10 Fences
 # TODO Illegal Fence Check
 # TODO Minimax Algorithm
 
