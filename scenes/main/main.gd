@@ -114,15 +114,15 @@ func _on_start_game_pressed() -> void:
 	board_options_menu.hide()
 	set_players_data()
 	
-	var board: Board = Resources.get_resource("board").instantiate()
-	Global.board = board
-	board.setup_board(size_options[size_option_button.selected])
-	foreground.add_child(board, true)
-	board.board_state.scale = Vector2.ONE * float(board_dimensions) / float(board.board_container.size.x)
+	var game: Game = Resources.get_resource("game").instantiate()
+	Global.game = game
+	game.setup_board(size_options[size_option_button.selected])
+	foreground.add_child(game, true)
+	game.board.scale = Vector2.ONE * float(board_dimensions) / float(game.board_container.size.x)
 
 
 func _on_exit_button_pressed() -> void:
-	Global.board.queue_free()
+	Global.game.queue_free()
 	show_main_menu()
 
 

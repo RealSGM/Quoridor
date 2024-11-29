@@ -1,12 +1,29 @@
-[gd_scene load_steps=5 format=3 uid="uid://cm0hndv0iu6qm"]
+[gd_scene load_steps=10 format=3 uid="uid://cm0hndv0iu6qm"]
 
 [ext_resource type="PackedScene" uid="uid://g12um5raoqio" path="res://scenes/game/game.tscn" id="1_cuwpg"]
-[ext_resource type="PackedScene" uid="uid://3pm4tnfcx00r" path="res://scenes/tile/tile.tscn" id="1_e5uwh"]
 [ext_resource type="PackedScene" uid="uid://rfqpiq385m6l" path="res://scenes/fence/fence_button.tscn" id="1_ev0q0"]
 [ext_resource type="PackedScene" uid="uid://b06lx81t8jb2d" path="res://scenes/pawn/pawn.tscn" id="3_e76re"]
+[ext_resource type="StyleBox" uid="uid://xjrxqguwd6gy" path="res://resources/tile/tile_normal.tres" id="4_a6yqn"]
+[ext_resource type="StyleBox" uid="uid://c6l644kbapyt4" path="res://resources/tile/tile_pressed.tres" id="5_0cwkr"]
+[ext_resource type="StyleBox" uid="uid://v1kyd2jp1ujl" path="res://resources/tile/tile_hover.tres" id="6_3pgu8"]
+[ext_resource type="Script" path="res://scripts/tile.gd" id="7_ml7ju"]
+[ext_resource type="PackedScene" uid="uid://rmjhwmm8lagg" path="res://scenes/tile_button/tile_button.tscn" id="8_bdlgi"]
+
+[sub_resource type="PackedScene" id="PackedScene_vr61w"]
+_bundled = {
+"conn_count": 0,
+"conns": PackedInt32Array(),
+"editable_instances": [],
+"names": PackedStringArray("Tile", "custom_minimum_size", "anchors_preset", "anchor_left", "anchor_top", "anchor_right", "anchor_bottom", "offset_left", "offset_top", "offset_right", "offset_bottom", "grow_horizontal", "grow_vertical", "theme_override_styles/focus", "theme_override_styles/disabled", "theme_override_styles/hover_pressed", "theme_override_styles/hover", "theme_override_styles/pressed", "theme_override_styles/normal", "script", "Button"),
+"node_count": 1,
+"node_paths": [],
+"nodes": PackedInt32Array(-1, -1, 20, 0, -1, 19, 1, 0, 2, 1, 3, 2, 4, 2, 5, 2, 6, 2, 7, 3, 8, 3, 9, 4, 10, 4, 11, 5, 12, 5, 13, 6, 14, 6, 15, 7, 16, 8, 17, 7, 18, 6, 19, 9, 0),
+"variants": [Vector2(64, 64), 8, 0.5, -4.0, 4.0, 2, ExtResource("4_a6yqn"), ExtResource("5_0cwkr"), ExtResource("6_3pgu8"), ExtResource("7_ml7ju")],
+"version": 3
+}
 
 [node name="Resources" type="ResourcePreloader"]
 process_thread_group = 2
 process_thread_group_order = 0
 process_thread_messages = 0
-resources = [PackedStringArray("board", "fence_button", "pawn", "tile"), [ExtResource("1_cuwpg"), ExtResource("1_ev0q0"), ExtResource("3_e76re"), ExtResource("1_e5uwh")]]
+resources = [PackedStringArray("fence_button", "game", "pawn", "tile", "tile_button"), [ExtResource("1_ev0q0"), ExtResource("1_cuwpg"), ExtResource("3_e76re"), SubResource("PackedScene_vr61w"), ExtResource("8_bdlgi")]]

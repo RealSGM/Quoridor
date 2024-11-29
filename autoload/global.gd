@@ -9,7 +9,7 @@ const COLORS: Array[Color] = [
 
 ## O is horizontal, 1 is vertical
 var fence_direction: int = 1
-var board: Board
+var game: Game
 var board_size: int
 var main: Control
 

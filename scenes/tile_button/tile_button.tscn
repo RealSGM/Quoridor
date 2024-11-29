@@ -1,0 +1,27 @@
+[gd_scene load_steps=5 format=3 uid="uid://rmjhwmm8lagg"]
+
+[ext_resource type="StyleBox" uid="uid://xjrxqguwd6gy" path="res://resources/tile/tile_normal.tres" id="1_3mp2l"]
+[ext_resource type="StyleBox" uid="uid://c6l644kbapyt4" path="res://resources/tile/tile_pressed.tres" id="2_al77t"]
+[ext_resource type="StyleBox" uid="uid://v1kyd2jp1ujl" path="res://resources/tile/tile_hover.tres" id="3_i4yfd"]
+[ext_resource type="Script" path="res://scenes/tile_button/tile_button.gd" id="4_jgrqp"]
+
+[node name="TileButton" type="Button"]
+custom_minimum_size = Vector2(64, 64)
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -4.0
+offset_top = -4.0
+offset_right = 4.0
+offset_bottom = 4.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/focus = ExtResource("1_3mp2l")
+theme_override_styles/disabled = ExtResource("1_3mp2l")
+theme_override_styles/hover_pressed = ExtResource("2_al77t")
+theme_override_styles/hover = ExtResource("3_i4yfd")
+theme_override_styles/pressed = ExtResource("2_al77t")
+theme_override_styles/normal = ExtResource("1_3mp2l")
+script = ExtResource("4_jgrqp")

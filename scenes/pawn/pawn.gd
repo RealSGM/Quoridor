@@ -1,7 +1,7 @@
 class_name Pawn extends Panel
 
 var player_name: String = ''
-var current: Tile
+var current: TileButton
 
 var colour: Color:
 	set(val):

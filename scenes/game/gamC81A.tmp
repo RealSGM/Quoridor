@@ -24,7 +24,7 @@ bg_color = Color(0.105882, 0.105882, 0.109804, 1)
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_2k6ku"]
 bg_color = Color(0.105882, 0.105882, 0.109804, 1)
 
-[node name="Game" type="Control" node_paths=PackedStringArray("board", "tile_container", "board_container", "fence_button_container", "toggle_direction_button", "confirm_button", "exit_button", "turn_label", "win_cover", "win_label", "win_exit_button")]
+[node name="Game" type="Control" node_paths=PackedStringArray("board_state", "tile_container", "board_container", "fence_button_container", "toggle_direction_button", "confirm_button", "exit_button", "turn_label", "win_cover", "win_label", "win_exit_button")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -33,7 +33,7 @@ grow_horizontal = 2
 grow_vertical = 2
 theme = ExtResource("1_khihi")
 script = ExtResource("2_8s0tt")
-board = NodePath("Board")
+board_state = NodePath("Board")
 tile_container = NodePath("Board/BoardContainer/TileContainer")
 board_container = NodePath("Board/BoardContainer")
 fence_button_container = NodePath("Board/FenceButtonContainer")
