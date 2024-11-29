@@ -226,7 +226,7 @@ func instance_fence_buttons(fence_size: int) -> void:
 
 func update_fence_buttons() -> void:
 	for fence_button: FenceButton in fence_buttons:
-		fence_button.disabled = fence_button.dir_is_disabled[Global.fence_direction]
+		fence_button.disabled = fence_button.dir_is_disabled[Global.fence_direction] if fence_counts[current_player] > 0 else true
 		# Disable mouse filter if the button is disabled
 		fence_button.mouse_filter = Control.MOUSE_FILTER_IGNORE if fence_button.disabled else Control.MOUSE_FILTER_STOP
 	# TODO Implement illegal fence check
@@ -249,6 +249,7 @@ func confirm_place_fence() -> void:
 			remove_tile_connection(connection, index)
 	
 	selected_fence_button.fence_placed = true
+	fence_counts[current_player] -= 1
 
 
 func remove_tile_connection(connection: Array, index) -> void:
