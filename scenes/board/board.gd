@@ -1,5 +1,6 @@
 class_name Board extends Control
 
+# TODO Max 10 Fences
 # TODO Illegal Fence Check
 # TODO Minimax Algorithm
 
@@ -8,6 +9,7 @@ class_name Board extends Control
 @export var tile_container: GridContainer
 @export var board_container: PanelContainer
 @export var fence_button_container: GridContainer
+@export var fence_counts: Array[int] = [10, 10]
 
 @export_category("User Interface")
 @export var toggle_direction_button: Button
@@ -307,6 +309,7 @@ func _on_fence_button_pressed(fence_button: FenceButton) -> void:
 func _on_tile_pressed(tile: Tile) -> void:
 	selected_pawn_tile = tile
 	selected_fence_button = null
+
 
 ## Flip the rotation of the fence
 func _on_directional_button_pressed() -> void:
