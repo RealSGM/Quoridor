@@ -118,7 +118,7 @@ func _on_start_game_pressed() -> void:
 	Global.board = board
 	board.setup_board(size_options[size_option_button.selected])
 	foreground.add_child(board, true)
-	board.board_anchor.scale = Vector2.ONE * float(board_dimensions) / float(board.board_container.size.x)
+	board.board_state.scale = Vector2.ONE * float(board_dimensions) / float(board.board_container.size.x)
 
 
 func _on_exit_button_pressed() -> void:

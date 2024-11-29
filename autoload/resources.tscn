@@ -1,6 +1,6 @@
 [gd_scene load_steps=5 format=3 uid="uid://cm0hndv0iu6qm"]
 
-[ext_resource type="PackedScene" uid="uid://g12um5raoqio" path="res://scenes/board/board.tscn" id="1_cuwpg"]
+[ext_resource type="PackedScene" uid="uid://g12um5raoqio" path="res://scenes/game/game.tscn" id="1_cuwpg"]
 [ext_resource type="PackedScene" uid="uid://3pm4tnfcx00r" path="res://scenes/tile/tile.tscn" id="1_e5uwh"]
 [ext_resource type="PackedScene" uid="uid://rfqpiq385m6l" path="res://scenes/fence/fence_button.tscn" id="1_ev0q0"]
 [ext_resource type="PackedScene" uid="uid://b06lx81t8jb2d" path="res://scenes/pawn/pawn.tscn" id="3_e76re"]
