@@ -60,6 +60,10 @@ class_name Game extends Control
 		set_tiles(board.pawn_indexes[current_player], true)
 		turn_label.text = str(Global.players[current_player]["name"]) + "'s Turn"
 
+func _input(event: InputEvent) -> void:
+	if event.is_action_pressed("test"):
+		get_illegal_fences()
+
 
 func _ready() -> void:
 	_on_directional_button_pressed()
@@ -248,23 +252,54 @@ func confirm_place_fence(fence_button: FenceButton) -> void:
 	board.fence_counts[current_player] -= 1
 
 
-func get_illegal_fences(fence_dir: int) -> void:
-	var illegals: Array[FenceButton] = []
-	for fence_button: FenceButton in board.fence_buttons:
-		if is_fence_legal(fence_button, fence_dir):
-			continue
-		illegals.append(fence_button)
+func get_illegal_fences() -> Array:
+	var illegals: Array[Fence] = []
+	var bits: Array[int] = [0, 1]
+	print("Getting illegal fences")
+	var start_time: int = Time.get_ticks_msec()
+	# Loop for each player
+	for player: int in bits:
+		# Loop for each fence direction
+		for fence_dir: int in bits:
+			# Check each fence button, to see if it is possible
+			for fence: Fence in board.fences:
+				if is_fence_legal(fence, fence_dir, player):
+					continue
+				illegals.append(fence)
+	print(illegals)
+	print("Time: " + str(Time.get_ticks_msec() - start_time))
+	return illegals
 
 
-func is_fence_legal(fence_button: FenceButton, _fence_dir: int) -> bool:
-	var fence_index: int = board.fences.find(fence_button)
-	var board_state: BoardState = board.duplicate()
+func is_fence_legal(fence: Fence, fence_dir: int, player_index: int) -> bool:
 	var bounds: Array = board.win_indexes[current_player]
 	var goal_tiles: Array[Tile] = board.tiles.slice(bounds[0], bounds[1])
+	
 	# Create board state with fence button being placed
-	# Perform DFS to check if from current position there is a possible
-	return true
+	var board_state: BoardState = board.duplicate()
+	#board_state.fences = board.fences
+	board_state.place_fence(fence, fence_dir)
+	
+	# Perform DFS to check if from current position of player there is a possible
+	var start: Tile = board_state.tiles[board_state.pawn_indexes[player_index]]
+	var visited: Dictionary = {}
+	return illegal_fence_check(start, goal_tiles, visited, board_state)
+	
 
+func illegal_fence_check(tile: Tile, goal_tiles: Array[Tile], visited: Dictionary, new_board: BoardState) -> bool:
+	if tile in goal_tiles:
+		return true
+	
+	# Mark tile as visited
+	visited[tile] = null
+	
+	# Explore all neighbours
+	for neighbour: Tile in tile.connections:
+		if neighbour and neighbour not in visited:
+			return illegal_fence_check(neighbour, goal_tiles, visited, new_board)
+	
+	return false
+	
 
 # Pawns ------------------------------------------------------------------------
 @warning_ignore("integer_division")
