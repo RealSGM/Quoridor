@@ -65,12 +65,6 @@ var threads: Array[Thread] = []
 		turn_label.text = str(Global.players[current_player]["name"]) + "'s Turn"
 
 
-#func _input(event: InputEvent) -> void:
-	#if event.is_action_pressed("test"):
-		#for illegal_fence: Array in get_illegal_fences():
-			#print(illegal_fence)
-
-
 func _ready() -> void:
 	_on_directional_button_pressed()
 	current_player = 0
@@ -107,7 +101,7 @@ func reset_board() -> void:
 
 ## Checks if the tile is within the player's winning bounds
 func check_win(tile: Tile, bounds: Array) -> bool:
-	return board.tiles.find(tile) > bounds[0] and board.tiles.find(tile) < bounds[1]
+	return board.tiles.find(tile) >= bounds[0] and board.tiles.find(tile) <= bounds[1]
 
 
 #region Fence Buttons
@@ -156,94 +150,6 @@ func confirm_place_fence(fence_button: FenceButton) -> void:
 	board.place_fence(fence_button.fence, Global.fence_direction)
 	fence_button.fence_placed = true
 	board.fence_counts[current_player] -= 1
-
-
-#func get_illegal_fences() -> Array[Array]:
-	#var illegal_fences: Array[Array] = [[], []]
-	#var bits: Array[int] = [0, 1]
-	#
-	#print("Getting illegal fences")
-	#var start_time: int = Time.get_ticks_msec()
-	#
-	## Check each fence button, to see if it is possible
-	#for fence: Fence in board.fences.duplicate():
-		## Ignore placed fences
-		#if fence.button.fence_placed:
-			#continue
-			#
-		## Loop for each fence direction
-		#for fence_dir: int in bits:
-			## Ignore fences adjacent to placed fences
-			#if fence.button.dir_disabled[fence_dir]:
-				#continue
-			#
-			## Ignore fences that are already known to be unobtainable
-			#if fence.button.dfs_disabled[fence_dir]:
-				#continue
-			#
-			## Loop for each player
-			#for player: int in bits:
-				#var thread: Thread = Thread.new()
-				#threads.append(thread)
-				#thread.start(_illegal_fence_check_threaded.bind(fence, fence_dir, player))
-				##break ## TEMP
-			##break ## TEMP
-		##break ## TEMP
-	#
-	#
-	#for thread: Thread in threads:
-		#var result: Array = thread.wait_to_finish()
-		#if result.is_empty():
-			#continue
-		#illegal_fences[result[0]].append(result[1])
-	#
-	#threads.clear()
-	#print("Time: " + str(Time.get_ticks_msec() - start_time))
-	#return illegal_fences
-
-
-#func _illegal_fence_check_threaded(fence: Fence, fence_dir: int, player: int) -> Array:
-	#if is_fence_legal(fence, fence_dir, player):
-		#return []
-	#fence.button.dfs_disabled[fence_dir] = true
-	#return [player, fence]
-
-
-## Perform DFS to check if from current position of player there is a possible
-#func is_fence_legal(fence: Fence, fence_dir: int, player_index: int) -> bool:
-	#var bounds: Array = board.win_indexes[player_index]
-	#var goal_tiles: Array[Tile] = board.tiles.slice(bounds[0], bounds[1]+1)
-	#
-	## Duplicate the board state
-	#var board_state: BoardState = BoardState.new()
-	#board_state.fences = board.fences.duplicate(true)
-	#board_state.tiles = board.tiles.duplicate(true)
-	#board_state.pawn_indexes = board.pawn_indexes.duplicate(true)
-	#board_state.win_indexes = board.win_indexes.duplicate(true)
-	#
-	## Simulate a fence being placed
-	#board_state.place_fence(fence, fence_dir)
-	#var start: Tile = board_state.tiles[board_state.pawn_indexes[player_index]]
-	#return recursive_dfs(start, goal_tiles, [])
-
-
-#func recursive_dfs(tile: Tile, goal_tiles: Array[Tile], visited: Array, data: String = '') -> bool:
-	#if tile in goal_tiles:
-		#return true
-	## Mark tile as visited
-	#visited.append(tile)
-	#
-	#data += "Current Tile: " + str(tile.id) + "\n"
-	#data += "Tile Connections: " + str(tile.connections) + "\n"
-	#
-	## Explore all neighbours
-	#for neighbour: Tile in tile.connections:
-		#if neighbour and neighbour not in visited:
-			#if recursive_dfs(neighbour, goal_tiles, visited, data):
-				#return true
-	#data += "--------DFS Returned False--------"
-	##print(data)
-	#return false
 
 
 
@@ -335,6 +241,7 @@ func get_direction(index: int, enemy_tile: Tile) -> int:
 		if board.tiles[index + board.directions[i]] == enemy_tile:
 			return i
 	return -1
+
 
 # Get adjacent tiles for the leaped position
 func get_leaped_tiles(player_index: int, dir_index: int, tile: Tile) -> Array[TileButton]:
