@@ -68,10 +68,10 @@ var threads: Array[Thread] = []
 
 #endregion
 
-func _input(event: InputEvent) -> void:
-	if event.is_action_pressed("test"):
-		for illegal_fence: Array in get_illegal_fences():
-			print(illegal_fence)
+#func _input(event: InputEvent) -> void:
+	#if event.is_action_pressed("test"):
+		#for illegal_fence: Array in get_illegal_fences():
+			#print(illegal_fence)
 
 
 func _ready() -> void:
@@ -134,7 +134,7 @@ func instance_fence_buttons(fence_size: int) -> void:
 	for index: int in range(total_fences):
 		var curr_fence: Fence = board.fences[index]
 		curr_fence.set_fence_connections(index, fence_size, board.fences)
-		curr_fence.set_tile_connections(index, board_size, board.tiles)
+		curr_fence.set_tile_connections(index, board_size)
 
 
 func update_fence_buttons() -> void:
@@ -160,92 +160,92 @@ func confirm_place_fence(fence_button: FenceButton) -> void:
 	board.fence_counts[current_player] -= 1
 
 
-func get_illegal_fences() -> Array[Array]:
-	var illegal_fences: Array[Array] = [[], []]
-	var bits: Array[int] = [0, 1]
-	
-	print("Getting illegal fences")
-	var start_time: int = Time.get_ticks_msec()
-	
-	# Check each fence button, to see if it is possible
-	for fence: Fence in board.fences.duplicate():
-		# Ignore placed fences
-		if fence.button.fence_placed:
-			continue
-			
-		# Loop for each fence direction
-		for fence_dir: int in bits:
-			# Ignore fences adjacent to placed fences
-			if fence.button.dir_disabled[fence_dir]:
-				continue
-			
-			# Ignore fences that are already known to be unobtainable
-			if fence.button.dfs_disabled[fence_dir]:
-				continue
-			
-			# Loop for each player
-			for player: int in bits:
-				var thread: Thread = Thread.new()
-				threads.append(thread)
-				thread.start(_illegal_fence_check_threaded.bind(fence, fence_dir, player))
-				#break ## TEMP
-			#break ## TEMP
-		#break ## TEMP
-	
-	
-	for thread: Thread in threads:
-		var result: Array = thread.wait_to_finish()
-		if result.is_empty():
-			continue
-		illegal_fences[result[0]].append(result[1])
-	
-	threads.clear()
-	print("Time: " + str(Time.get_ticks_msec() - start_time))
-	return illegal_fences
+#func get_illegal_fences() -> Array[Array]:
+	#var illegal_fences: Array[Array] = [[], []]
+	#var bits: Array[int] = [0, 1]
+	#
+	#print("Getting illegal fences")
+	#var start_time: int = Time.get_ticks_msec()
+	#
+	## Check each fence button, to see if it is possible
+	#for fence: Fence in board.fences.duplicate():
+		## Ignore placed fences
+		#if fence.button.fence_placed:
+			#continue
+			#
+		## Loop for each fence direction
+		#for fence_dir: int in bits:
+			## Ignore fences adjacent to placed fences
+			#if fence.button.dir_disabled[fence_dir]:
+				#continue
+			#
+			## Ignore fences that are already known to be unobtainable
+			#if fence.button.dfs_disabled[fence_dir]:
+				#continue
+			#
+			## Loop for each player
+			#for player: int in bits:
+				#var thread: Thread = Thread.new()
+				#threads.append(thread)
+				#thread.start(_illegal_fence_check_threaded.bind(fence, fence_dir, player))
+				##break ## TEMP
+			##break ## TEMP
+		##break ## TEMP
+	#
+	#
+	#for thread: Thread in threads:
+		#var result: Array = thread.wait_to_finish()
+		#if result.is_empty():
+			#continue
+		#illegal_fences[result[0]].append(result[1])
+	#
+	#threads.clear()
+	#print("Time: " + str(Time.get_ticks_msec() - start_time))
+	#return illegal_fences
 
 
-func _illegal_fence_check_threaded(fence: Fence, fence_dir: int, player: int) -> Array:
-	if is_fence_legal(fence, fence_dir, player):
-		return []
-	fence.button.dfs_disabled[fence_dir] = true
-	return [player, fence]
+#func _illegal_fence_check_threaded(fence: Fence, fence_dir: int, player: int) -> Array:
+	#if is_fence_legal(fence, fence_dir, player):
+		#return []
+	#fence.button.dfs_disabled[fence_dir] = true
+	#return [player, fence]
 
 
-# Perform DFS to check if from current position of player there is a possible
-func is_fence_legal(fence: Fence, fence_dir: int, player_index: int) -> bool:
-	var bounds: Array = board.win_indexes[player_index]
-	var goal_tiles: Array[Tile] = board.tiles.slice(bounds[0], bounds[1]+1)
-	
-	# Duplicate the board state
-	var board_state: BoardState = BoardState.new()
-	board_state.fences = board.fences.duplicate(true)
-	board_state.tiles = board.tiles.duplicate(true)
-	board_state.pawn_indexes = board.pawn_indexes.duplicate(true)
-	board_state.win_indexes = board.win_indexes.duplicate(true)
-	
-	# Simulate a fence being placed
-	board_state.place_fence(fence, fence_dir)
-	var start: Tile = board_state.tiles[board_state.pawn_indexes[player_index]]
-	return recursive_dfs(start, goal_tiles, [])
+## Perform DFS to check if from current position of player there is a possible
+#func is_fence_legal(fence: Fence, fence_dir: int, player_index: int) -> bool:
+	#var bounds: Array = board.win_indexes[player_index]
+	#var goal_tiles: Array[Tile] = board.tiles.slice(bounds[0], bounds[1]+1)
+	#
+	## Duplicate the board state
+	#var board_state: BoardState = BoardState.new()
+	#board_state.fences = board.fences.duplicate(true)
+	#board_state.tiles = board.tiles.duplicate(true)
+	#board_state.pawn_indexes = board.pawn_indexes.duplicate(true)
+	#board_state.win_indexes = board.win_indexes.duplicate(true)
+	#
+	## Simulate a fence being placed
+	#board_state.place_fence(fence, fence_dir)
+	#var start: Tile = board_state.tiles[board_state.pawn_indexes[player_index]]
+	#return recursive_dfs(start, goal_tiles, [])
 
 
-func recursive_dfs(tile: Tile, goal_tiles: Array[Tile], visited: Array, data: String = '') -> bool:
-	if tile in goal_tiles:
-		return true
-	# Mark tile as visited
-	visited.append(tile)
-	
-	data += "Current Tile: " + str(tile.id) + "\n"
-	data += "Tile Connections: " + str(tile.connections) + "\n"
-	
-	# Explore all neighbours
-	for neighbour: Tile in tile.connections:
-		if neighbour and neighbour not in visited:
-			if recursive_dfs(neighbour, goal_tiles, visited, data):
-				return true
-	data += "--------DFS Returned False--------"
-	#print(data)
-	return false
+#func recursive_dfs(tile: Tile, goal_tiles: Array[Tile], visited: Array, data: String = '') -> bool:
+	#if tile in goal_tiles:
+		#return true
+	## Mark tile as visited
+	#visited.append(tile)
+	#
+	#data += "Current Tile: " + str(tile.id) + "\n"
+	#data += "Tile Connections: " + str(tile.connections) + "\n"
+	#
+	## Explore all neighbours
+	#for neighbour: Tile in tile.connections:
+		#if neighbour and neighbour not in visited:
+			#if recursive_dfs(neighbour, goal_tiles, visited, data):
+				#return true
+	#data += "--------DFS Returned False--------"
+	##print(data)
+	#return false
 
 
 #endregion
@@ -271,7 +271,7 @@ func instance_tile_buttons(board_size: int) -> void:
 	# Setup the connections for each tile
 	for index: int in range(total_tiles):
 		var curr_tile: Tile = board.tiles[index]
-		curr_tile.set_connections(index, board_size, board.tiles)
+		curr_tile.set_connections(index, board_size)
 		
 	board.win_indexes = [[0, board_size - 1], [total_tiles - board_size - 1, total_tiles -1]]
 
@@ -286,12 +286,12 @@ func set_tiles(pawn_index: int, set_disabled: bool) -> void:
 		var tile: Tile = board.tiles[index]
 		
 		# Disable the pawn tile, but do not darken
-		if tile == pawn_tile:
+		if index == pawn_index:
 			tile.button.disabled = true
 			
 		# Search the current tiles connections that are not blocked by a fence
-		elif tile in pawn_tile.connections:
-			tiles_to_enable.append_array(get_adjacent_tiles(pawn_tile, tile, index, set_disabled))
+		elif index in pawn_tile.connections:
+			tiles_to_enable.append_array(get_adjacent_tiles(pawn_index, index, set_disabled))
 		else:
 			disable_tile_button(tile.button, set_disabled)
 			
@@ -305,16 +305,16 @@ func set_tiles(pawn_index: int, set_disabled: bool) -> void:
 
 
 ## Returns all adjacent tile buttons
-func get_adjacent_tiles(pawn_tile: Tile, tile: Tile, tile_index: int, set_disabled: bool) -> Array[TileButton]:
+func get_adjacent_tiles(pawn_index: int, tile_index: int, set_disabled: bool) -> Array[TileButton]:
 	# Empty tile (not taken by enemy pawn
+	var tile: Tile = board.tiles[tile_index]
 	if tile_index != board.pawn_indexes[1 - current_player]:
 		return [tile.button]
 	
 	# Current tile is taken by enemy pawn, find adjacent tiles of enemy tile
 	disable_tile_button(tile.button, set_disabled)
 	
-	# Get the cardinal direction between the two pawns
-	var pawn_index: int = board.tiles.find(pawn_tile)
+	# Get the index delta of leaped position
 	var dir_index: int = get_direction(pawn_index, tile)
 	
 	# Check if the leaped index is within the board boundaries
@@ -337,20 +337,21 @@ func get_direction(index: int, enemy_tile: Tile) -> int:
 			return i
 	return -1
 
-
+# Get adjacent tiles for the leaped position
 func get_leaped_tiles(player_index: int, dir_index: int, tile: Tile) -> Array[TileButton]:
-	var leaped_tile: Tile = board.tiles[player_index + (board.directions[dir_index] * 2)]
+	var leaped_index: int = player_index + (board.directions[dir_index] * 2)
+	var leaped_tile: Tile = board.tiles[leaped_index]
 		
 	# Check if there is no fence blocking it
-	if leaped_tile && tile.connections[dir_index] == leaped_tile:
+	if leaped_tile && tile.connections[dir_index] == leaped_index:
 		return [leaped_tile.button]
 		
 	var tiles: Array[TileButton] = []
 	# If there is a fence blocking it, add the adjacent positions of the enemy pawn
-	for tile_connection: Tile in tile.connections:
+	for tile_index: int in tile.connections:
 		# Remove the current pawns from being added
-		if tile_connection != board.tiles[player_index] && tile_connection:
-			tiles.append(tile_connection.button)
+		if tile_index != player_index && tile_index != -1:
+			tiles.append(board.tiles[tile_index].button)
 	return tiles
 
 

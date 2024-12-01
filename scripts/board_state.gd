@@ -3,14 +3,13 @@ class_name BoardState extends Control
 var fence_counts: Array[int] = [10, 10]
 
 ## Stored as [Player One Index, Player Two Index]
-@export var pawn_indexes: Array[int] = [-1, -1]
+var pawn_indexes: Array[int] = [-1, -1]
 ## 1D Array containing every fence button
-@export var fences: Array[Fence] = []
+var fences: Array[Fence] = []
 ## 1D Array containing every tile
-@export var tiles: Array[Tile] = []
+var tiles: Array[Tile] = []
 ## Stores the adjacent cardinal directions relative to the board
 var directions: Array[int] = []
-
 ## Stores the upper and lower bounds for each pawn's finish line
 var win_indexes: Array[Array] = [[], []]
 
@@ -23,8 +22,8 @@ func place_fence(fence: Fence, direction: int) -> void:
 
 
 func remove_tile_connection(connection: Array, index) -> void:
-	var tile: Tile = connection[index]
+	var tile_index = connection[index]
 	var inverted_index: int = 1 - index
-	var tile_to_remove: Tile = connection[inverted_index]
-	var replace_index: int =  tile.connections.find(tile_to_remove)
-	tile.connections[replace_index] = null
+	var removing_index: int = connection[inverted_index]
+	var tile: Tile = tiles[tile_index]
+	tile.connections[tile.connections.find(removing_index)] = -1

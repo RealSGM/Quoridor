@@ -18,14 +18,14 @@ func set_fence_connections(index: int, fence_size: int, fences: Array[Fence]) ->
 
 
 @warning_ignore("integer_division")
-func set_tile_connections(index: int, board_size: int, tiles: Array[Tile]) -> void:
+func set_tile_connections(index: int, board_size: int) -> void:
 	# Match the fence button index to the index of the Top-Left Tile in 2x2 Grid
 	index += (index / (board_size - 1))
 	
-	var TL: Tile = tiles[index]
-	var TR: Tile = tiles[index + 1]
-	var BL: Tile = tiles[index + board_size]
-	var BR: Tile = tiles[index + 1 + board_size]
+	var TL: int = index
+	var TR: int = index + 1
+	var BL: int = index + board_size
+	var BR: int = index + 1 + board_size
 	
 	adj_tiles[0][0] = [TL, BL] # Left Horizontal Fence
 	adj_tiles[0][1] = [TR, BR] # Right Horizontal Fence
