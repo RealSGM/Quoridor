@@ -10,7 +10,6 @@ class_name Game extends Control
 # TODO Illegal Fence check
 # TODO Minimax Algorithm
 
-#region Variables
 @export_category("Board")
 @export var board: BoardState
 @export var tile_container: GridContainer
@@ -66,8 +65,6 @@ var threads: Array[Thread] = []
 		turn_label.text = str(Global.players[current_player]["name"]) + "'s Turn"
 
 
-#endregion
-
 #func _input(event: InputEvent) -> void:
 	#if event.is_action_pressed("test"):
 		#for illegal_fence: Array in get_illegal_fences():
@@ -114,6 +111,7 @@ func check_win(tile: Tile, bounds: Array) -> bool:
 
 
 #region Fence Buttons
+#endregion
 ## Set the fence container size and instance the fence buttons under the 
 ## container
 func instance_fence_buttons(fence_size: int) -> void:
@@ -248,10 +246,11 @@ func confirm_place_fence(fence_button: FenceButton) -> void:
 	#return false
 
 
-#endregion
+
 
 
 #region Tiles
+#endregion
 ## Set the grid container size and instance the tiles under the grid
 func instance_tile_buttons(board_size: int) -> void:
 	var tile_resource: Resource  = Resources.get_resource('tile_button')
@@ -355,10 +354,8 @@ func get_leaped_tiles(player_index: int, dir_index: int, tile: Tile) -> Array[Ti
 	return tiles
 
 
-#endregion
-
-
 #region Pawns
+#endregion
 @warning_ignore("integer_division")
 @warning_ignore("narrowing_conversion")
 func spawn_pawns(board_size: int) -> void:
@@ -399,10 +396,8 @@ func confirm_move_pawn() -> void:
 	board.pawn_indexes[current_player] = board.tiles.find(selected_pawn_tile.tile)
 
 
-#endregion
-
-
 #region Signals
+#endregion
 func _on_fence_button_pressed(fence_button: FenceButton) -> void:
 	selected_fence_button = fence_button
 	selected_pawn_tile = null
@@ -448,6 +443,3 @@ func _on_confirm_pressed() -> void:
 		current_player = 1 - current_player
 	
 	update_fence_buttons()
-
-
-#endregion
