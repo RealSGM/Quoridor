@@ -7,6 +7,11 @@ class_name Game extends Control
 ## TODO Illegal Fence check
 ## TODO Minimax Algorithm
 
+
+@export var test_fence: int = 0
+@export_range(0, 1) var test_dir: int = 0
+@export_range(0, 1) var test_player: int = 0
+
 @export_category("Board")
 @export var board: BoardState
 @export var tile_container: GridContainer
@@ -24,6 +29,7 @@ class_name Game extends Control
 @export var win_label: Label
 @export var win_exit_button: Button
 
+var threads: Array[Thread] = []
 
 ## Update the selected fence, and the confirm button
 @onready var selected_fence_button: FenceButton = null:
@@ -62,7 +68,12 @@ class_name Game extends Control
 
 func _input(event: InputEvent) -> void:
 	if event.is_action_pressed("test"):
-		get_illegal_fences()
+		#var foo = _illegal_fence_check_threaded(board.fences[test_fence], test_dir, test_player)
+		#if !foo.is_empty():
+			#print(foo[1].id)
+		for illegal_fence: Array in get_illegal_fences():
+			pass
+			
 
 
 func _ready() -> void:
@@ -114,6 +125,7 @@ func instance_tile_buttons(board_size: int) -> void:
 	for i: int in range(total_tiles):
 		var tile: Tile = Tile.new()
 		board.tiles.append(tile)
+		tile.id = i
 		var tile_button: TileButton = tile_resource.instantiate()
 		tile.button = tile_button
 		tile_button.tile = tile
@@ -162,7 +174,6 @@ func get_adjacent_tiles(pawn_tile: Tile, tile: Tile, tile_index: int, set_disabl
 		return [tile.button]
 	
 	# Current tile is taken by enemy pawn, find adjacent tiles of enemy tile
-	## TODO Reimplement
 	disable_tile_button(tile.button, set_disabled)
 	
 	# Get the cardinal direction between the two pawns
@@ -216,9 +227,10 @@ func instance_fence_buttons(fence_size: int) -> void:
 	fence_button_container.columns = fence_size
 	
 	for i: int in range(total_fences):
+		var fence_button: Button = fence_button_resource.instantiate()
 		var fence: Fence = Fence.new()
 		board.fences.append(fence)
-		var fence_button: Button = fence_button_resource.instantiate()
+		fence.id = i
 		fence.button = fence_button
 		fence_button.fence = fence
 		fence_button_container.add_child(fence_button, true)
@@ -252,54 +264,91 @@ func confirm_place_fence(fence_button: FenceButton) -> void:
 	board.fence_counts[current_player] -= 1
 
 
-func get_illegal_fences() -> Array:
-	var illegals: Array[Fence] = []
+func get_illegal_fences() -> Array[Array]:
+	var illegal_fences: Array[Array] = [[], []]
 	var bits: Array[int] = [0, 1]
+	
 	print("Getting illegal fences")
 	var start_time: int = Time.get_ticks_msec()
-	# Loop for each player
-	for player: int in bits:
+	
+	# Check each fence button, to see if it is possible
+	for fence: Fence in board.fences.duplicate():
+		# Ignore placed fences
+		if fence.button.fence_placed:
+			continue
+			
 		# Loop for each fence direction
 		for fence_dir: int in bits:
-			# Check each fence button, to see if it is possible
-			for fence: Fence in board.fences:
-				if is_fence_legal(fence, fence_dir, player):
-					continue
-				illegals.append(fence)
-	print(illegals)
+			# Ignore fences adjacent to placed fences
+			if fence.button.dir_disabled[fence_dir]:
+				continue
+			
+			# Ignore fences that are already known to be unobtainable
+			if fence.button.dfs_disabled[fence_dir]:
+				continue
+			
+			# Loop for each player
+			for player: int in bits:
+				var thread: Thread = Thread.new()
+				threads.append(thread)
+				thread.start(_illegal_fence_check_threaded.bind(fence, fence_dir, player))
+				#break ## Temps
+			#break ## Temps
+		#break ## Temps
+	
+	
+	for thread: Thread in threads:
+		var result: Array = thread.wait_to_finish()
+		if result.is_empty():
+			continue
+		illegal_fences[result[0]].append(result[1])
+	
+	threads.clear()
 	print("Time: " + str(Time.get_ticks_msec() - start_time))
-	return illegals
+	
+	return illegal_fences
 
 
+func _illegal_fence_check_threaded(fence: Fence, fence_dir: int, player: int) -> Array:
+	if is_fence_legal(fence, fence_dir, player):
+		return []
+	fence.button.dfs_disabled[fence_dir] = true
+	return [player, fence]
+
+
+# Perform DFS to check if from current position of player there is a possible
 func is_fence_legal(fence: Fence, fence_dir: int, player_index: int) -> bool:
-	var bounds: Array = board.win_indexes[current_player]
-	var goal_tiles: Array[Tile] = board.tiles.slice(bounds[0], bounds[1])
+	var bounds: Array = board.win_indexes[player_index]
+	var goal_tiles: Array[Tile] = board.tiles.slice(bounds[0], bounds[1]+1)
 	
-	# Create board state with fence button being placed
-	var board_state: BoardState = board.duplicate()
-	#board_state.fences = board.fences
+	# Duplicate the board state
+	var board_state: BoardState = BoardState.new()
+	board_state.fences = board.fences.duplicate(true)
+	board_state.tiles = board.tiles.duplicate(true)
+	board_state.pawn_indexes = board.pawn_indexes.duplicate(true)
+	
+	# Simulate a fence being placed
 	board_state.place_fence(fence, fence_dir)
-	
-	# Perform DFS to check if from current position of player there is a possible
 	var start: Tile = board_state.tiles[board_state.pawn_indexes[player_index]]
-	var visited: Dictionary = {}
-	return illegal_fence_check(start, goal_tiles, visited, board_state)
 	
+	return recursive_dfs(start, goal_tiles, [])
 
-func illegal_fence_check(tile: Tile, goal_tiles: Array[Tile], visited: Dictionary, new_board: BoardState) -> bool:
+
+func recursive_dfs(tile: Tile, goal_tiles: Array[Tile], visited: Array, data: String = '') -> bool:
+	# Mark tile as visited
+	visited.append(tile)
+	data += "Current Tile: " + str(tile.id) + "\n"
+	data += "Tile Connections: " + str(tile.connections) + "\n"
 	if tile in goal_tiles:
 		return true
-	
-	# Mark tile as visited
-	visited[tile] = null
-	
 	# Explore all neighbours
 	for neighbour: Tile in tile.connections:
 		if neighbour and neighbour not in visited:
-			return illegal_fence_check(neighbour, goal_tiles, visited, new_board)
-	
+			if recursive_dfs(neighbour, goal_tiles, visited, data):
+				return true
+	#print(data + "=================")
 	return false
-	
+
 
 # Pawns ------------------------------------------------------------------------
 @warning_ignore("integer_division")

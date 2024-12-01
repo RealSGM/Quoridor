@@ -3,6 +3,7 @@ class_name Tile extends Node
 ## NESW Cardinal Tiles
 var connections: Array[Tile] = [null, null, null, null]
 var button: TileButton
+var id: int
 
 
 func set_connections(index: int, board_size: int, tiles: Array[Tile]) -> void:
