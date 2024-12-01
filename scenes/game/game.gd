@@ -1,17 +1,16 @@
 class_name Game extends Control
 
-## TODO Cache the directions for fence buttons
-## - Perform DFS to check if the fence in that direction is legal
-## - Store to see if it is disable
-## - Have permanent disabled for when it is placed
-## TODO Illegal Fence check
-## TODO Minimax Algorithm
+# BUG Data is being deleted from board states
+# TODO Change tile connections from Array[Tile] to Array[int] storing their indexes instead
 
+# TODO Cache the directions for fence buttons
+# - Perform DFS to check if the fence in that direction is legal
+# - Store to see if it is disable
+# - Have permanent disabled for when it is placed
+# TODO Illegal Fence check
+# TODO Minimax Algorithm
 
-@export var test_fence: int = 0
-@export_range(0, 1) var test_dir: int = 0
-@export_range(0, 1) var test_player: int = 0
-
+#region Variables
 @export_category("Board")
 @export var board: BoardState
 @export var tile_container: GridContainer
@@ -66,14 +65,13 @@ var threads: Array[Thread] = []
 		set_tiles(board.pawn_indexes[current_player], true)
 		turn_label.text = str(Global.players[current_player]["name"]) + "'s Turn"
 
+
+#endregion
+
 func _input(event: InputEvent) -> void:
 	if event.is_action_pressed("test"):
-		#var foo = _illegal_fence_check_threaded(board.fences[test_fence], test_dir, test_player)
-		#if !foo.is_empty():
-			#print(foo[1].id)
 		for illegal_fence: Array in get_illegal_fences():
-			pass
-			
+			print(illegal_fence)
 
 
 func _ready() -> void:
@@ -114,7 +112,144 @@ func check_win(tile: Tile, bounds: Array) -> bool:
 	return board.tiles.find(tile) > bounds[0] and board.tiles.find(tile) < bounds[1]
 
 
-# Tiles ------------------------------------------------------------------------
+#region Fence Buttons
+## Set the fence container size and instance the fence buttons under the 
+## container
+func instance_fence_buttons(fence_size: int) -> void:
+	var fence_button_resource: Resource  = Resources.get_resource('fence_button')
+	var total_fences: int = fence_size * fence_size
+	var board_size: int = fence_size + 1
+	fence_button_container.columns = fence_size
+	
+	for i: int in range(total_fences):
+		var fence_button: Button = fence_button_resource.instantiate()
+		var fence: Fence = Fence.new()
+		board.fences.append(fence)
+		fence.id = i
+		fence.button = fence_button
+		fence_button.fence = fence
+		fence_button_container.add_child(fence_button, true)
+	
+	for index: int in range(total_fences):
+		var curr_fence: Fence = board.fences[index]
+		curr_fence.set_fence_connections(index, fence_size, board.fences)
+		curr_fence.set_tile_connections(index, board_size, board.tiles)
+
+
+func update_fence_buttons() -> void:
+	for fence: Fence in board.fences:
+		fence.button.disabled = fence.button.dir_disabled[Global.fence_direction] if board.fence_counts[current_player] > 0 else true
+		# Disable mouse filter if the button is disabled
+		fence.button.mouse_filter = Control.MOUSE_FILTER_IGNORE if fence.button.disabled else Control.MOUSE_FILTER_STOP
+
+
+func confirm_place_fence(fence_button: FenceButton) -> void:
+	# Flip the index (for NESW adjustment)
+	var flipped_index: int = 1 - Global.fence_direction
+	# Get the adjacent directionals
+	var disabled_indexes: Array[int] = [flipped_index, flipped_index + 2]
+	
+	# Disable the adjacents buttons, for that direction
+	for indexes: int in disabled_indexes:
+		if fence_button.fence.adj_fences[indexes]:
+			fence_button.fence.adj_fences[indexes].button.dir_disabled[Global.fence_direction] = true
+	
+	board.place_fence(fence_button.fence, Global.fence_direction)
+	fence_button.fence_placed = true
+	board.fence_counts[current_player] -= 1
+
+
+func get_illegal_fences() -> Array[Array]:
+	var illegal_fences: Array[Array] = [[], []]
+	var bits: Array[int] = [0, 1]
+	
+	print("Getting illegal fences")
+	var start_time: int = Time.get_ticks_msec()
+	
+	# Check each fence button, to see if it is possible
+	for fence: Fence in board.fences.duplicate():
+		# Ignore placed fences
+		if fence.button.fence_placed:
+			continue
+			
+		# Loop for each fence direction
+		for fence_dir: int in bits:
+			# Ignore fences adjacent to placed fences
+			if fence.button.dir_disabled[fence_dir]:
+				continue
+			
+			# Ignore fences that are already known to be unobtainable
+			if fence.button.dfs_disabled[fence_dir]:
+				continue
+			
+			# Loop for each player
+			for player: int in bits:
+				var thread: Thread = Thread.new()
+				threads.append(thread)
+				thread.start(_illegal_fence_check_threaded.bind(fence, fence_dir, player))
+				#break ## TEMP
+			#break ## TEMP
+		#break ## TEMP
+	
+	
+	for thread: Thread in threads:
+		var result: Array = thread.wait_to_finish()
+		if result.is_empty():
+			continue
+		illegal_fences[result[0]].append(result[1])
+	
+	threads.clear()
+	print("Time: " + str(Time.get_ticks_msec() - start_time))
+	return illegal_fences
+
+
+func _illegal_fence_check_threaded(fence: Fence, fence_dir: int, player: int) -> Array:
+	if is_fence_legal(fence, fence_dir, player):
+		return []
+	fence.button.dfs_disabled[fence_dir] = true
+	return [player, fence]
+
+
+# Perform DFS to check if from current position of player there is a possible
+func is_fence_legal(fence: Fence, fence_dir: int, player_index: int) -> bool:
+	var bounds: Array = board.win_indexes[player_index]
+	var goal_tiles: Array[Tile] = board.tiles.slice(bounds[0], bounds[1]+1)
+	
+	# Duplicate the board state
+	var board_state: BoardState = BoardState.new()
+	board_state.fences = board.fences.duplicate(true)
+	board_state.tiles = board.tiles.duplicate(true)
+	board_state.pawn_indexes = board.pawn_indexes.duplicate(true)
+	board_state.win_indexes = board.win_indexes.duplicate(true)
+	
+	# Simulate a fence being placed
+	board_state.place_fence(fence, fence_dir)
+	var start: Tile = board_state.tiles[board_state.pawn_indexes[player_index]]
+	return recursive_dfs(start, goal_tiles, [])
+
+
+func recursive_dfs(tile: Tile, goal_tiles: Array[Tile], visited: Array, data: String = '') -> bool:
+	if tile in goal_tiles:
+		return true
+	# Mark tile as visited
+	visited.append(tile)
+	
+	data += "Current Tile: " + str(tile.id) + "\n"
+	data += "Tile Connections: " + str(tile.connections) + "\n"
+	
+	# Explore all neighbours
+	for neighbour: Tile in tile.connections:
+		if neighbour and neighbour not in visited:
+			if recursive_dfs(neighbour, goal_tiles, visited, data):
+				return true
+	data += "--------DFS Returned False--------"
+	#print(data)
+	return false
+
+
+#endregion
+
+#region Tiles
 ## Set the grid container size and instance the tiles under the grid
 func instance_tile_buttons(board_size: int) -> void:
 	var tile_resource: Resource  = Resources.get_resource('tile_button')
@@ -217,140 +352,9 @@ func get_leaped_tiles(player_index: int, dir_index: int, tile: Tile) -> Array[Ti
 	return tiles
 
 
-# Fence Buttons ----------------------------------------------------------------
-## Set the fence container size and instance the fence buttons under the 
-## container
-func instance_fence_buttons(fence_size: int) -> void:
-	var fence_button_resource: Resource  = Resources.get_resource('fence_button')
-	var total_fences: int = fence_size * fence_size
-	var board_size: int = fence_size + 1
-	fence_button_container.columns = fence_size
-	
-	for i: int in range(total_fences):
-		var fence_button: Button = fence_button_resource.instantiate()
-		var fence: Fence = Fence.new()
-		board.fences.append(fence)
-		fence.id = i
-		fence.button = fence_button
-		fence_button.fence = fence
-		fence_button_container.add_child(fence_button, true)
-	
-	for index: int in range(total_fences):
-		var curr_fence: Fence = board.fences[index]
-		curr_fence.set_fence_connections(index, fence_size, board.fences)
-		curr_fence.set_tile_connections(index, board_size, board.tiles)
+#endregion
 
-
-func update_fence_buttons() -> void:
-	for fence: Fence in board.fences:
-		fence.button.disabled = fence.button.dir_disabled[Global.fence_direction] if board.fence_counts[current_player] > 0 else true
-		# Disable mouse filter if the button is disabled
-		fence.button.mouse_filter = Control.MOUSE_FILTER_IGNORE if fence.button.disabled else Control.MOUSE_FILTER_STOP
-
-
-func confirm_place_fence(fence_button: FenceButton) -> void:
-	# Flip the index (for NESW adjustment)
-	var flipped_index: int = 1 - Global.fence_direction
-	# Get the adjacent directionals
-	var disabled_indexes: Array[int] = [flipped_index, flipped_index + 2]
-	
-	# Disable the adjacents buttons, for that direction
-	for indexes: int in disabled_indexes:
-		if fence_button.fence.adj_fences[indexes]:
-			fence_button.fence.adj_fences[indexes].button.dir_disabled[Global.fence_direction] = true
-	
-	board.place_fence(fence_button.fence, Global.fence_direction)
-	fence_button.fence_placed = true
-	board.fence_counts[current_player] -= 1
-
-
-func get_illegal_fences() -> Array[Array]:
-	var illegal_fences: Array[Array] = [[], []]
-	var bits: Array[int] = [0, 1]
-	
-	print("Getting illegal fences")
-	var start_time: int = Time.get_ticks_msec()
-	
-	# Check each fence button, to see if it is possible
-	for fence: Fence in board.fences.duplicate():
-		# Ignore placed fences
-		if fence.button.fence_placed:
-			continue
-			
-		# Loop for each fence direction
-		for fence_dir: int in bits:
-			# Ignore fences adjacent to placed fences
-			if fence.button.dir_disabled[fence_dir]:
-				continue
-			
-			# Ignore fences that are already known to be unobtainable
-			if fence.button.dfs_disabled[fence_dir]:
-				continue
-			
-			# Loop for each player
-			for player: int in bits:
-				var thread: Thread = Thread.new()
-				threads.append(thread)
-				thread.start(_illegal_fence_check_threaded.bind(fence, fence_dir, player))
-				#break ## Temps
-			#break ## Temps
-		#break ## Temps
-	
-	
-	for thread: Thread in threads:
-		var result: Array = thread.wait_to_finish()
-		if result.is_empty():
-			continue
-		illegal_fences[result[0]].append(result[1])
-	
-	threads.clear()
-	print("Time: " + str(Time.get_ticks_msec() - start_time))
-	
-	return illegal_fences
-
-
-func _illegal_fence_check_threaded(fence: Fence, fence_dir: int, player: int) -> Array:
-	if is_fence_legal(fence, fence_dir, player):
-		return []
-	fence.button.dfs_disabled[fence_dir] = true
-	return [player, fence]
-
-
-# Perform DFS to check if from current position of player there is a possible
-func is_fence_legal(fence: Fence, fence_dir: int, player_index: int) -> bool:
-	var bounds: Array = board.win_indexes[player_index]
-	var goal_tiles: Array[Tile] = board.tiles.slice(bounds[0], bounds[1]+1)
-	
-	# Duplicate the board state
-	var board_state: BoardState = BoardState.new()
-	board_state.fences = board.fences.duplicate(true)
-	board_state.tiles = board.tiles.duplicate(true)
-	board_state.pawn_indexes = board.pawn_indexes.duplicate(true)
-	
-	# Simulate a fence being placed
-	board_state.place_fence(fence, fence_dir)
-	var start: Tile = board_state.tiles[board_state.pawn_indexes[player_index]]
-	
-	return recursive_dfs(start, goal_tiles, [])
-
-
-func recursive_dfs(tile: Tile, goal_tiles: Array[Tile], visited: Array, data: String = '') -> bool:
-	# Mark tile as visited
-	visited.append(tile)
-	data += "Current Tile: " + str(tile.id) + "\n"
-	data += "Tile Connections: " + str(tile.connections) + "\n"
-	if tile in goal_tiles:
-		return true
-	# Explore all neighbours
-	for neighbour: Tile in tile.connections:
-		if neighbour and neighbour not in visited:
-			if recursive_dfs(neighbour, goal_tiles, visited, data):
-				return true
-	#print(data + "=================")
-	return false
-
-
-# Pawns ------------------------------------------------------------------------
+#region Pawns
 @warning_ignore("integer_division")
 @warning_ignore("narrowing_conversion")
 func spawn_pawns(board_size: int) -> void:
@@ -391,7 +395,9 @@ func confirm_move_pawn() -> void:
 	board.pawn_indexes[current_player] = board.tiles.find(selected_pawn_tile.tile)
 
 
-# Signals ----------------------------------------------------------------------
+#endregion
+
+#region Signals
 func _on_fence_button_pressed(fence_button: FenceButton) -> void:
 	selected_fence_button = fence_button
 	selected_pawn_tile = null
@@ -437,3 +443,6 @@ func _on_confirm_pressed() -> void:
 		current_player = 1 - current_player
 	
 	update_fence_buttons()
+
+
+#endregion
