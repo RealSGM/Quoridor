@@ -108,6 +108,7 @@ func reset_board() -> void:
 	)
 
 
+## Checks if the tile is within the player's winning bounds
 func check_win(tile: Tile, bounds: Array) -> bool:
 	return board.tiles.find(tile) > bounds[0] and board.tiles.find(tile) < bounds[1]
 
@@ -249,6 +250,7 @@ func recursive_dfs(tile: Tile, goal_tiles: Array[Tile], visited: Array, data: St
 
 #endregion
 
+
 #region Tiles
 ## Set the grid container size and instance the tiles under the grid
 func instance_tile_buttons(board_size: int) -> void:
@@ -354,6 +356,7 @@ func get_leaped_tiles(player_index: int, dir_index: int, tile: Tile) -> Array[Ti
 
 #endregion
 
+
 #region Pawns
 @warning_ignore("integer_division")
 @warning_ignore("narrowing_conversion")
@@ -396,6 +399,7 @@ func confirm_move_pawn() -> void:
 
 
 #endregion
+
 
 #region Signals
 func _on_fence_button_pressed(fence_button: FenceButton) -> void:
