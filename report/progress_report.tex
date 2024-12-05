@@ -67,7 +67,7 @@ Once the tiles and fences were in place, I started to handle the pawn spawning a
 Now that every tile has a connection, proper pawn movement can be set up. I first disable all tiles on the board, and then enable all tile connections for the tile that the player's pawn is currently on. When a fence is placed, the tile connection is severed, as shown in Figure~\ref{fig:fence_placement}.
 
 \subsubsection{Pawn Leaping}
-One of the rules states that if two pawns are adjacent, a pawn can leap over another pawn, provided that there isn't a fence behind the pawn to be leaped, as shown in Figure~\ref{fig:pawn_leaping}. I achieved this by checking if one of the connections contains the enemy pawn. I then determine the cardinal direction of that tile and multiply it by 2 to get the leaped tile position. Another rule is that to prevent a pawn from being entrapped, if the pawn cannot leap, it can move to the enemy pawn's tile connections, as shown in Figure~\ref{fig:fence_blocking_leap}.
+One of the rules states that if two pawns are adjacent, a pawn can leap over another pawn, provided that there isn't a fence behind the pawn to be leaped, as shown in Figure~\ref{fig:pawn_leaping}. I achieved this by checking if one of the connections contains the enemy pawn. I then determine the cardinal direction of that tile and multiply it by 2 to get the leaped tile position, if there is a connection between the enemy pawn and the leaped tile. Another rule is that to prevent a pawn from being entrapped, if the pawn cannot leap, it can move to the enemy pawn's tile connections, as shown in Figure~\ref{fig:fence_blocking_leap}. To achieve this, if a fence is blocking the leaped tile, we then get the adjacent tiles of the enemy pawn's tile.
 
 \subsection{Game Loop}
 Once the movement was set, the last step was the game loop. I used a bit to store the current player, which allowed me to store both players' actions in arrays. After the player clicks confirm, the \texttt{current\_player} bit is flipped. The bit has an attached setter, which then resets the board and stores the moveable locations. Lastly, I implemented a win condition that runs a check every time a pawn is moved, to determine if the pawns are at their respective goal lines (top and bottom of the board).
@@ -78,7 +78,7 @@ Once the movement was set, the last step was the game loop. I used a bit to stor
 So far, I have been working on the first objective: "Create a working game of Quoridor against 2 players.". The base game is nearly completed, with the illegal fence check being the last step before having a fully working game of Quoridor.
 
 \subsection{Risk Analysis}
-The biggest problem so far was figuring out how to implement fences both graphically and logically. After a while, I realised that it was best to separate the fence logic and use it to update the tile connections. Another issue that arose was invalid tile connections. The problem stemmed from mapping the \(2 \times 2\) Tile Grid with a single fence button, while also using the \texttt{board\_size}. This was resolved later after examining the underlying logic.  
+The biggest problem so far was figuring out how to implement fences both graphically and logically. After a while, I realised that it was best to separate the fence logic and use it to update the tile connections. Another issue that arose were invalid tile connections. The problem stemmed from mapping the \(2 \times 2\) \texttt{Tile Grid} with a single \texttt{Fence Button}, while also using the \texttt{board\_size}. This was resolved later after examining the underlying logic.  
 
 \noindent A future concern will be optimising the AI and DFS, ensuring the efficient use of C\# and threading in order to perform the calculations in a shorter period of time. Another oversight is that the \texttt{BoardState} class stores references to the actual class itself, rather than the index of the position in the grid. This might be a problem in the future, as duplicating board states to simulate moves may cause issues such as overwriting data on the original board, which is something I will need to be careful of.
 
@@ -87,7 +87,7 @@ The next steps will be to implement the illegal fence check. This will require a
 
 \newpage
 \appendix
-\section{Images}
+\section{Appendix}
 \begin{figure}[h]
     \centering
     \includegraphics[width=0.4\textwidth]{images/board_options.png}
@@ -125,7 +125,6 @@ The next steps will be to implement the illegal fence check. This will require a
     \label{fig:pawn_leaping}
 \end{figure}
 
-\section{Adjusted Gantt Chart} \label{ApB}
 \begin{cmpfigure}[htb]{Quoridor Development Gantt Chart \label{pplan}}
 \begin{sideways}
 \newganttchartelement{voidbar}{
