@@ -9,7 +9,7 @@ var fences: Array[Fence] = []
 ## 1D Array containing every tile
 var tiles: Array[Tile] = []
 ## Stores the adjacent cardinal directions relative to the board
-var directions: Array[int] = []
+var adj_offsets: Array[int] = []
 ## Stores the upper and lower bounds for each pawn's finish line
 var win_indexes: Array[Array] = [[], []]
 

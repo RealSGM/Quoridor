@@ -79,7 +79,7 @@ func _ready() -> void:
 ## Setup the board with the selected size
 func setup_board(board_size: int) -> void:
 	Global.board_size = board_size
-	board.directions = [-board_size, 1, board_size, 1]
+	board.adj_offsets = [-board_size, 1, board_size, 1]
 	instance_tile_buttons(board_size)
 	instance_fence_buttons(board_size - 1)
 	spawn_pawns(board_size)
@@ -223,7 +223,7 @@ func get_adjacent_tiles(pawn_index: int, tile_index: int, set_disabled: bool) ->
 	var dir_index: int = get_direction(pawn_index, tile)
 	
 	# Check if the leaped index is within the board boundaries
-	if pawn_index + (board.directions[dir_index] * 2) > board.tiles.size():
+	if pawn_index + (board.adj_offsets[dir_index] * 2) > board.tiles.size():
 		return []
 	
 	return get_leaped_tiles(pawn_index, dir_index, tile)
@@ -237,15 +237,15 @@ func disable_tile_button(tile: TileButton, set_disabled: bool) -> void:
 
 
 func get_direction(index: int, enemy_tile: Tile) -> int:
-	for i: int in board.directions.size():
-		if board.tiles[index + board.directions[i]] == enemy_tile:
+	for i: int in board.adj_offsets.size():
+		if board.tiles[index + board.adj_offsets[i]] == enemy_tile:
 			return i
 	return -1
 
 
 # Get adjacent tiles for the leaped position
 func get_leaped_tiles(player_index: int, dir_index: int, tile: Tile) -> Array[TileButton]:
-	var leaped_index: int = player_index + (board.directions[dir_index] * 2)
+	var leaped_index: int = player_index + (board.adj_offsets[dir_index] * 2)
 	var leaped_tile: Tile = board.tiles[leaped_index]
 		
 	# Check if there is no fence blocking it
