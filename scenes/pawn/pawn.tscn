@@ -1,7 +1,6 @@
-[gd_scene load_steps=3 format=3 uid="uid://b06lx81t8jb2d"]
+[gd_scene load_steps=2 format=3 uid="uid://b06lx81t8jb2d"]
 
 [ext_resource type="StyleBox" uid="uid://bg1r7h5djva5g" path="res://resources/pawn.tres" id="1_8g4co"]
-[ext_resource type="Script" path="res://scenes/pawn/pawn.gd" id="1_yg714"]
 
 [node name="Pawn" type="Panel"]
 modulate = Color(0.847474, 0.847474, 0.847474, 1)
@@ -18,4 +17,3 @@ offset_bottom = 30.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = ExtResource("1_8g4co")
-script = ExtResource("1_yg714")

@@ -45,6 +45,8 @@ p_one_colours = NodePath("Background/Foreground/BoardOptionsMenu/VBC/BoardOption
 p_two_colours = NodePath("Background/Foreground/BoardOptionsMenu/VBC/BoardOptions/BoardVBC/PlayerTwoContainer/PlayerTwoColour/PlayerTwoColourOption")
 player_one_name = NodePath("Background/Foreground/BoardOptionsMenu/VBC/BoardOptions/BoardVBC/PlayerOneContainer/PlayerOneName/LineEdit")
 player_two_name = NodePath("Background/Foreground/BoardOptionsMenu/VBC/BoardOptions/BoardVBC/PlayerTwoContainer/PlayerTwoName/LineEdit")
+size_options = null
+board_dimensions = null
 
 [node name="Background" type="ColorRect" parent="."]
 layout_mode = 1

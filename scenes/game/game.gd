@@ -1,7 +1,6 @@
 class_name Game extends Control
-
-# BUG Data is being deleted from board states
-# TODO Change tile connections from Array[Tile] to Array[int] storing their indexes instead
+## Handles the Interface for the Game
+## Sends signals to the board
 
 # TODO Cache the directions for fence buttons
 # - Perform DFS to check if the fence in that direction is legal
@@ -15,6 +14,8 @@ class_name Game extends Control
 @export var tile_container: GridContainer
 @export var board_container: PanelContainer
 @export var fence_button_container: GridContainer
+@export var fence_amount: int = 10
+@export var player_amount: int = 2
 
 @export_category("User Interface")
 @export var toggle_direction_button: Button
@@ -28,31 +29,33 @@ class_name Game extends Control
 @export var win_exit_button: Button
 
 var threads: Array[Thread] = []
+var tile_buttons: Array[TileButton] = []
+var fence_buttons: Array[FenceButton] = []
 
 ## Update the selected fence, and the confirm button
-@onready var selected_fence_button: FenceButton = null:
+@onready var selected_fence_index: int = -1:
 	set(val):
 		# Clear current fence
-		if selected_fence_button:
-			selected_fence_button.clear_fences()
+		if selected_fence_index > -1:
+			fence_buttons[selected_fence_index].clear_fences()
 		
 		# Validate the confirm button
-		selected_fence_button = val
-		set_confirm_button(val, selected_pawn_tile)
+		selected_fence_index = val
+		set_confirm_button(val, selected_tile_index)
 
 ## Update the selected tile, and the confirm button
-@onready var selected_pawn_tile: TileButton = null:
+@onready var selected_tile_index: int = -1:
 	set(val):
 		# Clear the current pawn
-		if selected_pawn_tile:
-			selected_pawn_tile.clear_pawns()
+		if selected_tile_index > -1:
+			tile_buttons[selected_tile_index].clear_pawns()
 		
 		# Validate the confirm button
-		selected_pawn_tile = val
-		set_confirm_button(selected_fence_button, val)
+		selected_tile_index = val
+		set_confirm_button(selected_fence_index, val)
 		
-		if val:
-			var pawn: Pawn = val.pawns[current_player]
+		if val > -1:
+			var pawn: Panel = tile_buttons[selected_tile_index].pawns[current_player]
 			pawn.modulate.a = 0.5
 			pawn.show()
 
@@ -60,9 +63,16 @@ var threads: Array[Thread] = []
 @onready var current_player: int:
 	set(val):
 		current_player = val
+		board.CurrentPlayer = val
 		reset_board()
-		set_tiles(board.pawn_indexes[current_player], true)
+		set_tiles(board.PawnPositions[current_player])
+		board.CurrentPlayer = val
 		turn_label.text = str(Global.players[current_player]["name"]) + "'s Turn"
+
+
+func _input(event: InputEvent) -> void:
+	if event.is_action_pressed("confirm") and !confirm_button.disabled:
+		_on_confirm_pressed()
 
 
 func _ready() -> void:
@@ -76,67 +86,78 @@ func _ready() -> void:
 	exit_button.show()
 
 
-## Setup the board with the selected size
-func setup_board(board_size: int) -> void:
-	Global.board_size = board_size
-	board.adj_offsets = [-board_size, 1, board_size, 1]
-	instance_tile_buttons(board_size)
-	instance_fence_buttons(board_size - 1)
-	spawn_pawns(board_size)
-	reset_board()
-
-
+#region Interface
+#endregion
 ## Disable the confirm button when neither option is selected
-func set_confirm_button(fence_button: FenceButton, tile_button: TileButton) -> void:
-	confirm_button.disabled = !(fence_button || tile_button)
+func set_confirm_button(fence: int, tile: int) -> void:
+	confirm_button.disabled = !(fence >= 0 || tile >= 0)
 
 
 ## Disable all tiles, and reset their modulate
 func reset_board() -> void:
-	board.tiles.map(func(tile: Tile): 
-		tile.button.disabled = true
-		tile.button.modulate = Color.WHITE
+	tile_buttons.map(func(tile: TileButton):
+		tile.disabled = true
+		tile.modulate = Color.WHITE
+		tile.focus_mode = Control.FOCUS_NONE
 	)
 
 
-## Checks if the tile is within the player's winning bounds
-func check_win(tile: Tile, bounds: Array) -> bool:
-	return board.tiles.find(tile) >= bounds[0] and board.tiles.find(tile) <= bounds[1]
-
-
-#region Fence Buttons
+#region Setup
 #endregion
+## Setup the board with the selected size
+func setup_board(board_size: int) -> void:
+	Global.board_size = board_size
+	board.SetAdjacentOffsets(board_size)
+	board.GenerateTiles(board_size)
+	board.GenerateFences(board_size - 1)
+	board.SetFenceCounts(fence_amount, player_amount)
+	board.SetPawnPositions(player_amount, board_size)
+	board.SetWinPositions(board_size, player_amount)
+	
+	instance_tile_buttons(board_size)
+	instance_fence_buttons(board_size - 1)
+	spawn_pawns()
+	reset_board()
+
+
 ## Set the fence container size and instance the fence buttons under the 
 ## container
 func instance_fence_buttons(fence_size: int) -> void:
 	var fence_button_resource: Resource  = Resources.get_resource('fence_button')
 	var total_fences: int = fence_size * fence_size
-	var board_size: int = fence_size + 1
 	fence_button_container.columns = fence_size
 	
 	for i: int in range(total_fences):
 		var fence_button: Button = fence_button_resource.instantiate()
-		var fence: Fence = Fence.new()
-		board.fences.append(fence)
-		fence.id = i
-		fence.button = fence_button
-		fence_button.fence = fence
+		fence_button.id = i
 		fence_button_container.add_child(fence_button, true)
+		fence_buttons.append(fence_button)
+
+
+## Set the grid container size and instance the tiles under the grid
+func instance_tile_buttons(board_size: int) -> void:
+	var tile_resource: Resource  = Resources.get_resource('tile_button')
+	tile_container.columns = board_size
 	
-	for index: int in range(total_fences):
-		var curr_fence: Fence = board.fences[index]
-		curr_fence.set_fence_connections(index, fence_size, board.fences)
-		curr_fence.set_tile_connections(index, board_size)
+	# Instance board state tiles
+	for i: int in range(board_size * board_size):
+		var tile_button: TileButton = tile_resource.instantiate()
+		tile_button.id = i
+		tile_container.add_child(tile_button, true)
+		tile_buttons.append(tile_button)
 
 
+#region Fences
+#endregion
 func update_fence_buttons() -> void:
-	for fence: Fence in board.fences:
-		fence.button.disabled = fence.button.dir_disabled[Global.fence_direction] if board.fence_counts[current_player] > 0 else true
+	for fence_button: FenceButton in fence_buttons:
+		fence_button.disabled = fence_button.dir_disabled[Global.fence_direction] if board.IsFenceAvailable(current_player) else true
 		# Disable mouse filter if the button is disabled
-		fence.button.mouse_filter = Control.MOUSE_FILTER_IGNORE if fence.button.disabled else Control.MOUSE_FILTER_STOP
+		fence_button.mouse_filter = Control.MOUSE_FILTER_IGNORE if fence_button.disabled else Control.MOUSE_FILTER_STOP
 
 
-func confirm_place_fence(fence_button: FenceButton) -> void:
+func confirm_place_fence(fence: int) -> void:
+	var fence_button: FenceButton = fence_buttons[fence]
 	# Flip the index (for NESW adjustment)
 	var flipped_index: int = 1 - Global.fence_direction
 	# Get the adjacent directionals
@@ -144,182 +165,87 @@ func confirm_place_fence(fence_button: FenceButton) -> void:
 	
 	# Disable the adjacents buttons, for that direction
 	for indexes: int in disabled_indexes:
-		if fence_button.fence.adj_fences[indexes]:
-			fence_button.fence.adj_fences[indexes].button.dir_disabled[Global.fence_direction] = true
+		var adj_fences: Array = Array(board.GetConnections(fence, Global.board_size-1))
+		var index: int = adj_fences[indexes]
+		if index > -1:
+			fence_buttons[index].dir_disabled[Global.fence_direction] = true
 	
-	board.place_fence(fence_button.fence, Global.fence_direction)
+	board.PlaceFence(selected_fence_index, Global.fence_direction, current_player)
 	fence_button.fence_placed = true
-	board.fence_counts[current_player] -= 1
-
-
-
 
 
 #region Tiles
 #endregion
-## Set the grid container size and instance the tiles under the grid
-func instance_tile_buttons(board_size: int) -> void:
-	var tile_resource: Resource  = Resources.get_resource('tile_button')
-	var total_tiles: int = board_size * board_size
-	tile_container.columns = board_size
-	
-	# Instance board state tiles
-	for i: int in range(total_tiles):
-		var tile: Tile = Tile.new()
-		board.tiles.append(tile)
-		tile.id = i
-		var tile_button: TileButton = tile_resource.instantiate()
-		tile.button = tile_button
-		tile_button.tile = tile
-		tile_container.add_child(tile_button, true)
-	
-	# Setup the connections for each tile
-	for index: int in range(total_tiles):
-		var curr_tile: Tile = board.tiles[index]
-		curr_tile.set_connections(index, board_size)
-		
-	board.win_indexes = [[0, board_size - 1], [total_tiles - board_size - 1, total_tiles -1]]
-
-
 ## Set the tiles of the board, based off the current player's turn
-func set_tiles(pawn_index: int, set_disabled: bool) -> void:
-	var tiles_to_enable: Array[TileButton] = []
-	var pawn_tile: Tile = board.tiles[pawn_index]
+func set_tiles(pawn_index: int) -> void:
+	tile_buttons[pawn_index].disabled = true
+	var enabled_tiles: Array = Array(board.GetSelectableTiles(current_player))
 	
-	# Loop through all tiles
-	for index: int in range(board.tiles.size()):
-		var tile: Tile = board.tiles[index]
-		
-		# Disable the pawn tile, but do not darken
-		if index == pawn_index:
-			tile.button.disabled = true
-			
-		# Search the current tiles connections that are not blocked by a fence
-		elif index in pawn_tile.connections:
-			tiles_to_enable.append_array(get_adjacent_tiles(pawn_index, index, set_disabled))
-		else:
-			disable_tile_button(tile.button, set_disabled)
-			
-	# Enable all selectable tiles that the pawn can move to
-	tiles_to_enable.map(func(tile: TileButton):
-		if !tile:
-			return
-		tile.disabled = false
-		tile.modulate = Color.WHITE
-	)
-
-
-## Returns all adjacent tile buttons
-func get_adjacent_tiles(pawn_index: int, tile_index: int, set_disabled: bool) -> Array[TileButton]:
-	# Empty tile (not taken by enemy pawn
-	var tile: Tile = board.tiles[tile_index]
-	if tile_index != board.pawn_indexes[1 - current_player]:
-		return [tile.button]
-	
-	# Current tile is taken by enemy pawn, find adjacent tiles of enemy tile
-	disable_tile_button(tile.button, set_disabled)
-	
-	# Get the index delta of leaped position
-	var dir_index: int = get_direction(pawn_index, tile)
-	
-	# Check if the leaped index is within the board boundaries
-	if pawn_index + (board.adj_offsets[dir_index] * 2) > board.tiles.size():
-		return []
-	
-	return get_leaped_tiles(pawn_index, dir_index, tile)
+	for index: int in range(tile_buttons.size()):
+		set_tile_button(tile_buttons[index], index not in enabled_tiles)
 
 
 ## Disable and darken a tile
-func disable_tile_button(tile: TileButton, set_disabled: bool) -> void:
-	tile.disabled = set_disabled
-	tile.modulate = Color(0.7, 0.7, 0.7) if set_disabled else Color.WHITE
-	tile.focus_mode = Control.FOCUS_NONE if set_disabled else Control.FOCUS_CLICK
-
-
-func get_direction(index: int, enemy_tile: Tile) -> int:
-	for i: int in board.adj_offsets.size():
-		if board.tiles[index + board.adj_offsets[i]] == enemy_tile:
-			return i
-	return -1
-
-
-# Get adjacent tiles for the leaped position
-func get_leaped_tiles(player_index: int, dir_index: int, tile: Tile) -> Array[TileButton]:
-	var leaped_index: int = player_index + (board.adj_offsets[dir_index] * 2)
-	var leaped_tile: Tile = board.tiles[leaped_index]
-		
-	# Check if there is no fence blocking it
-	if leaped_tile && tile.connections[dir_index] == leaped_index:
-		return [leaped_tile.button]
-		
-	var tiles: Array[TileButton] = []
-	# If there is a fence blocking it, add the adjacent positions of the enemy pawn
-	for tile_index: int in tile.connections:
-		# Remove the current pawns from being added
-		if tile_index != player_index && tile_index != -1:
-			tiles.append(board.tiles[tile_index].button)
-	return tiles
+func set_tile_button(tile: TileButton, is_disabled: bool) -> void:
+	tile.disabled = is_disabled
+	tile.modulate = Color(0.7, 0.7, 0.7) if is_disabled else Color.WHITE
+	tile.focus_mode = Control.FOCUS_NONE if is_disabled else Control.FOCUS_CLICK
 
 
 #region Pawns
 #endregion
 @warning_ignore("integer_division")
 @warning_ignore("narrowing_conversion")
-func spawn_pawns(board_size: int) -> void:
+func spawn_pawns() -> void:
 	# For each tile, instance a pawn for both players
-	for index: int in range(board.tiles.size()):
-		board.tiles[index].button.pawns[0] = spawn_pawn(Global.players[0]["name"], Global.players[0]["color"], index)
-		board.tiles[index].button.pawns[1] = spawn_pawn(Global.players[1]["name"], Global.players[1]["color"], index)
+	for tile_button: TileButton in tile_buttons:
+		tile_button.pawns[0] = spawn_pawn(Global.players[0]["color"], tile_button.id)
+		tile_button.pawns[1] = spawn_pawn(Global.players[1]["color"], tile_button.id)
 	
-	board.pawn_indexes[0] = int(board_size * (board_size - 0.5))
-	board.pawn_indexes[1] = int(board_size / 2)
-	
-	# Show both pawns
-	board.tiles[board.pawn_indexes[0]].button.pawns[0].show()
-	board.tiles[board.pawn_indexes[1]].button.pawns[1].show()
+	tile_buttons[board.PawnPositions[0]].pawns[0].show()
+	tile_buttons[board.PawnPositions[1]].pawns[1].show()
 
 
-func spawn_pawn(p_name: String, color: Color, pos_index: int) -> Pawn:
-	var pawn: Pawn = Resources.get_resource("pawn").instantiate()
+func spawn_pawn(color: Color, index: int) -> Panel:
+	var pawn: Panel = Resources.get_resource("pawn").instantiate()
 	pawn.modulate = color
-	pawn.player_name = p_name
-	board.tiles[pos_index].button.add_child(pawn, true)
-	pawn.current = board.tiles[pos_index].button
+	tile_buttons[index].add_child(pawn, true)
 	pawn.hide()
 	return pawn
 
 
 func confirm_move_pawn() -> void:
-	var current_position: int = board.pawn_indexes[current_player]
+	# Hide current pawn
+	var current_position: int = board.PawnPositions[current_player]
+	tile_buttons[current_position].pawns[current_player].hide()
 	
-	# Move the pawn
-	board.tiles[current_position].button.pawns[current_player].hide()
-	selected_pawn_tile.pawns[current_player].modulate.a = 1
-	
-	# Update pawn
-	selected_pawn_tile.pawn_moved = true 
+	# Set the modulate of the selected pawn to one
+	var tile_button: TileButton = tile_buttons[selected_tile_index]
+	tile_button.pawns[current_player].modulate.a = 1
+	tile_button.pawn_moved = true 
 	
 	# Reset selected pawn, enabled pawn moved so the new pawn isn't hidden
-	board.pawn_indexes[current_player] = board.tiles.find(selected_pawn_tile.tile)
+	board.MovePawn(selected_tile_index)
 
 
 #region Signals
 #endregion
-func _on_fence_button_pressed(fence_button: FenceButton) -> void:
-	selected_fence_button = fence_button
-	selected_pawn_tile = null
+func _on_fence_button_pressed(fence: int) -> void:
+	selected_fence_index = fence
+	selected_tile_index = -1
+	var fence_button: FenceButton = fence_buttons[fence]
 	fence_button.h_fence.visible = Global.fence_direction == 0
 	fence_button.v_fence.visible = Global.fence_direction != 0
 
 
-func _on_tile_pressed(tile_button: TileButton) -> void:
-	selected_pawn_tile = tile_button
-	selected_fence_button = null
+func _on_tile_pressed(tile: int) -> void:
+	selected_tile_index = tile
+	selected_fence_index = -1
 
 
 ## Flip the rotation of the fence
 func _on_directional_button_pressed() -> void:
-	selected_fence_button = null
+	selected_fence_index = -1
 	Global.fence_direction = 1 - Global.fence_direction
 	toggle_direction_button.text = 'Horizontal' if Global.fence_direction == 0 else 'Vertical'
 	update_fence_buttons()
@@ -331,14 +257,14 @@ func _on_confirm_pressed() -> void:
 	
 	var has_won: bool = false
 	
-	if selected_fence_button:
-		confirm_place_fence(selected_fence_button)
-		selected_fence_button = null
+	if selected_fence_index > -1:
+		confirm_place_fence(selected_fence_index)
+		selected_fence_index = -1
 		
-	elif selected_pawn_tile:
+	elif selected_tile_index:
 		confirm_move_pawn()
-		has_won = check_win(selected_pawn_tile.tile, board.win_indexes[current_player])
-		selected_pawn_tile = null
+		has_won = board.CheckWin(selected_tile_index)
+		selected_tile_index = -1
 	
 	# Check if the pawn has reached end goal
 	if has_won:
