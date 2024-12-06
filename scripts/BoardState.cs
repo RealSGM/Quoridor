@@ -72,16 +72,17 @@ public partial class BoardState : Node
 			.ForEach(i => SetFenceTileConnections(i, fenceRows));
 	}
 
-	public void SetFenceTileConnections(int index, int boardSize)
+	public void SetFenceTileConnections(int index, int fenceRows)
 	{
 		// Match the fence button index to the index of the Top-Left Tile in 2x2 Grid
-		index += index / (boardSize - 1);
+		int modifiedIndex = index + index / fenceRows;
 
-		int topLeft = index;
-		int topRight = index + 1;
-		int bottomLeft = index + boardSize;
-		int bottomRight = index + 1 + boardSize;
-
+		int boardSize = fenceRows + 1;
+		int topLeft = modifiedIndex;
+		int topRight = modifiedIndex + 1;
+		int bottomLeft = modifiedIndex + boardSize;
+		int bottomRight = modifiedIndex + 1 + boardSize;
+		
 		Fences[index][0] = new int[2][] { new int[2] { topLeft, bottomLeft }, new int[2] { topRight, bottomRight } }; // Horizontal Fences
 		Fences[index][1] = new int[2][] { new int[2] { topLeft, topRight }, new int[2] { bottomLeft, bottomRight } }; // Vertical Fences
 	}
@@ -102,7 +103,6 @@ public partial class BoardState : Node
 		int[] playerPawnTile = Tiles[playerPawnPosition];
 		int[] tilesToSelect = new int[0];
 
-		GD.Print("Player Pawn Tile: " + playerPawnTile);
 		// Loop through all tiles
 		foreach (int playerTile in playerPawnTile)
 		{
@@ -187,4 +187,26 @@ public partial class BoardState : Node
 		return connections;
 	}
 
+	public void PrintBoard()
+	{
+		for (int i = 0; i < Tiles.Length; i++)
+		{
+			GD.Print("Tile " + i + ": " + string.Join(", ", Tiles[i]));
+		}
+	}
+
+	public void PrintFences()
+	{
+		for (int i = 0; i < Fences.Length; i++)
+		{
+			GD.Print("Fence: ");
+			for (int j = 0; j < Fences[i].Length; j++)
+			{
+				for (int k = 0; k < Fences[i][j].Length; k++)
+				{
+					GD.Print(string.Join(", ", Fences[i][j][k]));
+				}
+			}
+		}
+	}
 }

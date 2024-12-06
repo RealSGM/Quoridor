@@ -67,12 +67,13 @@ var fence_buttons: Array[FenceButton] = []
 		current_player = val
 		reset_board()
 		set_tiles(board.PawnPositions[current_player])
+		board.CurrentPlayer = val
 		turn_label.text = str(Global.players[current_player]["name"]) + "'s Turn"
 
 
 func _input(event: InputEvent) -> void:
 	if event.is_action_pressed("test"):
-		board.PrintBoard()
+		board.PrintFences()
 
 
 func _ready() -> void:
