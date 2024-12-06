@@ -1,11 +1,11 @@
 class_name TileButton extends Button
 
-var pawns: Array[Pawn] = [null, null]
+var pawns: Array[Panel] = [null, null]
 var pawn_moved: bool = false
-var tile: Tile
+var id: int
 
 func _ready() -> void:
-	pressed.connect(Global.game._on_tile_pressed.bind(self))
+	pressed.connect(Global.game._on_tile_pressed.bind(id))
 
 
 func clear_pawns() -> void:

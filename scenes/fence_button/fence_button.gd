@@ -13,11 +13,11 @@ var dir_disabled: Array[bool] = [false, false]
 ## based off latest DFS
 var dfs_disabled: Array[bool] = [false, false]
 
-var fence: Fence
+var id: int
 
 
 func _ready() -> void:
-	pressed.connect(Global.game._on_fence_button_pressed.bind(self))
+	pressed.connect(Global.game._on_fence_button_pressed.bind(id))
 	h_fence.hide()
 	v_fence.hide()
 

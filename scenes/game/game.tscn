@@ -2,7 +2,7 @@
 
 [ext_resource type="Theme" uid="uid://gl4viqpfcsgn" path="res://resources/main_theme.tres" id="1_khihi"]
 [ext_resource type="Script" path="res://scenes/game/game.gd" id="2_8s0tt"]
-[ext_resource type="Script" path="res://scripts/board_state.gd" id="3_1xymj"]
+[ext_resource type="Script" path="res://scripts/BoardState.cs" id="3_kvsy8"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_pufkf"]
 bg_color = Color(0.105882, 0.105882, 0.109804, 1)
@@ -33,8 +33,6 @@ grow_horizontal = 2
 grow_vertical = 2
 theme = ExtResource("1_khihi")
 script = ExtResource("2_8s0tt")
-test_fence = 60
-test_dir = 1
 board = NodePath("Board")
 tile_container = NodePath("Board/BoardContainer/TileContainer")
 board_container = NodePath("Board/BoardContainer")
@@ -56,7 +54,7 @@ anchor_right = 0.5
 anchor_bottom = 0.5
 grow_horizontal = 2
 grow_vertical = 2
-script = ExtResource("3_1xymj")
+script = ExtResource("3_kvsy8")
 
 [node name="BoardContainer" type="PanelContainer" parent="Board"]
 layout_mode = 1
