@@ -116,6 +116,7 @@ func setup_board(board_size: int) -> void:
 	board.GenerateFences(board_size - 1)
 	board.SetFenceCounts(fence_amount, player_amount)
 	board.SetPawnPositions(player_amount, board_size)
+	board.SetWinPositions(board_size, player_amount)
 	
 	instance_tile_buttons(board_size)
 	instance_fence_buttons(board_size - 1)
@@ -266,8 +267,7 @@ func _on_confirm_pressed() -> void:
 		
 	elif selected_tile_index:
 		confirm_move_pawn()
-		## REIMPLEMENT
-		## has_won = check_win(selected_pawn_tile.tile, board.win_indexes[current_player])
+		has_won = board.CheckWin(selected_tile_index)
 		selected_tile_index = -1
 	
 	# Check if the pawn has reached end goal

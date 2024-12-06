@@ -87,9 +87,9 @@ public partial class BoardState : Node
 		Fences[index][1] = new int[2][] { new int[2] { topLeft, topRight }, new int[2] { bottomLeft, bottomRight } }; // Vertical Fences
 	}
 
-	public bool CheckWin(int playerIndex, int currentTileIndex)
+	public bool CheckWin(int currentTileIndex)
 	{
-		return WinPositions[playerIndex].Contains(currentTileIndex);
+		return WinPositions[CurrentPlayer].Contains(currentTileIndex);
 	}
 
 	public bool IsFenceAvailable(int playerIndex)
@@ -144,10 +144,6 @@ public partial class BoardState : Node
 	{
 		int[] leapedTile = Tiles[leapedTileIndex];
 
-		GD.Print("Leaped Tile: " + leapedTileIndex);
-		GD.Print("Leaped Tile Connections: " + string.Join(", ", leapedTile));
-		GD.Print("Leaped Tile Direction: " + dirIndex);
-
 		// Check no fence blocking it
 		if (Tiles[tileIndex][dirIndex] == leapedTileIndex)
 		{
@@ -185,7 +181,7 @@ public partial class BoardState : Node
 		PawnPositions[CurrentPlayer] = tileIndex;
 	}
 
-	public static int[] GetConnections(int index, int size) 
+	public int[] GetConnections(int index, int size) 
 	{
 		int[] connections = new int[4];
 		connections[0] = index >= size ? index - size : -1; // North Tile
