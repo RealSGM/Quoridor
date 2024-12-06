@@ -104,44 +104,52 @@ public partial class BoardState : Node
 		int[] tilesToSelect = new int[0];
 
 		// Loop through all tiles
-		foreach (int playerTile in playerPawnTile)
+		foreach (int connectedTile in playerPawnTile)
 		{
 			// Check if the tile is not empty
-			if (playerTile != -1)
+			if (connectedTile != -1)
 			{
-				tilesToSelect = tilesToSelect.Concat(GetAdjacentTiles(playerTile)).ToArray();
+				tilesToSelect = tilesToSelect.Concat(CheckForEnemy(connectedTile)).ToArray();
 			}
 		}
 		return tilesToSelect;
 	}
 
-	public int[] GetAdjacentTiles(int tileIndex)
+	public int[] CheckForEnemy(int connectedTile)
 	{
+		int enemyPawnPosition = PawnPositions[1-CurrentPlayer];
 		// Check enemy pawn is not on the tile
-		if (PawnPositions[1-CurrentPlayer] != tileIndex)
+		if (enemyPawnPosition != connectedTile)
 		{
-			return new int[] { tileIndex };
+			return new int[] { connectedTile };
 		}
 
 		// Get the direction of the enemy pawn
-		int dirIndex = Array.IndexOf(Tiles[tileIndex], PawnPositions[1-CurrentPlayer]);
+		int dirIndex = Array.IndexOf(Tiles[PawnPositions[CurrentPlayer]], enemyPawnPosition);
+		
 		// Check if leaped tile is in boundary
-		int leapedTileIndex = tileIndex + AdjacentOffsets[dirIndex] * 2;
-
+		int leapedTileIndex = connectedTile + AdjacentOffsets[dirIndex];
 		if (leapedTileIndex < 0 || leapedTileIndex >= Tiles.Length)
 		{
+			// Return empty array, as leaped tile is out of boundary, pawn is taken
 			return Array.Empty<int>();
 		}
 
-		return GetLeapedTiles(PawnPositions[CurrentPlayer], leapedTileIndex, tileIndex, dirIndex);
+		// return Array.Empty<int>();
+
+		return GetLeapedTiles(PawnPositions[CurrentPlayer], leapedTileIndex, connectedTile, dirIndex);
 	}
 
 	public int[] GetLeapedTiles(int playerIndex, int leapedTileIndex, int tileIndex, int dirIndex)
 	{
 		int[] leapedTile = Tiles[leapedTileIndex];
 
+		GD.Print("Leaped Tile: " + leapedTileIndex);
+		GD.Print("Leaped Tile Connections: " + string.Join(", ", leapedTile));
+		GD.Print("Leaped Tile Direction: " + dirIndex);
+
 		// Check no fence blocking it
-		if (leapedTile[dirIndex] == tileIndex)
+		if (Tiles[tileIndex][dirIndex] == leapedTileIndex)
 		{
 			return new int[] { leapedTileIndex };
 		}
@@ -177,7 +185,7 @@ public partial class BoardState : Node
 		PawnPositions[CurrentPlayer] = tileIndex;
 	}
 
-	public int[] GetConnections(int index, int size) 
+	public static int[] GetConnections(int index, int size) 
 	{
 		int[] connections = new int[4];
 		connections[0] = index >= size ? index - size : -1; // North Tile

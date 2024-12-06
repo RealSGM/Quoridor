@@ -65,6 +65,7 @@ var fence_buttons: Array[FenceButton] = []
 @onready var current_player: int:
 	set(val):
 		current_player = val
+		board.CurrentPlayer = val
 		reset_board()
 		set_tiles(board.PawnPositions[current_player])
 		board.CurrentPlayer = val
@@ -74,6 +75,8 @@ var fence_buttons: Array[FenceButton] = []
 func _input(event: InputEvent) -> void:
 	if event.is_action_pressed("test"):
 		board.PrintFences()
+	if event.is_action_pressed("confirm") and !confirm_button.disabled:
+		_on_confirm_pressed()
 
 
 func _ready() -> void:
@@ -156,7 +159,6 @@ func update_fence_buttons() -> void:
 		fence_button.mouse_filter = Control.MOUSE_FILTER_IGNORE if fence_button.disabled else Control.MOUSE_FILTER_STOP
 
 
-## TODO REIMPLEMENT
 func confirm_place_fence(fence: int) -> void:
 	var fence_button: FenceButton = fence_buttons[fence]
 	# Flip the index (for NESW adjustment)
