@@ -17,6 +17,7 @@ public partial class BoardState : Node
 	[Export]
 	public int CurrentPlayer { get; set; }
 
+	#region Initialization
 	public void SetFenceCounts(int fencesPerPlayer, int playerCount)
 	{
 		FenceCounts = Enumerable.Repeat(fencesPerPlayer, playerCount).ToArray();
@@ -86,17 +87,9 @@ public partial class BoardState : Node
 		Fences[index][0] = new int[2][] { new int[2] { topLeft, bottomLeft }, new int[2] { topRight, bottomRight } }; // Horizontal Fences
 		Fences[index][1] = new int[2][] { new int[2] { topLeft, topRight }, new int[2] { bottomLeft, bottomRight } }; // Vertical Fences
 	}
+	#endregion
 
-	public bool CheckWin(int currentTileIndex)
-	{
-		return WinPositions[CurrentPlayer].Contains(currentTileIndex);
-	}
-
-	public bool IsFenceAvailable(int playerIndex)
-	{
-		return FenceCounts[playerIndex] > 0;
-	}
-
+	#region Selectable Tiles
 	public int[] GetSelectableTiles(int playerIndex)
 	{
 		int playerPawnPosition = PawnPositions[playerIndex];
@@ -157,6 +150,17 @@ public partial class BoardState : Node
 
 		return leapedTiles;
 	}
+	#endregion
+
+	public bool CheckWin(int currentTileIndex)
+	{
+		return WinPositions[CurrentPlayer].Contains(currentTileIndex);
+	}
+
+	public bool IsFenceAvailable(int playerIndex)
+	{
+		return FenceCounts[playerIndex] > 0;
+	}
 
 	public void PlaceFence(int fenceIndex, int direction, int currentPlayer)
 	{
@@ -189,28 +193,5 @@ public partial class BoardState : Node
 		connections[2] = index < size * (size - 1) ? index + size : -1; // South Tile
 		connections[3] = index % size != 0 ? index - 1 : -1; // West Tile
 		return connections;
-	}
-
-	public void PrintBoard()
-	{
-		for (int i = 0; i < Tiles.Length; i++)
-		{
-			GD.Print("Tile " + i + ": " + string.Join(", ", Tiles[i]));
-		}
-	}
-
-	public void PrintFences()
-	{
-		for (int i = 0; i < Fences.Length; i++)
-		{
-			GD.Print("Fence: ");
-			for (int j = 0; j < Fences[i].Length; j++)
-			{
-				for (int k = 0; k < Fences[i][j].Length; k++)
-				{
-					GD.Print(string.Join(", ", Fences[i][j][k]));
-				}
-			}
-		}
 	}
 }

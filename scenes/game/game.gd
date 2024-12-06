@@ -2,8 +2,6 @@ class_name Game extends Control
 ## Handles the Interface for the Game
 ## Sends signals to the board
 
-# BUG Data is being deleted from board states
-# TODO Change tile connections from Array[Tile] to Array[int] storing their indexes instead
 # TODO Cache the directions for fence buttons
 # - Perform DFS to check if the fence in that direction is legal
 # - Store to see if it is disable
@@ -73,8 +71,6 @@ var fence_buttons: Array[FenceButton] = []
 
 
 func _input(event: InputEvent) -> void:
-	if event.is_action_pressed("test"):
-		board.PrintFences()
 	if event.is_action_pressed("confirm") and !confirm_button.disabled:
 		_on_confirm_pressed()
 
