@@ -1,6 +1,7 @@
 using Godot;
 using System;
 using System.Linq;
+using System.Collections.Generic;
 
 [GlobalClass]
 public partial class BoardState : Node
@@ -87,6 +88,19 @@ public partial class BoardState : Node
 		Fences[index][0] = new int[2][] { new int[2] { topLeft, bottomLeft }, new int[2] { topRight, bottomRight } }; // Horizontal Fences
 		Fences[index][1] = new int[2][] { new int[2] { topLeft, topRight }, new int[2] { bottomLeft, bottomRight } }; // Vertical Fences
 	}
+	
+	public BoardState Clone()
+	{
+		BoardState boardState = new BoardState();
+		boardState.FenceCounts = FenceCounts.ToArray();
+		boardState.PawnPositions = PawnPositions.ToArray();
+		boardState.Fences = Fences.Select(fence => fence.Select(direction => direction.Select(connection => connection.ToArray()).ToArray()).ToArray()).ToArray();
+		boardState.Tiles = Tiles.Select(tile => tile.ToArray()).ToArray();
+		boardState.AdjacentOffsets = AdjacentOffsets.ToArray();
+		boardState.WinPositions = WinPositions.Select(winPosition => winPosition.ToArray()).ToArray();
+		boardState.CurrentPlayer = CurrentPlayer;
+		return boardState;
+	}
 	#endregion
 
 	#region Selectable Tiles
@@ -152,6 +166,47 @@ public partial class BoardState : Node
 	}
 	#endregion
 
+	#region Illegal Fence Check
+	public bool CheckIllegalFence(int fenceIndex, int direction)
+	{
+		// Create a duplicate of the current board state
+		BoardState boardState = Clone();
+		boardState.PlaceFence(fenceIndex, direction, CurrentPlayer);
+
+		int startIndex = PawnPositions[CurrentPlayer];
+		int[] goalTiles = WinPositions[CurrentPlayer];
+
+		return true;
+	}
+
+	public bool RecursiveDFS(int currentIndex, int[] goalTiles, HashSet<int> visitedTiles, BoardState boardState)
+	{
+		// Check if the current index is in the goal tiles
+		if (goalTiles.Contains(currentIndex))
+		{
+			return true;
+		}
+
+		// Add the current index to the visited tiles
+		visitedTiles.Add(currentIndex);
+
+		// Loop through all connected tiles
+		foreach (int connectedTile in boardState.Tiles[currentIndex])
+		{
+			// Check if the connected tile is not empty and not visited
+			if (connectedTile != -1 && !visitedTiles.Contains(connectedTile))
+			{
+				// Recursively call the function with the connected tile
+				if (RecursiveDFS(connectedTile, goalTiles, visitedTiles, boardState))
+				{
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	#endregion
 	public bool CheckWin(int currentTileIndex)
 	{
 		return WinPositions[CurrentPlayer].Contains(currentTileIndex);
@@ -185,7 +240,7 @@ public partial class BoardState : Node
 		PawnPositions[CurrentPlayer] = tileIndex;
 	}
 
-	public int[] GetConnections(int index, int size) 
+	public int[] GetConnections(int index, int size)
 	{
 		int[] connections = new int[4];
 		connections[0] = index >= size ? index - size : -1; // North Tile
