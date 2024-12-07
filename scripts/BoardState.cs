@@ -167,16 +167,16 @@ public partial class BoardState : Node
 	#endregion
 
 	#region Illegal Fence Check
-	public bool CheckIllegalFence(int fenceIndex, int direction)
+	public bool CheckIllegalFence(int fenceIndex, int direction, int playerIndex)
 	{
 		// Create a duplicate of the current board state
 		BoardState boardState = Clone();
-		boardState.PlaceFence(fenceIndex, direction, CurrentPlayer);
+		boardState.PlaceFence(fenceIndex, direction, playerIndex);
 
-		int startIndex = PawnPositions[CurrentPlayer];
-		int[] goalTiles = WinPositions[CurrentPlayer];
+		int startIndex = PawnPositions[playerIndex];
+		int[] goalTiles = WinPositions[playerIndex];
 
-		return true;
+		return RecursiveDFS(startIndex, goalTiles, new HashSet<int>(), boardState);
 	}
 
 	public bool RecursiveDFS(int currentIndex, int[] goalTiles, HashSet<int> visitedTiles, BoardState boardState)

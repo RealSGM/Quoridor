@@ -43,6 +43,7 @@ var fence_buttons: Array[FenceButton] = []
 		selected_fence_index = val
 		set_confirm_button(val, selected_tile_index)
 
+
 ## Update the selected tile, and the confirm button
 @onready var selected_tile_index: int = -1:
 	set(val):
@@ -59,6 +60,7 @@ var fence_buttons: Array[FenceButton] = []
 			pawn.modulate.a = 0.5
 			pawn.show()
 
+
 ## Update board when the player is changed
 @onready var current_player: int:
 	set(val):
@@ -68,6 +70,7 @@ var fence_buttons: Array[FenceButton] = []
 		set_tiles(board.PawnPositions[current_player])
 		board.CurrentPlayer = val
 		turn_label.text = str(Global.players[current_player]["name"]) + "'s Turn"
+
 
 #region Override Methods
 func _input(event: InputEvent) -> void:
@@ -269,11 +272,7 @@ func get_illegal_fences() -> Array[Array]:
 				var thread: Thread = Thread.new()
 				threads.append(thread)
 				# Replace 0 with player
-				thread.start(_illegal_fence_check_threaded.bind(fence_button.id, fence_dir, 0))
-				
-				break # TEMP
-			break # TEMP
-		break # TEMP
+				thread.start(_illegal_fence_check_threaded.bind(fence_button.id, fence_dir, player))
 	
 	for thread: Thread in threads:
 		var result: Array = thread.wait_to_finish()
@@ -287,10 +286,10 @@ func get_illegal_fences() -> Array[Array]:
 
 
 func _illegal_fence_check_threaded(fence: int, fence_dir: int, player: int) -> Array:
-	if board.CheckIllegalFence(fence, fence_dir):
+	if board.CheckIllegalFence(fence, fence_dir, player):
 		return []
 	fence_buttons[fence].dfs_disabled[fence_dir] = true
-	return [player, fence]
+	return [fence_dir, fence]
 
 
 #endregion
