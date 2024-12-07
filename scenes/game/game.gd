@@ -43,6 +43,7 @@ var fence_buttons: Array[FenceButton] = []
 		selected_fence_index = val
 		set_confirm_button(val, selected_tile_index)
 
+
 ## Update the selected tile, and the confirm button
 @onready var selected_tile_index: int = -1:
 	set(val):
@@ -59,6 +60,7 @@ var fence_buttons: Array[FenceButton] = []
 			pawn.modulate.a = 0.5
 			pawn.show()
 
+
 ## Update board when the player is changed
 @onready var current_player: int:
 	set(val):
@@ -70,9 +72,12 @@ var fence_buttons: Array[FenceButton] = []
 		turn_label.text = str(Global.players[current_player]["name"]) + "'s Turn"
 
 
+#region Override Methods
 func _input(event: InputEvent) -> void:
 	if event.is_action_pressed("confirm") and !confirm_button.disabled:
 		_on_confirm_pressed()
+	if event.is_action_pressed("test"):
+		print(get_illegal_fences())
 
 
 func _ready() -> void:
@@ -86,8 +91,9 @@ func _ready() -> void:
 	exit_button.show()
 
 
-#region Interface
 #endregion
+
+#region Interface
 ## Disable the confirm button when neither option is selected
 func set_confirm_button(fence: int, tile: int) -> void:
 	confirm_button.disabled = !(fence >= 0 || tile >= 0)
@@ -102,8 +108,9 @@ func reset_board() -> void:
 	)
 
 
-#region Setup
 #endregion
+
+#region Setup
 ## Setup the board with the selected size
 func setup_board(board_size: int) -> void:
 	Global.board_size = board_size
@@ -147,8 +154,9 @@ func instance_tile_buttons(board_size: int) -> void:
 		tile_buttons.append(tile_button)
 
 
-#region Fences
 #endregion
+
+#region Fences
 func update_fence_buttons() -> void:
 	for fence_button: FenceButton in fence_buttons:
 		fence_button.disabled = fence_button.dir_disabled[Global.fence_direction] if board.IsFenceAvailable(current_player) else true
@@ -174,8 +182,9 @@ func confirm_place_fence(fence: int) -> void:
 	fence_button.fence_placed = true
 
 
-#region Tiles
 #endregion
+
+#region Tiles
 ## Set the tiles of the board, based off the current player's turn
 func set_tiles(pawn_index: int) -> void:
 	tile_buttons[pawn_index].disabled = true
@@ -192,8 +201,9 @@ func set_tile_button(tile: TileButton, is_disabled: bool) -> void:
 	tile.focus_mode = Control.FOCUS_NONE if is_disabled else Control.FOCUS_CLICK
 
 
-#region Pawns
 #endregion
+
+#region Pawns
 @warning_ignore("integer_division")
 @warning_ignore("narrowing_conversion")
 func spawn_pawns() -> void:
@@ -228,8 +238,63 @@ func confirm_move_pawn() -> void:
 	board.MovePawn(selected_tile_index)
 
 
-#region Signals
 #endregion
+
+#region Illegal Fence Check
+func get_illegal_fences() -> Array[Array]:
+	var illegal_fences: Array[Array] = [[], []]
+	var bits: Array[int] = [0, 1]
+
+	print("Getting illegal fences")
+	var start_time: int = Time.get_ticks_msec()
+	
+	if board.FenceCounts[current_player] <= 0:
+		return illegal_fences
+
+	# Check each fence button, to see if it is possible
+	for fence_button: FenceButton in fence_buttons:
+		
+		# Reset DFS Array
+		fence_button.dfs_disabled = [false, false]
+		
+		# Ignore any placed fences
+		if fence_button.fence_placed:
+			continue
+
+		# Loop for both, horizontal and vertical fences
+		for fence_dir: int in bits:
+			# Ignore fences adjacent to placed fences
+			if fence_button.dir_disabled[fence_dir]:
+				continue
+				
+			# Loop for each player
+			for player: int in bits:
+				var thread: Thread = Thread.new()
+				threads.append(thread)
+				# Replace 0 with player
+				thread.start(_illegal_fence_check_threaded.bind(fence_button.id, fence_dir, player))
+	
+	for thread: Thread in threads:
+		var result: Array = thread.wait_to_finish()
+		if result.is_empty():
+			continue
+		illegal_fences[result[0]].append(result[1])
+
+	threads.clear()
+	print("Time: " + str(Time.get_ticks_msec() - start_time))
+	return illegal_fences
+
+
+func _illegal_fence_check_threaded(fence: int, fence_dir: int, player: int) -> Array:
+	if board.CheckIllegalFence(fence, fence_dir, player):
+		return []
+	fence_buttons[fence].dfs_disabled[fence_dir] = true
+	return [fence_dir, fence]
+
+
+#endregion
+
+#region Signals
 func _on_fence_button_pressed(fence: int) -> void:
 	selected_fence_index = fence
 	selected_tile_index = -1
@@ -276,3 +341,6 @@ func _on_confirm_pressed() -> void:
 		current_player = 1 - current_player
 	
 	update_fence_buttons()
+
+
+#endregion
