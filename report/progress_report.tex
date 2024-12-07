@@ -20,7 +20,7 @@
 \section{Project Introduction}
 
 \subsection{Motivation and Aim}
-This project is about the classical board game Quoridor and integrating AI into it. My motivation for this project comes from my love for board games and my interest in creating computer AI and this project allows me to combine these interests by building a game in which I can explore how AI makes decisions. Creating an efficient algorithm will be challenging due to Quoridor's dual objective nature of moving pawns and placing down fences; however, by using algorithms like Minimax or MCTS, I can explore strategic decision-making that balances both actions while considering the long-term consequences of each move. The project will be built in Godot which is a game engine I have had many years of experience in.
+This project is about the classical board game Quoridor and integrating AI into it. My motivation for this project comes from my love for board games and my interest in creating computer AI and this project allows me to combine these interests by building a game to explore how AI makes decisions. Creating an efficient algorithm will be challenging due to Quoridor's dual objective nature of moving pawns and placing down fences; however, by using algorithms like Minimax or MCTS, I can explore strategic decision-making that balances both actions while considering the long-term consequences of each move. The project will be built in Godot which is a game engine I have had many years of experience in.
 
 \subsection{Objectives}
 My aim for this project is to create a fully functional Quoridor game that allows a player to compete against the computer. In addition to developing the core gameplay mechanics, I plan to explore and implement various AI algorithms, such as Minimax, Monte Carlo Tree Search, and possibly Neural Networks, to assess their effectiveness in making strategic decisions.
@@ -51,10 +51,10 @@ Multiplayer Support, Save Game State, Move History & Leaderboard, AntiCheat, VR\
 \label{tab:moscow}
 \end{table}
 
-\noindent I created a MoSCoW table to prioritise sections of the project. Since this project is local game, the main focus will be on the main mechanics of the game, such as the fence placement and pawn movement and AI. Once the main mechanics have been implemented, I can then focus on additional features such as comparing different type of AI algorithms.
+\noindent I created a MoSCoW table to prioritise sections of the project. Since this project is a local game, the main focus will be on the game's mechanics, such as fence placement, pawn movement, and AI. Once the main mechanics have been implemented, I can then focus on additional features, such as comparing different types of AI algorithms.
 
 \subsection{Design}
-The key areas of planning focused on the pre-game user interface, the board, fences, movement, and game loop. For the main menu, I created a list of possible options that the user would be able to navigate. Designing the board was straightforward, as it was simply an X × X grid of tiles, whereas designing the fences proved more challenging. I decided to use buttons to represent the fences, which were positioned at the centre of every 2 × 2 grid of tiles. This design was much simpler to implement than other potential ideas, such as a drag-and-drop mechanism.
+The key planning areas focused on the pre-game user interface, the board, fences, movement, and game loop. For the main menu, I created a list of possible options that the user would be able to navigate. Designing the board was straightforward, as it was simply an X × X grid of tiles, whereas designing the fences proved more challenging. I decided to use buttons to represent the fences, which were positioned at the center of every 2 × 2 grid of tiles. This design was much simpler to implement than other potential ideas, such as a drag-and-drop mechanism.
 
 \noindent For movement, I took inspiration from Chess, where available tiles are highlighted upon selection, and I planned to implement a similar feature. Regarding the game loop, I chose to have players click a "Confirm" button to lock in their move. This approach allows players to explore possible moves and strategise — for example, they can click on different fences to consider how their opponent might respond.
 
@@ -80,7 +80,7 @@ I created a \texttt{BoardState} class, which can be used later for the DFS and A
 \subsection{Pawn Spawning}
 Once the tiles and fences were in place, I started to handle the pawn spawning and movement. I created a \texttt{Pawn} class, which inherits from Godot's Panel class. I made the pawn a white circle so that I could change the colour by updating the panel's modulate.  
 
-\noindent During my first attempt at spawning the pawns, I placed two pawns: one at the top centre for Player 2, and one at the bottom centre for Player 1. However, when I reached the pawn movement stage, I changed how the pawns were spawned. Instead, I spawned a pawn on each tile for each player. This way, for pawn movement, I could simply hide and show the pawn as needed.
+\noindent During my first attempt at spawning the pawns, I placed two pawns: one at the top centre for Player 2 and one at the bottom centre for Player 1. However, when I reached the pawn movement stage, I changed how the pawns were spawned. Instead, I spawned a pawn on each tile for each player. This way, for pawn movement, I could simply hide and show the pawn as needed.
 
 \subsection{Advanced Pawn Movement}
 Now that every tile has a connection, proper pawn movement can be set up. I first disable all tiles on the board, and then enable all tile connections for the tile that the player's pawn is currently on. When a fence is placed, the tile connection is severed, as shown in Figure~\ref{fig:fence_placement}.
@@ -99,7 +99,7 @@ So far, I have been working on the first objective: "Create a working game of Qu
 \subsection{Risk Analysis}
 The biggest problem so far was figuring out how to implement fences both graphically and logically. After a while, I realised that it was best to separate the fence logic and use it to update the tile connections. Another issue that arose were invalid tile connections. The problem stemmed from mapping the \(2 \times 2\) \texttt{Tile Grid} with a single \texttt{Fence Button}, while also using the \texttt{board\_size}. This was resolved later after examining the underlying logic.  
 
-\noindent A future concern will be optimising the AI and DFS, ensuring the efficient use of C\# and threading in order to                   perform the calculations in a shorter period of time. Another oversight is that the \texttt{BoardState} class stores references to the actual class itself, rather than the index of the position in the grid. This might be a problem in the future, as duplicating board states to simulate moves may cause issues such as overwriting data on the original board, which is something I will need to be careful of.
+\noindent A future concern will be optimising the AI and DFS, ensuring the efficient use of C\# and threading in order to perform the calculations in a shorter period of time. Another oversight is that the \texttt{BoardState} class stores references to the actual class itself, rather than the index of the position in the grid. This might be a problem in the future, as duplicating board states to simulate moves may cause issues such as overwriting data on the original board, which is something I will need to be careful of.
 
 \subsection{Conclusion}
 In terms of a project plan, the next steps will be to implement the illegal fence check. This will require a depth-first search and will be written in C\#. This is the final step in completing the local multiplayer. Once that is finished, I can work on implementing the Minimax and MCTS algorithms. I will be modifying the \texttt{BoardState} to use indexes, rather than references, as mentioned before, to make the DFS and AI algorithm implementations easier.
