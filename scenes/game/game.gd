@@ -241,12 +241,10 @@ func confirm_move_pawn() -> void:
 #endregion
 
 #region Illegal Fence Check
-func get_illegal_fences() -> Array[Array]:
-	var illegal_fences: Array[Array] = [[], []]
+func get_illegal_fences() -> Dictionary:
+	var illegal_fences: Dictionary = { 0: {}, 1: {} }
 	var bits: Array[int] = [0, 1]
-
-	print("Getting illegal fences")
-	var start_time: int = Time.get_ticks_msec()
+	var start_time: int = Time.get_ticks_usec()
 	
 	if board.FenceCounts[current_player] <= 0:
 		return illegal_fences
@@ -274,14 +272,15 @@ func get_illegal_fences() -> Array[Array]:
 				# Replace 0 with player
 				thread.start(_illegal_fence_check_threaded.bind(fence_button.id, fence_dir, player))
 	
+	# Get results from threads
 	for thread: Thread in threads:
 		var result: Array = thread.wait_to_finish()
 		if result.is_empty():
 			continue
-		illegal_fences[result[0]].append(result[1])
+		illegal_fences[result[0]][result[1]] = true
 
 	threads.clear()
-	print("Time: " + str(Time.get_ticks_msec() - start_time))
+	print("Illegal Fence Check Time: " + str(Time.get_ticks_usec() - start_time) + " us")
 	return illegal_fences
 
 
