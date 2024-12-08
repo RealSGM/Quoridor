@@ -5,6 +5,7 @@
 \usepackage{color}
 \usepackage{pdfpages}
 \usepackage{graphicx}
+\usepackage{subcaption}
 
 \title{Progress Report for AI for playing classical strategy games - Quoridor}
 
@@ -67,7 +68,7 @@ The next step was to work on the actual board. I created a \texttt{TileButton} s
 \subsection{FenceButton}
 The \texttt{FenceButton} class also inherits from the Button class. This class contains two panels to display horizontal and vertical fences. I instanced \((b-1)^2\) \texttt{FenceButtons} and offset them so that they appeared in the middle of a \(2 \times 2\) grid of \texttt{TileButtons}, as shown in Figure~\ref{fig:board}.
 
-\noindent I configured a toggle button to switch between horizontal and vertical modes. When a \texttt{FenceButton} is pressed, it displays the corresponding fence panel, and upon clicking confirm, the fence is placed. After the fence is placed, the adjacent \texttt{FenceButtons} are disabled to prevent overlapping. This behaviour is shown in Figure~\ref{fig:fence_blocking_leap}, where the red buttons represent the disabled \texttt{FenceButtons}.  
+\noindent I configured a toggle button to switch between horizontal and vertical modes. When a \texttt{FenceButton} is pressed, it displays the corresponding fence panel, and upon clicking confirm, the fence is placed. After the fence is placed, the adjacent \texttt{FenceButtons} are disabled to prevent overlapping. This behaviour is shown in Figure~\ref{fig:fence_block_leaping}, where the red buttons represent the disabled \texttt{FenceButtons}.  
 
 \subsection{Tile and Fence Connections}
 To separate the user interface from the game logic for future use, I created the \texttt{Fence} and \texttt{Tile} classes to store their connections and associated buttons. Each tile has a connection in each cardinal direction, and these are stored in a 1D array. Calculating the connections between tiles and fences uses the length of the board/fence grids.  
@@ -107,42 +108,46 @@ In terms of a project plan, the next steps will be to implement the illegal fenc
 \newpage
 \appendix
 \section{Appendix}
-\begin{figure}[h]
+
+\begin{minipage}[b]{0.45\textwidth}
     \centering
-    \includegraphics[width=0.4\textwidth]{images/board_options.png}
-    \caption{Board Settings for local multiplayer.}
-    \label{fig:options}
-\end{figure}
+    \includegraphics[width=\textwidth]{images/fence_placement.png}
+    \captionof{figure}{Fence Placement}
+\end{minipage}%
+\hfill
+\begin{minipage}[b]{0.45\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{images/pawn_leaping.png}
+    \captionof{figure}{Pawn Leaping}
+\end{minipage}
+
+\begin{minipage}[b]{0.45\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{images/pawn_movement.png}
+    \captionof{figure}{Pawn Movement}
+\end{minipage}%
+\hfill
+\begin{minipage}[b]{0.45\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{images/board_options.png}
+    \captionof{figure}{Board Options}
+\end{minipage}
+
+
 \begin{figure}[h]
     \centering
     \includegraphics[width=0.6\textwidth]{images/current_board.png}
     \caption{Current Board.}
     \label{fig:board}
 \end{figure}
+
 \begin{figure}[h]
     \centering
-    \includegraphics[width=0.6\textwidth]{images/fence_placement.png}
-    \caption{Fence Placement.}
-    \label{fig:fence_placement}
+    \includegraphics[width=0.6\textwidth]{images/fence_block_leaping.png}
+    \caption{Fence Blocking Leap.}
+    \label{fig:fence_block_leaping}
 \end{figure}
-\begin{figure}[h]   
-    \centering
-    \includegraphics[width=0.6\textwidth]{images/pawn_movement.png}
-    \caption{Pawn Movement.}
-    \label{fig:pawn_movement}
-\end{figure}
-\begin{figure}[h]
-    \centering
-    \includegraphics[width=0.6\textwidth]{images/fence_blocking_leap.png}
-    \caption{A fence blocking a leap.}
-    \label{fig:fence_blocking_leap}
-\end{figure}
-\begin{figure}[h]
-    \centering
-    \includegraphics[width=0.6\textwidth]{images/pawn_leaping.png}
-    \caption{Pawn Leaping.}
-    \label{fig:pawn_leaping}
-\end{figure}
+
 
 \begin{cmpfigure}[htb]{Quoridor Development Gantt Chart \label{pplan}}
 \begin{sideways}

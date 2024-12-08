@@ -54,9 +54,10 @@ public partial class BoardState : Node
 			.ToArray();
 
 		// Loop through tiles, and apply SetTileConnections function to each tile
-		Enumerable.Range(0, totalTiles)
-			.ToList()
-			.ForEach(i => Tiles[i] = GetConnections(i, boardSize));
+		for (int i = 0; i < totalTiles; i++)
+		{
+			Tiles[i] = GetConnections(i, boardSize);
+		}
 	}
 
 	public void GenerateFences(int fenceRows)
@@ -64,14 +65,13 @@ public partial class BoardState : Node
 		int totalFences = fenceRows * fenceRows;
 
 		// Generate empty fences in the form of a 3D array
-		Fences = Enumerable.Range(0, totalFences)
-			.Select(_ => new int[2][][])
-			.ToArray();
-
-		// Loop through fences, and apply SetFenceTileConnections function to each fence
-		Enumerable.Range(0, totalFences)
-			.ToList()
-			.ForEach(i => SetFenceTileConnections(i, fenceRows));
+		Fences = new int[totalFences][][][];
+		
+		for (int i = 0; i < totalFences; i++)
+		{
+			Fences[i] = new int[2][][];
+			SetFenceTileConnections(i, fenceRows);
+		}
 	}
 
 	public void SetFenceTileConnections(int index, int fenceRows)
