@@ -172,6 +172,8 @@ func confirm_place_fence(fence: int) -> void:
 	
 	board.PlaceFence(selected_fence_index, Global.fence_direction, current_player)
 	fence_button.fence_placed = true
+	fence_button.disabled = true
+	selected_fence_index = -1
 
 
 #endregion
@@ -228,6 +230,7 @@ func confirm_move_pawn() -> void:
 	
 	# Reset selected pawn, enabled pawn moved so the new pawn isn't hidden
 	board.MovePawn(selected_tile_index)
+	selected_tile_index = -1
 
 
 #endregion
@@ -317,12 +320,10 @@ func _on_confirm_pressed() -> void:
 	
 	if selected_fence_index > -1:
 		confirm_place_fence(selected_fence_index)
-		selected_fence_index = -1
-		
 	elif selected_tile_index:
 		confirm_move_pawn()
 		has_won = board.CheckWin(selected_tile_index)
-		selected_tile_index = -1
+		
 	
 	# Check if the pawn has reached end goal
 	if has_won:

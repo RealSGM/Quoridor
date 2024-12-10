@@ -31,4 +31,4 @@ func clear_fences() -> void:
 
 
 func get_enabled() -> bool:
-	return dir_disabled[Global.fence_direction] or dfs_disabled[Global.fence_direction]
+	return dir_disabled[Global.fence_direction] or dfs_disabled[Global.fence_direction] or fence_placed
