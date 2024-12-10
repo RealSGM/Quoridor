@@ -19,8 +19,8 @@ class_name Game extends Control
 @export var pause_menu: Panel
 @export var pause_exit: Button
 @export var pause_return: Button
-@export var p_one_fences: Label
-@export var p_two_fences: Label
+@export var chat: Panel
+@export var fence_count_labels: Array[Label]
 
 @export_category("Win Screen")
 @export var win_menu: Control
@@ -32,7 +32,6 @@ var tile_buttons: Array[TileButton] = []
 var fence_buttons: Array[FenceButton] = []
 var has_won: bool = false
 
-@onready var fence_count_labels: Array[Label] = [p_one_fences, p_two_fences]
 ## Update the selected fence, and the confirm button
 @onready var selected_fence_index: int = -1:
 	set(val):
@@ -109,7 +108,18 @@ func reset_board() -> void:
 	)
 
 
-#region Setup
+## Add move to the chat
+func add_to_chat(fence: int, tile: int) -> void:
+	var msg: String = ''
+	# Selection was place fence
+	if fence > -1:
+		msg = "Add Fence: " + str(fence)
+	# Selection was move pawn
+	elif tile > -1:
+		msg = "Move Pawn: " + str(tile)
+		
+	chat.add_message(msg)
+
 ## Setup the board with the selected size
 func setup_board(board_size: int) -> void:
 	Global.board_size = board_size
@@ -152,8 +162,6 @@ func instance_tile_buttons(board_size: int) -> void:
 		tile_container.add_child(tile_button, true)
 		tile_buttons.append(tile_button)
 
-
-#endregion
 
 #region Fences
 func update_fence_buttons() -> void:
@@ -301,6 +309,7 @@ func _illegal_fence_check_threaded(fence: int, fence_dir: int, player: int) -> A
 func _on_fence_button_pressed(fence: int) -> void:
 	selected_fence_index = fence
 	selected_tile_index = -1
+
 	var fence_button: FenceButton = fence_buttons[fence]
 	fence_button.h_fence.visible = Global.fence_direction == 0
 	fence_button.v_fence.visible = Global.fence_direction != 0
@@ -322,6 +331,8 @@ func _on_directional_button_pressed() -> void:
 func _on_confirm_pressed() -> void:
 	# Reset Board
 	reset_board()
+	
+	add_to_chat(selected_fence_index, selected_tile_index)
 	
 	if selected_fence_index > -1:
 		confirm_place_fence(selected_fence_index)

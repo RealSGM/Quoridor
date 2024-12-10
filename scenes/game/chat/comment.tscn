@@ -1,0 +1,10 @@
+[gd_scene load_steps=2 format=3 uid="uid://dm77attl8ovul"]
+
+[ext_resource type="FontFile" uid="uid://bqs1impjgngsx" path="res://assets/fonts/OpenSans-Regular.ttf" id="1_amq5p"]
+
+[node name="ChatComment" type="Label"]
+offset_right = 1.0
+offset_bottom = 10.0
+theme_override_fonts/font = ExtResource("1_amq5p")
+theme_override_font_sizes/font_size = 16
+text = "Player Moved To 1"

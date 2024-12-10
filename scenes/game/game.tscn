@@ -1,8 +1,9 @@
-[gd_scene load_steps=9 format=3 uid="uid://g12um5raoqio"]
+[gd_scene load_steps=13 format=3 uid="uid://g12um5raoqio"]
 
 [ext_resource type="Theme" uid="uid://gl4viqpfcsgn" path="res://resources/main_theme.tres" id="1_khihi"]
 [ext_resource type="Script" path="res://scenes/game/game.gd" id="2_8s0tt"]
 [ext_resource type="Script" path="res://scripts/BoardState.cs" id="3_kvsy8"]
+[ext_resource type="Script" path="res://scenes/game/chat/chat.gd" id="4_sufga"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_pufkf"]
 bg_color = Color(0.105882, 0.105882, 0.109804, 1)
@@ -21,13 +22,22 @@ expand_margin_bottom = 8.0
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_dms26"]
 bg_color = Color(0.105882, 0.105882, 0.109804, 1)
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_khpxh"]
+bg_color = Color(0.129412, 0.129412, 0.129412, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ndgeo"]
+bg_color = Color(0.150803, 0.150803, 0.155786, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bjlgr"]
+bg_color = Color(0.150803, 0.150803, 0.155786, 1)
+
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_2k6ku"]
 bg_color = Color(0.105882, 0.105882, 0.109804, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_50a8v"]
 bg_color = Color(0.172549, 0.184314, 0.2, 1)
 
-[node name="Game" type="Control" node_paths=PackedStringArray("board", "tile_container", "board_container", "fence_button_container", "toggle_direction_button", "confirm_button", "turn_label", "pause_menu", "pause_exit", "pause_return", "p_one_fences", "p_two_fences", "win_menu", "win_label", "win_exit_button")]
+[node name="Game" type="Control" node_paths=PackedStringArray("board", "tile_container", "board_container", "fence_button_container", "toggle_direction_button", "confirm_button", "turn_label", "pause_menu", "pause_exit", "pause_return", "chat", "fence_count_labels", "win_menu", "win_label", "win_exit_button")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -40,14 +50,14 @@ board = NodePath("Board")
 tile_container = NodePath("Board/BoardContainer/TileContainer")
 board_container = NodePath("Board/BoardContainer")
 fence_button_container = NodePath("Board/FenceButtonContainer")
-toggle_direction_button = NodePath("UserInterface/InterfaceVBC/ActionsVBC/TogglePanel/DirectionContainer/ToggleDirection")
-confirm_button = NodePath("UserInterface/InterfaceVBC/ActionsVBC/ConfirmButton")
-turn_label = NodePath("TurnLabel")
+toggle_direction_button = NodePath("UserInterface/ActionInterface/InterfaceVBC/ActionsVBC/TogglePanel/DirectionContainer/ToggleDirection")
+confirm_button = NodePath("UserInterface/ActionInterface/InterfaceVBC/ActionsVBC/ConfirmButton")
+turn_label = NodePath("UserInterface/TurnLabel")
 pause_menu = NodePath("PauseMenu")
 pause_exit = NodePath("PauseMenu/PanelContainer/VBoxContainer/ExitButton")
 pause_return = NodePath("PauseMenu/PanelContainer/VBoxContainer/ReturnButton")
-p_one_fences = NodePath("UserInterface/InterfaceVBC/FenceCountVBC/PlayerOneFences/VBC/Number")
-p_two_fences = NodePath("UserInterface/InterfaceVBC/FenceCountVBC/PlayerTwo/VBC/Number")
+chat = NodePath("UserInterface/Chat")
+fence_count_labels = [NodePath("UserInterface/ActionInterface/InterfaceVBC/FenceCountVBC/PlayerOneFences/VBC/Number"), NodePath("UserInterface/ActionInterface/InterfaceVBC/FenceCountVBC/PlayerTwo/VBC/Number")]
 win_menu = NodePath("WinMenu")
 win_label = NodePath("WinMenu/WinPanel/VBoxContainer/PanelContainer/Label")
 win_exit_button = NodePath("WinMenu/WinPanel/VBoxContainer/ExitButton")
@@ -94,82 +104,16 @@ theme_override_constants/h_separation = 80
 theme_override_constants/v_separation = 80
 columns = 9
 
-[node name="UserInterface" type="PanelContainer" parent="."]
+[node name="UserInterface" type="Control" parent="."]
 layout_mode = 1
-anchors_preset = -1
-offset_left = 40.0
-offset_top = 40.0
-offset_right = 402.0
-offset_bottom = 162.0
-theme_override_styles/panel = SubResource("StyleBoxFlat_d1llx")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
 
-[node name="InterfaceVBC" type="VBoxContainer" parent="UserInterface"]
-layout_mode = 2
-theme_override_constants/separation = 32
-
-[node name="ActionsVBC" type="VBoxContainer" parent="UserInterface/InterfaceVBC"]
-layout_mode = 2
-theme_override_constants/separation = 8
-
-[node name="TogglePanel" type="PanelContainer" parent="UserInterface/InterfaceVBC/ActionsVBC"]
-layout_mode = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_dms26")
-
-[node name="DirectionContainer" type="HBoxContainer" parent="UserInterface/InterfaceVBC/ActionsVBC/TogglePanel"]
-layout_mode = 2
-
-[node name="Label" type="Label" parent="UserInterface/InterfaceVBC/ActionsVBC/TogglePanel/DirectionContainer"]
-layout_mode = 2
-text = "Fence: "
-
-[node name="ToggleDirection" type="Button" parent="UserInterface/InterfaceVBC/ActionsVBC/TogglePanel/DirectionContainer"]
-custom_minimum_size = Vector2(212, 57)
-layout_mode = 2
-size_flags_horizontal = 3
-text = "Horizontal"
-
-[node name="ConfirmButton" type="Button" parent="UserInterface/InterfaceVBC/ActionsVBC"]
-layout_mode = 2
-text = "Confirm
-"
-
-[node name="FenceCountVBC" type="VBoxContainer" parent="UserInterface/InterfaceVBC"]
-layout_mode = 2
-theme_override_constants/separation = 8
-
-[node name="PlayerOneFences" type="PanelContainer" parent="UserInterface/InterfaceVBC/FenceCountVBC"]
-layout_mode = 2
-
-[node name="VBC" type="HBoxContainer" parent="UserInterface/InterfaceVBC/FenceCountVBC/PlayerOneFences"]
-layout_mode = 2
-
-[node name="Const" type="Label" parent="UserInterface/InterfaceVBC/FenceCountVBC/PlayerOneFences/VBC"]
-layout_mode = 2
-text = "Player 1 Fences:"
-
-[node name="Number" type="Label" parent="UserInterface/InterfaceVBC/FenceCountVBC/PlayerOneFences/VBC"]
-custom_minimum_size = Vector2(60, 0)
-layout_mode = 2
-text = "10"
-horizontal_alignment = 1
-
-[node name="PlayerTwo" type="PanelContainer" parent="UserInterface/InterfaceVBC/FenceCountVBC"]
-layout_mode = 2
-
-[node name="VBC" type="HBoxContainer" parent="UserInterface/InterfaceVBC/FenceCountVBC/PlayerTwo"]
-layout_mode = 2
-
-[node name="Const" type="Label" parent="UserInterface/InterfaceVBC/FenceCountVBC/PlayerTwo/VBC"]
-layout_mode = 2
-text = "Player 2 Fences:"
-
-[node name="Number" type="Label" parent="UserInterface/InterfaceVBC/FenceCountVBC/PlayerTwo/VBC"]
-custom_minimum_size = Vector2(60, 0)
-layout_mode = 2
-text = "10"
-horizontal_alignment = 1
-
-[node name="TurnLabel" type="Label" parent="."]
+[node name="TurnLabel" type="Label" parent="UserInterface"]
 layout_mode = 1
 anchors_preset = -1
 anchor_left = 0.5
@@ -181,6 +125,137 @@ offset_bottom = 89.0
 grow_horizontal = 2
 text = "Player 1's Turn"
 horizontal_alignment = 1
+
+[node name="ActionInterface" type="PanelContainer" parent="UserInterface"]
+layout_mode = 1
+anchors_preset = -1
+offset_left = 40.0
+offset_top = 40.0
+offset_right = 438.0
+offset_bottom = 300.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_d1llx")
+
+[node name="InterfaceVBC" type="VBoxContainer" parent="UserInterface/ActionInterface"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="FenceCountVBC" type="VBoxContainer" parent="UserInterface/ActionInterface/InterfaceVBC"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="PlayerOneFences" type="PanelContainer" parent="UserInterface/ActionInterface/InterfaceVBC/FenceCountVBC"]
+layout_mode = 2
+
+[node name="VBC" type="HBoxContainer" parent="UserInterface/ActionInterface/InterfaceVBC/FenceCountVBC/PlayerOneFences"]
+layout_mode = 2
+
+[node name="Const" type="Label" parent="UserInterface/ActionInterface/InterfaceVBC/FenceCountVBC/PlayerOneFences/VBC"]
+layout_mode = 2
+text = "Player 1 Fences:"
+
+[node name="Number" type="Label" parent="UserInterface/ActionInterface/InterfaceVBC/FenceCountVBC/PlayerOneFences/VBC"]
+custom_minimum_size = Vector2(60, 0)
+layout_mode = 2
+text = "10"
+horizontal_alignment = 1
+
+[node name="PlayerTwo" type="PanelContainer" parent="UserInterface/ActionInterface/InterfaceVBC/FenceCountVBC"]
+layout_mode = 2
+
+[node name="VBC" type="HBoxContainer" parent="UserInterface/ActionInterface/InterfaceVBC/FenceCountVBC/PlayerTwo"]
+layout_mode = 2
+
+[node name="Const" type="Label" parent="UserInterface/ActionInterface/InterfaceVBC/FenceCountVBC/PlayerTwo/VBC"]
+layout_mode = 2
+text = "Player 2 Fences:"
+
+[node name="Number" type="Label" parent="UserInterface/ActionInterface/InterfaceVBC/FenceCountVBC/PlayerTwo/VBC"]
+custom_minimum_size = Vector2(60, 0)
+layout_mode = 2
+text = "10"
+horizontal_alignment = 1
+
+[node name="ActionsVBC" type="VBoxContainer" parent="UserInterface/ActionInterface/InterfaceVBC"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="TogglePanel" type="PanelContainer" parent="UserInterface/ActionInterface/InterfaceVBC/ActionsVBC"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_dms26")
+
+[node name="DirectionContainer" type="HBoxContainer" parent="UserInterface/ActionInterface/InterfaceVBC/ActionsVBC/TogglePanel"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="UserInterface/ActionInterface/InterfaceVBC/ActionsVBC/TogglePanel/DirectionContainer"]
+layout_mode = 2
+text = "Fence: "
+
+[node name="ToggleDirection" type="Button" parent="UserInterface/ActionInterface/InterfaceVBC/ActionsVBC/TogglePanel/DirectionContainer"]
+custom_minimum_size = Vector2(212, 57)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Horizontal"
+
+[node name="ConfirmButton" type="Button" parent="UserInterface/ActionInterface/InterfaceVBC/ActionsVBC"]
+layout_mode = 2
+text = "Confirm
+"
+
+[node name="Chat" type="Panel" parent="UserInterface" node_paths=PackedStringArray("chat_container")]
+custom_minimum_size = Vector2(398, 0)
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -438.0
+offset_top = 40.0
+offset_right = -40.0
+offset_bottom = -40.0
+grow_horizontal = 0
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_khpxh")
+script = ExtResource("4_sufga")
+chat_container = NodePath("VBoxContainer/History/ScrollContainer/VBC")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="UserInterface/Chat"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+offset_top = 8.0
+offset_right = -8.0
+offset_bottom = -8.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 8
+
+[node name="TextContainer" type="PanelContainer" parent="UserInterface/Chat/VBoxContainer"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_ndgeo")
+
+[node name="Label" type="Label" parent="UserInterface/Chat/VBoxContainer/TextContainer"]
+layout_mode = 2
+text = "Chat History"
+horizontal_alignment = 1
+
+[node name="History" type="Panel" parent="UserInterface/Chat/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_bjlgr")
+
+[node name="ScrollContainer" type="ScrollContainer" parent="UserInterface/Chat/VBoxContainer/History"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_vertical = 3
+
+[node name="VBC" type="VBoxContainer" parent="UserInterface/Chat/VBoxContainer/History/ScrollContainer"]
+layout_mode = 2
 
 [node name="WinMenu" type="Control" parent="."]
 visible = false
@@ -271,5 +346,5 @@ text = "Return To Game
 layout_mode = 2
 text = "Exit to Menu"
 
-[connection signal="pressed" from="UserInterface/InterfaceVBC/ActionsVBC/TogglePanel/DirectionContainer/ToggleDirection" to="." method="_on_directional_button_pressed"]
-[connection signal="pressed" from="UserInterface/InterfaceVBC/ActionsVBC/ConfirmButton" to="." method="_on_confirm_pressed"]
+[connection signal="pressed" from="UserInterface/ActionInterface/InterfaceVBC/ActionsVBC/TogglePanel/DirectionContainer/ToggleDirection" to="." method="_on_directional_button_pressed"]
+[connection signal="pressed" from="UserInterface/ActionInterface/InterfaceVBC/ActionsVBC/ConfirmButton" to="." method="_on_confirm_pressed"]
