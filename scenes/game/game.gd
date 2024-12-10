@@ -15,18 +15,24 @@ class_name Game extends Control
 @export_category("User Interface")
 @export var toggle_direction_button: Button
 @export var confirm_button: Button
-@export var exit_button: Button
 @export var turn_label: Label
+@export var pause_menu: Panel
+@export var pause_exit: Button
+@export var pause_return: Button
+@export var p_one_fences: Label
+@export var p_two_fences: Label
 
 @export_category("Win Screen")
-@export var win_cover: Control
+@export var win_menu: Control
 @export var win_label: Label
 @export var win_exit_button: Button
 
 var threads: Array[Thread] = []
 var tile_buttons: Array[TileButton] = []
 var fence_buttons: Array[FenceButton] = []
+var has_won: bool = false
 
+@onready var fence_count_labels: Array[Label] = [p_one_fences, p_two_fences]
 ## Update the selected fence, and the confirm button
 @onready var selected_fence_index: int = -1:
 	set(val):
@@ -72,20 +78,23 @@ var fence_buttons: Array[FenceButton] = []
 func _input(event: InputEvent) -> void:
 	if event.is_action_pressed("confirm") and !confirm_button.disabled:
 		_on_confirm_pressed()
+	if event.is_action_pressed("pause"):
+		pause_menu.visible = !pause_menu.visible
 
 
 func _ready() -> void:
 	_on_directional_button_pressed()
+	
 	current_player = 0
-	exit_button.pressed.connect(SignalManager.exit_pressed.emit)
 	win_exit_button.pressed.connect(SignalManager.exit_pressed.emit)
+	pause_exit.pressed.connect(SignalManager.exit_pressed.emit)
+	pause_return.pressed.connect(func(): pause_menu.hide())
 	
 	board.show()
-	win_cover.hide()
-	exit_button.show()
+	win_menu.hide()
+	pause_menu.hide()
 
 
-#region Interface
 ## Disable the confirm button when neither option is selected
 func set_confirm_button(fence: int, tile: int) -> void:
 	confirm_button.disabled = !(fence >= 0 || tile >= 0)
@@ -99,8 +108,6 @@ func reset_board() -> void:
 		tile.focus_mode = Control.FOCUS_NONE
 	)
 
-
-#endregion
 
 #region Setup
 ## Setup the board with the selected size
@@ -316,10 +323,9 @@ func _on_confirm_pressed() -> void:
 	# Reset Board
 	reset_board()
 	
-	var has_won: bool = false
-	
 	if selected_fence_index > -1:
 		confirm_place_fence(selected_fence_index)
+		fence_count_labels[current_player].text = str(board.FenceCounts[current_player])
 	elif selected_tile_index:
 		confirm_move_pawn()
 		has_won = board.CheckWin(selected_tile_index)
@@ -328,8 +334,7 @@ func _on_confirm_pressed() -> void:
 	# Check if the pawn has reached end goal
 	if has_won:
 		win_label.text = Global.players[current_player]["name"] + " Wins!"
-		win_cover.show()
-		exit_button.hide()
+		win_menu.show()
 	# Switch to next player
 	else:
 		current_player = 1 - current_player
