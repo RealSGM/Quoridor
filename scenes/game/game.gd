@@ -31,6 +31,7 @@ var threads: Array[Thread] = []
 var tile_buttons: Array[TileButton] = []
 var fence_buttons: Array[FenceButton] = []
 var has_won: bool = false
+var move_history: String = ''
 
 ## Update the selected fence, and the confirm button
 @onready var selected_fence_index: int = -1:
@@ -79,6 +80,8 @@ func _input(event: InputEvent) -> void:
 		_on_confirm_pressed()
 	if event.is_action_pressed("pause"):
 		pause_menu.visible = !pause_menu.visible
+	if event.is_action_pressed("test"):
+		print(move_history)
 
 
 func _ready() -> void:
@@ -111,12 +114,19 @@ func reset_board() -> void:
 ## Add move to the chat
 func add_to_chat(fence: int, tile: int) -> void:
 	var msg: String = ''
+	move_history += str(current_player)
+	
 	# Selection was place fence
 	if fence > -1:
 		msg = "Add Fence: " + str(fence)
+		move_history += "f" + str(fence)
+	
 	# Selection was move pawn
 	elif tile > -1:
 		msg = "Move Pawn: " + str(tile)
+		move_history += "p" + str(tile)
+		
+	move_history += ";"
 		
 	chat.add_message(msg)
 
