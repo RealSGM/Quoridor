@@ -256,6 +256,7 @@ size_flags_vertical = 3
 
 [node name="VBC" type="VBoxContainer" parent="UserInterface/Chat/VBoxContainer/History/ScrollContainer"]
 layout_mode = 2
+alignment = 1
 
 [node name="WinMenu" type="Control" parent="."]
 visible = false

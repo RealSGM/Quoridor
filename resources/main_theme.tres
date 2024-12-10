@@ -1,6 +1,6 @@
 [gd_resource type="Theme" load_steps=9 format=3 uid="uid://gl4viqpfcsgn"]
 
-[ext_resource type="FontFile" uid="uid://ckckkqwc7krsd" path="res://assets/fonts/Roboto-Thin.ttf" id="1_lnqd1"]
+[ext_resource type="FontFile" uid="uid://bqs1impjgngsx" path="res://assets/fonts/OpenSans-Regular.ttf" id="1_ncqm2"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_o64v4"]
 bg_color = Color(0.368627, 0.368627, 0.368627, 1)
@@ -24,24 +24,26 @@ bg_color = Color(0.105882, 0.105882, 0.109804, 1)
 
 [resource]
 Button/font_sizes/font_size = 48
-Button/fonts/font = ExtResource("1_lnqd1")
+Button/fonts/font = ExtResource("1_ncqm2")
 Button/styles/disabled = SubResource("StyleBoxFlat_o64v4")
 Button/styles/focus = SubResource("StyleBoxFlat_hb4nq")
 Button/styles/hover = SubResource("StyleBoxFlat_toy7k")
 Button/styles/normal = SubResource("StyleBoxFlat_d1377")
 Button/styles/pressed = SubResource("StyleBoxFlat_ceue7")
 Label/font_sizes/font_size = 48
-Label/fonts/font = ExtResource("1_lnqd1")
+Label/fonts/font = ExtResource("1_ncqm2")
 LineEdit/font_sizes/font_size = 48
-LineEdit/fonts/font = ExtResource("1_lnqd1")
+LineEdit/fonts/font = ExtResource("1_ncqm2")
 OptionButton/font_sizes/font_size = 48
-OptionButton/fonts/font = ExtResource("1_lnqd1")
+OptionButton/fonts/font = ExtResource("1_ncqm2")
 OptionButton/icons/arrow = null
 OptionButton/icons/icon = null
 PopupMenu/font_sizes/font_separator_size = 16
 PopupMenu/font_sizes/font_size = 16
 PopupMenu/font_sizes/title_font_size = 16
-PopupMenu/fonts/font = ExtResource("1_lnqd1")
+PopupMenu/fonts/font = ExtResource("1_ncqm2")
+PopupMenu/fonts/font_separator = ExtResource("1_ncqm2")
+PopupMenu/fonts/title_font = ExtResource("1_ncqm2")
 PopupMenu/icons/checked = null
 PopupMenu/icons/checked_disabled = null
 PopupMenu/icons/close = null
