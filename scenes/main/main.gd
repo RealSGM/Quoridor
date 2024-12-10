@@ -22,13 +22,25 @@ extends Control
 @export var multiplayer_back_button: Button
 
 @export_category("Board Options")
+@export var board_vbc: VBoxContainer
+
 @export var start_game_button: Button
 @export var board_options_back_button: Button
+
+# Global Options
+@export var board_size_container: HBoxContainer
 @export var size_option_button: OptionButton
+@export var player_one_container: VBoxContainer
 @export var p_one_colours: OptionButton
-@export var p_two_colours: OptionButton
 @export var player_one_name: LineEdit
+
+# Local Options
+@export var p_two_colours: OptionButton
 @export var player_two_name: LineEdit
+@export var player_two_container: VBoxContainer
+
+# Singleplayer Options
+@export var bot_container: VBoxContainer
 
 @export var size_options: Array[int] = [7, 9, 11]
 @export var board_dimensions: float = 800
@@ -36,6 +48,11 @@ extends Control
 var menu_stack: Array = []
 
 @onready var menus: Array[PanelContainer] = [main_menu, play_menu, multiplayer_menu, board_options_menu]
+@onready var global_options: Array[BoxContainer] = [player_one_container, board_size_container]
+@onready var game_type_dict: Dictionary = {
+	"Singleplayer": [bot_container],
+	"Local": [player_two_container]
+}
 
 
 func _ready() -> void:
@@ -43,7 +60,6 @@ func _ready() -> void:
 	SignalManager.exit_pressed.connect(_on_exit_button_pressed)
 
 
-# TODO Refactor into scene, make it flexible with other gamemodes
 ## Setup the menus, ensure all panels are hidden on launch
 ## Connect all buttons to appropriate signals
 func setup_menus() -> void:
@@ -53,12 +69,12 @@ func setup_menus() -> void:
 	play_button.pressed.connect(_on_menu_button_pressed.bind(play_menu))
 	exit_button.pressed.connect(get_tree().quit)
 	
-	#singleplayer_button.pressed
+	singleplayer_button.pressed.connect(_on_menu_button_pressed.bind(board_options_menu, singleplayer_button))
 	multiplayer_button.pressed.connect(_on_menu_button_pressed.bind(multiplayer_menu))
 	play_back_button.pressed.connect(_on_back_button_pressed)
 	
 	#online_button.pressed
-	local_button.pressed.connect(_on_menu_button_pressed.bind(board_options_menu))
+	local_button.pressed.connect(_on_menu_button_pressed.bind(board_options_menu, local_button))
 	multiplayer_back_button.pressed.connect(_on_back_button_pressed)
 	
 	start_game_button.pressed.connect(_on_start_game_pressed)
@@ -95,11 +111,22 @@ func set_players_data() -> void:
 	Global.players[1]['name'] = player_two_name.text
 
 
+func setup_board_options(type: String) -> void:
+	board_vbc.get_children().map(func(x: Control): x.hide())
+	global_options.map(func(x: Control): x.show())
+	game_type_dict[type].map(func(x: Control): x.show())
+
+
 ## Hide previous menu, add new panel to stack
-func _on_menu_button_pressed(menu: PanelContainer) -> void:
+func _on_menu_button_pressed(menu: PanelContainer, prev_button: Button = null) -> void:
 	menu_stack.back().hide()
 	menu_stack.append(menu)
 	menu.show()
+	
+	if !prev_button:
+		return
+		
+	setup_board_options(prev_button.name.replace("Button", ""))
 
 
 ## Hide current menu, pop stack and reveal last shown

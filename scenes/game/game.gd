@@ -2,11 +2,6 @@ class_name Game extends Control
 ## Handles the Interface for the Game
 ## Sends signals to the board
 
-# TODO Cache the directions for fence buttons
-# - Perform DFS to check if the fence in that direction is legal
-# - Store to see if it is disable
-# - Have permanent disabled for when it is placed
-# TODO Illegal Fence check
 # TODO Minimax Algorithm
 
 @export_category("Board")
