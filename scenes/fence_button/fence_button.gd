@@ -28,3 +28,7 @@ func clear_fences() -> void:
 	
 	h_fence.visible = false
 	v_fence.visible = false
+
+
+func get_enabled() -> bool:
+	return dir_disabled[Global.fence_direction] or dfs_disabled[Global.fence_direction]

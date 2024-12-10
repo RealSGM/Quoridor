@@ -68,11 +68,11 @@ var fence_buttons: Array[FenceButton] = []
 		board.CurrentPlayer = val
 		reset_board()
 		set_tiles(board.PawnPositions[current_player])
+		update_fence_buttons()
 		board.CurrentPlayer = val
 		turn_label.text = str(Global.players[current_player]["name"]) + "'s Turn"
 
 
-#region Override Methods
 func _input(event: InputEvent) -> void:
 	if event.is_action_pressed("confirm") and !confirm_button.disabled:
 		_on_confirm_pressed()
@@ -90,8 +90,6 @@ func _ready() -> void:
 	win_cover.hide()
 	exit_button.show()
 
-
-#endregion
 
 #region Interface
 ## Disable the confirm button when neither option is selected
@@ -158,8 +156,14 @@ func instance_tile_buttons(board_size: int) -> void:
 
 #region Fences
 func update_fence_buttons() -> void:
+	var illegal_fences: Dictionary = get_illegal_fences()
+	
+	for direction: int in illegal_fences:
+		for fence: int in illegal_fences[direction]:
+			fence_buttons[fence].dfs_disabled[direction] = true
+	
 	for fence_button: FenceButton in fence_buttons:
-		fence_button.disabled = fence_button.dir_disabled[Global.fence_direction] if board.IsFenceAvailable(current_player) else true
+		fence_button.disabled = fence_button.get_enabled() if board.IsFenceAvailable(current_player) else true
 		# Disable mouse filter if the button is disabled
 		fence_button.mouse_filter = Control.MOUSE_FILTER_IGNORE if fence_button.disabled else Control.MOUSE_FILTER_STOP
 
@@ -244,7 +248,6 @@ func confirm_move_pawn() -> void:
 func get_illegal_fences() -> Dictionary:
 	var illegal_fences: Dictionary = { 0: {}, 1: {} }
 	var bits: Array[int] = [0, 1]
-	var start_time: int = Time.get_ticks_usec()
 	
 	if board.FenceCounts[current_player] <= 0:
 		return illegal_fences
@@ -280,7 +283,6 @@ func get_illegal_fences() -> Dictionary:
 		illegal_fences[result[0]][result[1]] = true
 
 	threads.clear()
-	print("Illegal Fence Check Time: " + str(Time.get_ticks_usec() - start_time) + " us")
 	return illegal_fences
 
 
@@ -338,8 +340,5 @@ func _on_confirm_pressed() -> void:
 	# Switch to next player
 	else:
 		current_player = 1 - current_player
-	
-	update_fence_buttons()
-
 
 #endregion
