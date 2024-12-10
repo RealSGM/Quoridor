@@ -68,6 +68,7 @@ var fence_buttons: Array[FenceButton] = []
 		board.CurrentPlayer = val
 		reset_board()
 		set_tiles(board.PawnPositions[current_player])
+		get_illegal_fences()
 		update_fence_buttons()
 		board.CurrentPlayer = val
 		turn_label.text = str(Global.players[current_player]["name"]) + "'s Turn"
@@ -76,8 +77,6 @@ var fence_buttons: Array[FenceButton] = []
 func _input(event: InputEvent) -> void:
 	if event.is_action_pressed("confirm") and !confirm_button.disabled:
 		_on_confirm_pressed()
-	if event.is_action_pressed("test"):
-		print(get_illegal_fences())
 
 
 func _ready() -> void:
@@ -156,12 +155,6 @@ func instance_tile_buttons(board_size: int) -> void:
 
 #region Fences
 func update_fence_buttons() -> void:
-	var illegal_fences: Dictionary = get_illegal_fences()
-	
-	for direction: int in illegal_fences:
-		for fence: int in illegal_fences[direction]:
-			fence_buttons[fence].dfs_disabled[direction] = true
-	
 	for fence_button: FenceButton in fence_buttons:
 		fence_button.disabled = fence_button.get_enabled() if board.IsFenceAvailable(current_player) else true
 		# Disable mouse filter if the button is disabled
@@ -245,13 +238,14 @@ func confirm_move_pawn() -> void:
 #endregion
 
 #region Illegal Fence Check
-func get_illegal_fences() -> Dictionary:
+func get_illegal_fences() -> void:
+	# Stop if current player has no more fences
+	if board.FenceCounts[current_player] <= 0:
+		return
+	
 	var illegal_fences: Dictionary = { 0: {}, 1: {} }
 	var bits: Array[int] = [0, 1]
 	
-	if board.FenceCounts[current_player] <= 0:
-		return illegal_fences
-
 	# Check each fence button, to see if it is possible
 	for fence_button: FenceButton in fence_buttons:
 		
@@ -275,7 +269,7 @@ func get_illegal_fences() -> Dictionary:
 				# Replace 0 with player
 				thread.start(_illegal_fence_check_threaded.bind(fence_button.id, fence_dir, player))
 	
-	# Get results from threads
+	# Store results from threads into dictionary
 	for thread: Thread in threads:
 		var result: Array = thread.wait_to_finish()
 		if result.is_empty():
@@ -283,7 +277,11 @@ func get_illegal_fences() -> Dictionary:
 		illegal_fences[result[0]][result[1]] = true
 
 	threads.clear()
-	return illegal_fences
+	
+	# Set results into fence buttons
+	for direction: int in illegal_fences:
+		for fence: int in illegal_fences[direction]:
+			fence_buttons[fence].dfs_disabled[direction] = true
 
 
 func _illegal_fence_check_threaded(fence: int, fence_dir: int, player: int) -> Array:
@@ -295,7 +293,6 @@ func _illegal_fence_check_threaded(fence: int, fence_dir: int, player: int) -> A
 
 #endregion
 
-#region Signals
 func _on_fence_button_pressed(fence: int) -> void:
 	selected_fence_index = fence
 	selected_tile_index = -1
@@ -340,5 +337,3 @@ func _on_confirm_pressed() -> void:
 	# Switch to next player
 	else:
 		current_player = 1 - current_player
-
-#endregion
