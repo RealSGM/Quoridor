@@ -41,11 +41,13 @@ extends Control
 
 # Singleplayer Options
 @export var bot_container: VBoxContainer
+@export var bot_colours: OptionButton
 
 @export var size_options: Array[int] = [7, 9, 11]
 @export var board_dimensions: float = 800
 
 var menu_stack: Array = []
+var game_type: String
 
 @onready var menus: Array[PanelContainer] = [main_menu, play_menu, multiplayer_menu, board_options_menu]
 @onready var global_options: Array[BoxContainer] = [player_one_container, board_size_container]
@@ -83,6 +85,7 @@ func setup_menus() -> void:
 	# Setup colour option buttons
 	p_one_colours.item_selected.connect(_on_colour_selected.bind(p_one_colours.selected,  p_two_colours,))
 	p_two_colours.item_selected.connect(_on_colour_selected.bind(p_two_colours.selected, p_one_colours))
+	bot_colours.item_selected.connect(_on_colour_selected.bind(bot_colours.selected, p_one_colours))
 	p_one_colours.select(0)
 	p_two_colours.select(1)
 	
@@ -103,18 +106,29 @@ func show_main_menu() -> void:
 	menu_stack.append(main_menu)
 
 
-func set_players_data() -> void:
+func set_game_data() -> void:
 	Global.players[0]['name'] = player_one_name.text
 	Global.players[0]['color'] = Global.COLORS[p_one_colours.selected]
 	
-	Global.players[1]['color'] = Global.COLORS[p_two_colours.selected]
-	Global.players[1]['name'] = player_two_name.text
+	var selected_colour: int 
+	var selected_name: String
+	
+	match game_type:
+		"Local":
+			selected_colour = p_two_colours.selected
+			selected_name = player_two_name.text
+		"Singleplayer":
+			selected_colour = bot_colours.selected
+			selected_name = "Bot"
+	
+	Global.players[1]['color'] = Global.COLORS[selected_colour]
+	Global.players[1]['name'] = selected_name
 
 
-func setup_board_options(type: String) -> void:
+func setup_board_options() -> void:
 	board_vbc.get_children().map(func(x: Control): x.hide())
 	global_options.map(func(x: Control): x.show())
-	game_type_dict[type].map(func(x: Control): x.show())
+	game_type_dict[game_type].map(func(x: Control): x.show())
 
 
 ## Hide previous menu, add new panel to stack
@@ -125,8 +139,9 @@ func _on_menu_button_pressed(menu: PanelContainer, prev_button: Button = null) -
 	
 	if !prev_button:
 		return
-		
-	setup_board_options(prev_button.name.replace("Button", ""))
+	
+	game_type = prev_button.name.replace("Button", "")
+	setup_board_options()
 
 
 ## Hide current menu, pop stack and reveal last shown
@@ -139,7 +154,7 @@ func _on_back_button_pressed() -> void:
 ## Generate the board
 func _on_start_game_pressed() -> void:
 	board_options_menu.hide()
-	set_players_data()
+	set_game_data()
 	
 	var game: Game = Resources.get_resource("game").instantiate()
 	Global.game = game

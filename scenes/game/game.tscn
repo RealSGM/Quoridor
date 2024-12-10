@@ -133,6 +133,7 @@ offset_right = 150.0
 offset_bottom = 89.0
 grow_horizontal = 2
 text = "Player 1's Turn"
+horizontal_alignment = 1
 
 [node name="ExitButton" type="Button" parent="."]
 layout_mode = 1
