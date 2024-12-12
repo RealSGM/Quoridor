@@ -2,7 +2,7 @@
 
 [ext_resource type="PackedScene" uid="uid://g12um5raoqio" path="res://scenes/game/game.tscn" id="1_cuwpg"]
 [ext_resource type="PackedScene" uid="uid://rfqpiq385m6l" path="res://scenes/game/fence_button/fence_button.tscn" id="1_ev0q0"]
-[ext_resource type="PackedScene" uid="uid://dm77attl8ovul" path="res://scenes/game/chat/comment.tscn" id="1_mux7d"]
+[ext_resource type="PackedScene" uid="uid://dm77attl8ovul" path="res://scenes/game/comment.tscn" id="1_mux7d"]
 [ext_resource type="PackedScene" uid="uid://b06lx81t8jb2d" path="res://scenes/game/pawn.tscn" id="3_e76re"]
 [ext_resource type="PackedScene" uid="uid://rmjhwmm8lagg" path="res://scenes/game/tile_button/tile_button.tscn" id="8_bdlgi"]
 

@@ -1,7 +1,6 @@
-[gd_scene load_steps=10 format=3 uid="uid://c6fyma6opa8b1"]
+[gd_scene load_steps=9 format=3 uid="uid://c6fyma6opa8b1"]
 
-[ext_resource type="Script" path="res://scenes/game/user_interface.gd" id="1_j6xwu"]
-[ext_resource type="Script" path="res://scenes/game/chat/chat.gd" id="2_83qrr"]
+[ext_resource type="Script" path="res://scenes/game/user_interface/user_interface.gd" id="1_j6xwu"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_d1llx"]
 bg_color = Color(0.129412, 0.129412, 0.129412, 1)
@@ -138,7 +137,7 @@ layout_mode = 2
 text = "Confirm
 "
 
-[node name="Chat" type="Panel" parent="." node_paths=PackedStringArray("chat_container")]
+[node name="Chat" type="Panel" parent="."]
 custom_minimum_size = Vector2(398, 0)
 layout_mode = 1
 anchors_preset = -1
@@ -152,8 +151,6 @@ offset_bottom = -40.0
 grow_horizontal = 0
 grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_khpxh")
-script = ExtResource("2_83qrr")
-chat_container = NodePath("VBoxContainer/History/ScrollContainer/VBC")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="Chat"]
 layout_mode = 1
