@@ -84,12 +84,12 @@ func reset_board() -> void:
 ## Setup the board with the selected size
 func setup_board(board_size: int) -> void:
 	Global.board_size = board_size
-	board.SetAdjacentOffsets(board_size)
+	board.InitialiseAdjacentOffsets(board_size)
 	board.GenerateTiles(board_size)
 	board.GenerateFences(board_size - 1)
-	board.SetFenceCounts(fence_amount, player_amount)
-	board.SetPawnPositions(player_amount, board_size)
-	board.SetWinPositions(board_size, player_amount)
+	board.InitialiseFenceCounts(fence_amount, player_amount)
+	board.InitialisePawnPositions(player_amount, board_size)
+	board.InitialiseWinPositions(board_size, player_amount)
 	
 	instance_tile_buttons(board_size)
 	instance_fence_buttons(board_size - 1)

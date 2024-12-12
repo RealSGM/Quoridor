@@ -6,61 +6,57 @@ using System.Collections.Generic;
 [GlobalClass]
 public partial class BoardState : Node
 {
-	[Export]
-	public int[] FenceCounts { get; set; }
+	[Export] public int[] FenceCounts { get; set; }
 	// Stores if the button should be disabled for each direction based off latest DFS
 	public bool[][] DFSDisabledFences { get; set;}
 	// Stores if the button should be disabled for each direction based off it the adjacent fence is placed or not
 	public bool[][] DirDisabledFences { get; set;}
 	public bool[] PlacedFences { get; set;}
 	public int[][][][] Fences { get; set; }
-	[Export]
-	public int[] PawnPositions { get; set; }
+	[Export] public int[] PawnPositions { get; set; }
 	public int[][] Tiles { get; set; }
-	[Export]
-	public int[] AdjacentOffsets { get; set; }
+	[Export] public int[] AdjacentOffsets { get; set; }
 	public int[][] WinPositions { get; set; }
-	[Export]
-	public int CurrentPlayer { get; set; }
+	[Export] public int CurrentPlayer { get; set; }
 
 	#region Initialization
 
 	public BoardState Clone()
 	{
-        BoardState boardState = new()
-        {
-            FenceCounts = FenceCounts.ToArray(),
-            PawnPositions = PawnPositions.ToArray(),
-            Fences = Fences.Select(fence => fence.Select(direction => direction.Select(connection => connection.ToArray()).ToArray()).ToArray()).ToArray(),
-            Tiles = Tiles.Select(tile => tile.ToArray()).ToArray(),
-            AdjacentOffsets = AdjacentOffsets.ToArray(),
-            WinPositions = WinPositions.Select(winPosition => winPosition.ToArray()).ToArray(),
-            CurrentPlayer = CurrentPlayer,
-            DirDisabledFences = DirDisabledFences.ToArray(),
-            DFSDisabledFences = DFSDisabledFences.ToArray(),
-            PlacedFences = PlacedFences.ToArray()
-        };
-        return boardState;
+		BoardState boardState = new()
+		{
+			FenceCounts = FenceCounts.ToArray(),
+			PawnPositions = PawnPositions.ToArray(),
+			Fences = Fences.Select(fence => fence.Select(direction => direction.Select(connection => connection.ToArray()).ToArray()).ToArray()).ToArray(),
+			Tiles = Tiles.Select(tile => tile.ToArray()).ToArray(),
+			AdjacentOffsets = AdjacentOffsets.ToArray(),
+			WinPositions = WinPositions.Select(winPosition => winPosition.ToArray()).ToArray(),
+			CurrentPlayer = CurrentPlayer,
+			DirDisabledFences = DirDisabledFences.ToArray(),
+			DFSDisabledFences = DFSDisabledFences.ToArray(),
+			PlacedFences = PlacedFences.ToArray()
+		};
+		return boardState;
 	}
 
-	public void SetFenceCounts(int fencesPerPlayer, int playerCount)
+	public void InitialiseFenceCounts(int fencesPerPlayer, int playerCount)
 	{
 		FenceCounts = Enumerable.Repeat(fencesPerPlayer, playerCount).ToArray();
 	}
 
-	public void SetPawnPositions(int playerCount, int boardSize)
+	public void InitialisePawnPositions(int playerCount, int boardSize)
 	{
 		PawnPositions = new int[playerCount];
 		PawnPositions[0] = (int)(boardSize * (boardSize - 0.5));
-		PawnPositions[1] = (int) boardSize / 2;
+		PawnPositions[1] = boardSize / 2;
 	}
 
-	public void SetAdjacentOffsets(int boardSize)
+	public void InitialiseAdjacentOffsets(int boardSize)
 	{
 		AdjacentOffsets = new int[4] { -boardSize, 1, boardSize, -1 };
 	}
 
-	public void SetWinPositions(int boardSize, int playerCount)
+	public void InitialisetWinPositions(int boardSize, int playerCount)
 	{
 		int totalTiles = boardSize * boardSize;
 		WinPositions = new int[playerCount][];
@@ -68,7 +64,7 @@ public partial class BoardState : Node
 		WinPositions[1] = Enumerable.Range(totalTiles - boardSize, boardSize).ToArray(); // Player 2's winning positions
 	}
 
-	public void SetFenceTileConnections(int index, int fenceRows)
+	public void InitialiseFenceTileConnections(int index, int fenceRows)
 	{
 		// Match the fence button index to the index of the Top-Left Tile in 2x2 Grid
 		int modifiedIndex = index + index / fenceRows;
@@ -83,37 +79,7 @@ public partial class BoardState : Node
 		Fences[index][1] = new int[2][] { new int[2] { topLeft, topRight }, new int[2] { bottomLeft, bottomRight } }; // Vertical Fences
 	}
 	
-	public void SetDFSDisabled(int fence, int direction, bool val)
-	{
-		DFSDisabledFences[fence][direction] = val;
-	}
-
-	public void SetDirDisabled(int fence, int direction, bool val)
-	{
-		DirDisabledFences[fence][direction] = val;
-	}
-
-	public void SetFencePlaced(int fence)
-	{
-		PlacedFences[fence] = true;
-	}
-
-	public bool GetDFSDisabled(int fence, int direction)
-	{
-		return DFSDisabledFences[fence][direction];
-	}
-
-	public bool GetDirDisabled(int fence, int direction)
-	{
-		return DirDisabledFences[fence][direction];
-	}
-
-	public bool GetFencePlaced(int fence)
-	{
-		return PlacedFences[fence];
-	}
-
-	public int[] GetConnections(int index, int size)
+	public static int[] InitialiseConnections(int index, int size)
 	{
 		int[] connections = new int[4];
 		connections[0] = index >= size ? index - size : -1; // North Tile
@@ -123,20 +89,6 @@ public partial class BoardState : Node
 		return connections;
 	}
 
-	public int[][][][] GetFences()
-	{
-		return Fences;
-	}
-
-	public int GetFenceAmount()
-	{
-		return Fences.Length;
-	}
-
-	public bool GetFenceEnabled(int fence, int direction)
-	{
-		return GetFencePlaced(fence) || GetDFSDisabled(fence, direction) || GetDirDisabled(fence, direction);
-	}
 	public void GenerateTiles(int boardSize)
 	{
 		int totalTiles = boardSize * boardSize;
@@ -149,7 +101,7 @@ public partial class BoardState : Node
 		// Loop through tiles, and apply SetTileConnections function to each tile
 		for (int i = 0; i < totalTiles; i++)
 		{
-			Tiles[i] = GetConnections(i, boardSize);
+			Tiles[i] = InitialiseConnections(i, boardSize);
 		}
 	}
 
@@ -166,10 +118,56 @@ public partial class BoardState : Node
 		for (int i = 0; i < totalFences; i++)
 		{
 			Fences[i] = new int[2][][];
-			SetFenceTileConnections(i, fenceRows);
+			InitialiseFenceTileConnections(i, fenceRows);
 			DFSDisabledFences[i] = new bool[] { false, false };
 			DirDisabledFences[i] = new bool[] { false, false };
 		}
+	}
+
+	#endregion
+
+	#region Setters
+	public void SetDFSDisabled(int fence, int direction, bool val)
+	{
+		DFSDisabledFences[fence][direction] = val;
+	}
+
+	public void SetDirDisabled(int fence, int direction, bool val)
+	{
+		DirDisabledFences[fence][direction] = val;
+	}
+
+	public void SetFencePlaced(int fence)
+	{
+		PlacedFences[fence] = true;
+	}
+
+	#endregion
+
+	#region Getters
+	public bool GetDFSDisabled(int fence, int direction)
+	{
+		return DFSDisabledFences[fence][direction];
+	}
+
+	public bool GetDirDisabled(int fence, int direction)
+	{
+		return DirDisabledFences[fence][direction];
+	}
+
+	public bool GetFencePlaced(int fence)
+	{
+		return PlacedFences[fence];
+	}
+
+	public int GetFenceAmount()
+	{
+		return Fences.Length;
+	}
+
+	public bool GetFenceEnabled(int fence, int direction)
+	{
+		return GetFencePlaced(fence) || GetDFSDisabled(fence, direction) || GetDirDisabled(fence, direction);
 	}
 
 	#endregion
