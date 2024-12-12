@@ -1,5 +1,7 @@
 extends Node
 
+const BITS: Array[int] = [0, 1]
+
 const COLORS: Array[Color] = [
 	Color.LIGHT_CORAL,
 	Color.LIGHT_GREEN,

@@ -3,16 +3,6 @@ class_name FenceButton extends Button
 @export var h_fence: Panel
 @export var v_fence: Panel
 
-## Stops the fences being hidden
-var fence_placed: bool = false
-
-## Stores if the button should be disabled for each direction
-## based off it the adjacent fence is placed or not
-var dir_disabled: Array[bool] = [false, false]
-## Stores if the button should be disabled for each direction
-## based off latest DFS
-var dfs_disabled: Array[bool] = [false, false]
-
 var id: int
 
 
@@ -21,8 +11,7 @@ func _ready() -> void:
 	h_fence.hide()
 	v_fence.hide()
 
-
-func clear_fences() -> void:
+func clear_fences(fence_placed: bool) -> void:
 	if fence_placed:
 		return
 	
@@ -30,5 +19,5 @@ func clear_fences() -> void:
 	v_fence.visible = false
 
 
-func get_enabled() -> bool:
-	return dir_disabled[Global.fence_direction] or dfs_disabled[Global.fence_direction] or fence_placed
+#func get_enabled() -> bool:
+	#return dir_disabled[Global.fence_direction] or dfs_disabled[Global.fence_direction] or fence_placed

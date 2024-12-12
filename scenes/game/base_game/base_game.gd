@@ -24,7 +24,7 @@ var move_history: String = ''
 	set(val):
 		# Clear current fence
 		if selected_fence_index > -1:
-			fence_buttons[selected_fence_index].clear_fences()
+			fence_buttons[selected_fence_index].clear_fences(board.GetFencePlaced(selected_fence_index))
 		
 		# Validate the confirm button
 		selected_fence_index = val
@@ -126,8 +126,9 @@ func instance_tile_buttons(board_size: int) -> void:
 
 #region Fences
 func update_fence_buttons() -> void:
-	for fence_button: FenceButton in fence_buttons:
-		fence_button.disabled = fence_button.get_enabled() if board.IsFenceAvailable(current_player) else true
+	for fence: int in range(board.GetFenceAmount()):
+		var fence_button: FenceButton = fence_buttons[fence]
+		fence_button.disabled = board.GetFenceEnabled(fence, Global.fence_direction) if board.IsFenceAvailable(current_player) else true
 		# Disable mouse filter if the button is disabled
 		fence_button.mouse_filter = Control.MOUSE_FILTER_IGNORE if fence_button.disabled else Control.MOUSE_FILTER_STOP
 
@@ -146,7 +147,7 @@ func confirm_place_fence(fence: int) -> void:
 		var adj_fences: Array = Array(board.GetConnections(fence, Global.board_size-1))
 		var index: int = adj_fences[indexes]
 		if index > -1:
-			fence_buttons[index].dir_disabled[Global.fence_direction] = true
+			board.SetDirDisabled(index, Global.fence_direction, true)
 	
 	# Place the fence on the board
 	board.PlaceFence(selected_fence_index, Global.fence_direction, current_player)
@@ -155,7 +156,7 @@ func confirm_place_fence(fence: int) -> void:
 	move_history += user_interface.update_fence(current_player, selected_fence_index, board.FenceCounts[current_player])
 	
 	# Update the fence button
-	fence_button.fence_placed = true
+	board.SetFencePlaced(selected_fence_index, true)
 	fence_button.disabled = true
 	selected_fence_index = -1
 
@@ -233,30 +234,30 @@ func get_illegal_fences() -> void:
 		return
 	
 	var illegal_fences: Dictionary = { 0: {}, 1: {} }
-	var bits: Array[int] = [0, 1]
 	
 	# Check each fence button, to see if it is possible
-	for fence_button: FenceButton in fence_buttons:
+	for fence: int in range(board.GetFenceAmount()):
 		
 		# Reset DFS Array
-		fence_button.dfs_disabled = [false, false]
+		board.SetDFSDisabled(fence, 0, false)
+		board.SetDFSDisabled(fence, 1, false)
 		
 		# Ignore any placed fences
-		if fence_button.fence_placed:
+		if board.GetFencePlaced(fence):
 			continue
 
 		# Loop for both, horizontal and vertical fences
-		for fence_dir: int in bits:
+		for fence_dir: int in Global.BITS:
 			# Ignore fences adjacent to placed fences
-			if fence_button.dir_disabled[fence_dir]:
+			if board.GetDirDisabled(fence, fence_dir):
 				continue
 				
 			# Loop for each player
-			for player: int in bits:
+			for player: int in Global.BITS:
 				var thread: Thread = Thread.new()
 				threads.append(thread)
 				# Replace 0 with player
-				thread.start(_illegal_fence_check_threaded.bind(fence_button.id, fence_dir, player))
+				thread.start(_illegal_fence_check_threaded.bind(fence, fence_dir, player))
 	
 	# Store results from threads into dictionary
 	for thread: Thread in threads:
@@ -270,13 +271,13 @@ func get_illegal_fences() -> void:
 	# Set results into fence buttons
 	for direction: int in illegal_fences:
 		for fence: int in illegal_fences[direction]:
-			fence_buttons[fence].dfs_disabled[direction] = true
+			board.SetDFSDisabled(fence, direction, true)
 
 
 func _illegal_fence_check_threaded(fence: int, fence_dir: int, player: int) -> Array:
 	if board.CheckIllegalFence(fence, fence_dir, player):
 		return []
-	fence_buttons[fence].dfs_disabled[fence_dir] = true
+	board.SetDFSDisabled(fence, fence_dir, true)
 	return [fence_dir, fence]
 
 
