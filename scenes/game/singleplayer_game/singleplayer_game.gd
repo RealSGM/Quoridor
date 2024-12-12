@@ -20,18 +20,6 @@ func set_current_player(val: int) -> void:
 
 
 func start_minimax() -> void:
-	# Get all possible fence buttons
-	var enabled_fences: Dictionary ={
-		0: [],
-		1: [],
-	}
-	
-	# Loop through both directions
-	#for bit: int in Global.BITS:
-		## Loop through all fence buttons
-		#for fence_button: FenceButton in fence_buttons:
-			## Check if the fence button is enabled, per direction
-			#if not(fence_button.dfs_disabled[bit] or fence_button.dir_disabled[bit]):
-				#enabled_fences[bit].append(fence_buttons.find(fence_button))
-	
-	#mini_max.CreateGameTree(enabled_fences)
+	var possible_moves: Dictionary = board.GetPossibleMoves()
+	# Create the game tree
+	mini_max.CreateGameTree(possible_moves, board)

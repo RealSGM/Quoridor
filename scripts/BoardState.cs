@@ -56,7 +56,7 @@ public partial class BoardState : Node
 		AdjacentOffsets = new int[4] { -boardSize, 1, boardSize, -1 };
 	}
 
-	public void InitialisetWinPositions(int boardSize, int playerCount)
+	public void InitialiseWinPositions(int boardSize, int playerCount)
 	{
 		int totalTiles = boardSize * boardSize;
 		WinPositions = new int[playerCount][];
@@ -153,6 +153,11 @@ public partial class BoardState : Node
 	public bool GetDirDisabled(int fence, int direction)
 	{
 		return DirDisabledFences[fence][direction];
+	}
+
+	public int[] GetAdjacentTiles(int tile)
+	{
+		return Tiles[tile];
 	}
 
 	public bool GetFencePlaced(int fence)
@@ -304,5 +309,25 @@ public partial class BoardState : Node
 	{
 		PawnPositions[CurrentPlayer] = tileIndex;
 		return WinPositions[CurrentPlayer].Contains(tileIndex);
+	}
+
+	public Godot.Collections.Dictionary GetPossibleMoves()
+	{
+		Godot.Collections.Dictionary possibleMoves = new() { };
+		int[] bits = new int[2] {0, 1};
+
+		// Loop through both directions
+		foreach	(int direction in bits)
+		{
+			var moves = Enumerable.Range(0, GetFenceAmount())
+				.Where(fence => !GetFenceEnabled(fence, direction))
+				.ToArray();
+			possibleMoves[direction] = moves;
+		}
+		
+		// Add the tile connections as index 2
+		possibleMoves.Add(2, GetAdjacentTiles(PawnPositions[CurrentPlayer]));
+
+		return possibleMoves;
 	}
 }
