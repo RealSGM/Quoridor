@@ -156,7 +156,7 @@ func confirm_place_fence(fence: int) -> void:
 	move_history += user_interface.update_fence(current_player, selected_fence_index, board.FenceCounts[current_player])
 	
 	# Update the fence button
-	board.SetFencePlaced(selected_fence_index, true)
+	board.SetFencePlaced(selected_fence_index)
 	fence_button.disabled = true
 	selected_fence_index = -1
 

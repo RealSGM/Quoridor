@@ -20,6 +20,7 @@ public partial class BoardState : Node
 	// Stores if the button should be disabled for each direction based off latest DFS
 	public bool[][] DFSDisabledFences { get; set;}
 	// Stores if the button should be disabled for each direction based off it the adjacent fence is placed or not
+	[Export]
 	public bool[][] DirDisabledFences { get; set;}
 	public bool[] PlacedFences { get; set;}
 
@@ -88,9 +89,9 @@ public partial class BoardState : Node
 		DirDisabledFences[fence][direction] = val;
 	}
 
-	public void SetFencePlaced(int fence, bool placed)
+	public void SetFencePlaced(int fence)
 	{
-		PlacedFences[fence] = placed;
+		PlacedFences[fence] = true;
 	}
 
 	public bool GetDFSDisabled(int fence, int direction)
