@@ -1,5 +1,5 @@
-class_name Game extends Control
-## Handles the Interface for the Game
+class_name BaseGame extends Control
+## Handles the Interface for the BaseGame
 ## Sends signals to the board
 
 # TODO Minimax Algorithm
@@ -13,19 +13,20 @@ class_name Game extends Control
 @export var player_amount: int = 2
 
 @export_category("User Interface")
-@export var toggle_direction_button: Button
-@export var confirm_button: Button
-@export var turn_label: Label
-@export var pause_menu: Panel
-@export var pause_exit: Button
-@export var pause_return: Button
-@export var chat: Panel
-@export var fence_count_labels: Array[Label]
+@export var user_interface: UserInterface
+#@export var toggle_direction_button: Button
+#@export var confirm_button: Button
+#@export var turn_label: Label
+#@export var pause_menu: Panel
+#@export var pause_exit: Button
+#@export var pause_return: Button
+#@export var chat: Panel
+#@export var fence_count_labels: Array[Label]
 
-@export_category("Win Screen")
-@export var win_menu: Control
-@export var win_label: Label
-@export var win_exit_button: Button
+#@export_category("Win Screen")
+#@export var win_menu: Control
+#@export var win_label: Label
+#@export var win_exit_button: Button
 
 var threads: Array[Thread] = []
 var tile_buttons: Array[TileButton] = []
@@ -42,7 +43,7 @@ var move_history: String = ''
 		
 		# Validate the confirm button
 		selected_fence_index = val
-		set_confirm_button(val, selected_tile_index)
+		user_interface.set_confirm_button(val, selected_tile_index)
 
 
 ## Update the selected tile, and the confirm button
@@ -54,7 +55,7 @@ var move_history: String = ''
 		
 		# Validate the confirm button
 		selected_tile_index = val
-		set_confirm_button(selected_fence_index, val)
+		user_interface.set_confirm_button(selected_fence_index, val)
 		
 		if val > -1:
 			var pawn: Panel = tile_buttons[selected_tile_index].pawns[current_player]
@@ -71,35 +72,16 @@ var move_history: String = ''
 		set_tiles(board.PawnPositions[current_player])
 		get_illegal_fences()
 		update_fence_buttons()
+		user_interface.update_turn(val)
 		board.CurrentPlayer = val
-		turn_label.text = str(Global.players[current_player]["name"]) + "'s Turn"
-
-
-func _input(event: InputEvent) -> void:
-	if event.is_action_pressed("confirm") and !confirm_button.disabled:
-		_on_confirm_pressed()
-	if event.is_action_pressed("pause"):
-		pause_menu.visible = !pause_menu.visible
-	if event.is_action_pressed("test"):
-		pass
 
 
 func _ready() -> void:
-	_on_directional_button_pressed()
+	SignalManager.confirm_pressed.connect(_on_confirm_pressed)
+	SignalManager.direction_toggled.connect(_on_directional_button_pressed)
 	
 	current_player = 0
-	win_exit_button.pressed.connect(SignalManager.exit_pressed.emit)
-	pause_exit.pressed.connect(SignalManager.exit_pressed.emit)
-	pause_return.pressed.connect(func(): pause_menu.hide())
-	
 	board.show()
-	win_menu.hide()
-	pause_menu.hide()
-
-
-## Disable the confirm button when neither option is selected
-func set_confirm_button(fence: int, tile: int) -> void:
-	confirm_button.disabled = !(fence >= 0 || tile >= 0)
 
 
 ## Disable all tiles, and reset their modulate
@@ -109,26 +91,6 @@ func reset_board() -> void:
 		tile.modulate = Color.WHITE
 		tile.focus_mode = Control.FOCUS_NONE
 	)
-
-
-## Add move to the chat
-func add_to_chat(fence: int, tile: int) -> void:
-	var msg: String = ''
-	move_history += str(current_player)
-	
-	# Selection was place fence
-	if fence > -1:
-		msg = "Add Fence: " + str(fence)
-		move_history += "f" + str(fence)
-	
-	# Selection was move pawn
-	elif tile > -1:
-		msg = "Move Pawn: " + str(tile)
-		move_history += "p" + str(tile)
-		
-	move_history += ";"
-		
-	chat.add_message(msg, current_player)
 
 
 ## Setup the board with the selected size
@@ -184,8 +146,10 @@ func update_fence_buttons() -> void:
 
 func confirm_place_fence(fence: int) -> void:
 	var fence_button: FenceButton = fence_buttons[fence]
+	
 	# Flip the index (for NESW adjustment)
 	var flipped_index: int = 1 - Global.fence_direction
+	
 	# Get the adjacent directionals
 	var disabled_indexes: Array[int] = [flipped_index, flipped_index + 2]
 	
@@ -196,7 +160,13 @@ func confirm_place_fence(fence: int) -> void:
 		if index > -1:
 			fence_buttons[index].dir_disabled[Global.fence_direction] = true
 	
+	# Place the fence on the board
 	board.PlaceFence(selected_fence_index, Global.fence_direction, current_player)
+	
+	# Update the UI
+	user_interface.update_fence(current_player, selected_fence_index, board.FenceCounts[current_player])
+	
+	# Update the fence button
 	fence_button.fence_placed = true
 	fence_button.disabled = true
 	selected_fence_index = -1
@@ -255,7 +225,11 @@ func confirm_move_pawn() -> void:
 	tile_button.pawn_moved = true 
 	
 	# Reset selected pawn, enabled pawn moved so the new pawn isn't hidden
-	board.MovePawn(selected_tile_index)
+	has_won = board.MovePawn(selected_tile_index)
+	
+	# Update the UI
+	user_interface.update_move(current_player, selected_tile_index)
+	
 	selected_tile_index = -1
 
 
@@ -317,6 +291,7 @@ func _illegal_fence_check_threaded(fence: int, fence_dir: int, player: int) -> A
 
 #endregion
 
+
 func _on_fence_button_pressed(fence: int) -> void:
 	selected_fence_index = fence
 	selected_tile_index = -1
@@ -335,7 +310,6 @@ func _on_tile_pressed(tile: int) -> void:
 func _on_directional_button_pressed() -> void:
 	selected_fence_index = -1
 	Global.fence_direction = 1 - Global.fence_direction
-	toggle_direction_button.text = 'Horizontal' if Global.fence_direction == 0 else 'Vertical'
 	update_fence_buttons()
 
 
@@ -343,19 +317,14 @@ func _on_confirm_pressed() -> void:
 	# Reset Board
 	reset_board()
 	
-	add_to_chat(selected_fence_index, selected_tile_index)
-	
 	if selected_fence_index > -1:
-		fence_count_labels[current_player].text = str(board.FenceCounts[current_player])
 		confirm_place_fence(selected_fence_index)
-	elif selected_tile_index:
-		has_won = board.CheckWin(selected_tile_index)
+	elif selected_tile_index > -1:
 		confirm_move_pawn()
 	
 	# Check if the pawn has reached end goal
 	if has_won:
-		win_label.text = Global.players[current_player]["name"] + " Wins!"
-		win_menu.show()
+		user_interface.update_win(current_player)
 	# Switch to next player
 	else:
 		current_player = 1 - current_player

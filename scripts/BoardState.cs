@@ -207,10 +207,6 @@ public partial class BoardState : Node
 	}
 
 	#endregion
-	public bool CheckWin(int currentTileIndex)
-	{
-		return WinPositions[CurrentPlayer].Contains(currentTileIndex);
-	}
 
 	public bool IsFenceAvailable(int playerIndex)
 	{
@@ -235,9 +231,10 @@ public partial class BoardState : Node
 		Tiles[tileIndex][Array.IndexOf(Tiles[tileIndex], removingIndex)] = -1;
 	}
 
-	public void MovePawn(int tileIndex)
+	public bool MovePawn(int tileIndex)
 	{
 		PawnPositions[CurrentPlayer] = tileIndex;
+		return WinPositions[CurrentPlayer].Contains(tileIndex);
 	}
 
 	public int[] GetConnections(int index, int size)
