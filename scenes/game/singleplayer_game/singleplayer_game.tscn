@@ -1,0 +1,16 @@
+[gd_scene load_steps=3 format=3 uid="uid://b6l2hysgj8hny"]
+
+[ext_resource type="PackedScene" uid="uid://g12um5raoqio" path="res://scenes/game/base_game/base_game.tscn" id="1_q7ens"]
+[ext_resource type="Script" path="res://scenes/game/singleplayer_game/singleplayer_game.gd" id="2_ysh73"]
+
+[node name="SingleplayerGame" node_paths=PackedStringArray("bot_cover") instance=ExtResource("1_q7ens")]
+script = ExtResource("2_ysh73")
+bot_cover = NodePath("BotCover")
+
+[node name="BotCover" type="Control" parent="." index="2"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2

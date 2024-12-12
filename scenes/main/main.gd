@@ -155,8 +155,7 @@ func _on_back_button_pressed() -> void:
 func _on_start_game_pressed() -> void:
 	board_options_menu.hide()
 	set_game_data()
-	
-	var game: BaseGame = Resources.get_resource("local_game").instantiate()
+	var game: BaseGame = Resources.get_resource(game_type.to_lower() + "_game").instantiate()
 	Global.game = game
 	game.setup_board(size_options[size_option_button.selected])
 	foreground.add_child(game, true)

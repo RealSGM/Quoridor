@@ -64,8 +64,12 @@ func _ready() -> void:
 	board.show()
 
 
-func set_current_player(_val: int) -> void:
-	pass
+func set_current_player(val: int) -> void:
+	reset_board()
+	set_tiles(board.PawnPositions[current_player])
+	get_illegal_fences()
+	update_fence_buttons()
+	user_interface.update_turn(val)
 
 
 ## Disable all tiles, and reset their modulate
