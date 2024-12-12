@@ -79,9 +79,11 @@ var move_history: String = ''
 func _ready() -> void:
 	SignalManager.confirm_pressed.connect(_on_confirm_pressed)
 	SignalManager.direction_toggled.connect(_on_directional_button_pressed)
-	
+	user_interface.set_confirm_button(selected_fence_index, selected_tile_index)
 	current_player = 0
 	board.show()
+	
+	
 
 
 ## Disable all tiles, and reset their modulate

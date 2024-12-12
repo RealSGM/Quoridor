@@ -98,10 +98,12 @@ theme_override_constants/separation = 8
 alignment = 1
 
 [node name="PlayButton" type="Button" parent="Background/Foreground/MainMenu/VBC"]
+custom_minimum_size = Vector2(400, 0)
 layout_mode = 2
 text = "Play"
 
 [node name="ExitButton" type="Button" parent="Background/Foreground/MainMenu/VBC"]
+custom_minimum_size = Vector2(400, 0)
 layout_mode = 2
 text = "Exit"
 
@@ -128,14 +130,17 @@ theme_override_constants/separation = 8
 alignment = 1
 
 [node name="SingleplayerButton" type="Button" parent="Background/Foreground/PlayMenu/VBC"]
+custom_minimum_size = Vector2(400, 0)
 layout_mode = 2
 text = "Singleplayer"
 
 [node name="MultiplayerButton" type="Button" parent="Background/Foreground/PlayMenu/VBC"]
+custom_minimum_size = Vector2(400, 0)
 layout_mode = 2
 text = "Multiplayer"
 
 [node name="BackButton" type="Button" parent="Background/Foreground/PlayMenu/VBC"]
+custom_minimum_size = Vector2(400, 0)
 layout_mode = 2
 text = "Back"
 
@@ -162,15 +167,18 @@ theme_override_constants/separation = 8
 alignment = 1
 
 [node name="LocalButton" type="Button" parent="Background/Foreground/MultiplayerMenu/VBC"]
+custom_minimum_size = Vector2(400, 0)
 layout_mode = 2
 text = "Local"
 
 [node name="OnlineButton" type="Button" parent="Background/Foreground/MultiplayerMenu/VBC"]
+custom_minimum_size = Vector2(400, 0)
 layout_mode = 2
 disabled = true
 text = "Online"
 
 [node name="BackButton" type="Button" parent="Background/Foreground/MultiplayerMenu/VBC"]
+custom_minimum_size = Vector2(400, 0)
 layout_mode = 2
 text = "Back"
 

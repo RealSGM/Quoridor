@@ -38,8 +38,9 @@ func _ready() -> void:
 	pause_menu.hide()
 	win_menu.hide()
 	
+	await get_parent().ready
 	_on_direction_toggled()
-
+	
 
 func update_win(player: int) -> void:
 	win_label.text = Global.players[player]["name"] + " Wins!"
@@ -78,6 +79,5 @@ func set_confirm_button(fence: int, tile: int) -> void:
 #endregion
 
 func _on_direction_toggled() -> void:
-	print("Direction Toggled")
 	toggle_direction_button.text = 'Horizontal' if Global.fence_direction == 0 else 'Vertical'
 	SignalManager.direction_toggled.emit()
