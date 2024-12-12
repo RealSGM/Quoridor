@@ -131,7 +131,6 @@ public partial class BoardState : Node
 	public bool GetFenceEnabled(int fence, int direction)
 	{
 		return GetFencePlaced(fence) || GetDFSDisabled(fence, direction) || GetDirDisabled(fence, direction);
-
 	}
 	public void GenerateTiles(int boardSize)
 	{

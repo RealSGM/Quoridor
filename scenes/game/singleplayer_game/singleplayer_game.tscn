@@ -5,12 +5,14 @@
 
 [node name="SingleplayerGame" node_paths=PackedStringArray("bot_cover") instance=ExtResource("1_q7ens")]
 script = ExtResource("2_ysh73")
-bot_cover = NodePath("BotCover")
+bot_cover = NodePath("UserInterface/BotCover")
 
-[node name="BotCover" type="Control" parent="." index="2"]
+[node name="BotCover" type="Control" parent="UserInterface" index="3"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+
+[editable path="UserInterface"]

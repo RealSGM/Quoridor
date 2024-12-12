@@ -105,7 +105,7 @@ func instance_fence_buttons(fence_size: int) -> void:
 	fence_button_container.columns = fence_size
 	
 	for i: int in range(total_fences):
-		var fence_button: Button = fence_button_resource.instantiate()
+		var fence_button: FenceButton = fence_button_resource.instantiate()
 		fence_button.id = i
 		fence_button_container.add_child(fence_button, true)
 		fence_buttons.append(fence_button)

@@ -27,11 +27,11 @@ func start_minimax() -> void:
 	}
 	
 	# Loop through both directions
-	for bit: int in Global.BITS:
-		# Loop through all fence buttons
-		for fence_button: FenceButton in fence_buttons:
-			# Check if the fence button is enabled, per direction
-			if not(fence_button.dfs_disabled[bit] or fence_button.dir_disabled[bit]):
-				enabled_fences[bit].append(fence_buttons.find(fence_button))
+	#for bit: int in Global.BITS:
+		## Loop through all fence buttons
+		#for fence_button: FenceButton in fence_buttons:
+			## Check if the fence button is enabled, per direction
+			#if not(fence_button.dfs_disabled[bit] or fence_button.dir_disabled[bit]):
+				#enabled_fences[bit].append(fence_buttons.find(fence_button))
 	
-	mini_max.CreateGameTree(enabled_fences)
+	#mini_max.CreateGameTree(enabled_fences)
