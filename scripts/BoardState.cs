@@ -35,6 +35,9 @@ public partial class BoardState : Node
 		boardState.AdjacentOffsets = AdjacentOffsets.ToArray();
 		boardState.WinPositions = WinPositions.Select(winPosition => winPosition.ToArray()).ToArray();
 		boardState.CurrentPlayer = CurrentPlayer;
+		boardState.DirDisabledFences = DirDisabledFences.ToArray();
+		boardState.DFSDisabledFences = DFSDisabledFences.ToArray();
+		boardState.PlacedFences = PlacedFences.ToArray();
 		return boardState;
 	}
 
