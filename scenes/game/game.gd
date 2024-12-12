@@ -1,32 +1,17 @@
 class_name BaseGame extends Control
 ## Handles the Interface for the BaseGame
-## Sends signals to the board
+## Sends signals to the board and user interface
 
-# TODO Minimax Algorithm
+@export_category("Game Settings")
+@export var fence_amount: int = 10
+@export var player_amount: int = 2
 
-@export_category("Board")
+@export_category("Nodes")
 @export var board: BoardState
 @export var tile_container: GridContainer
 @export var board_container: PanelContainer
 @export var fence_button_container: GridContainer
-@export var fence_amount: int = 10
-@export var player_amount: int = 2
-
-@export_category("User Interface")
 @export var user_interface: UserInterface
-#@export var toggle_direction_button: Button
-#@export var confirm_button: Button
-#@export var turn_label: Label
-#@export var pause_menu: Panel
-#@export var pause_exit: Button
-#@export var pause_return: Button
-#@export var chat: Panel
-#@export var fence_count_labels: Array[Label]
-
-#@export_category("Win Screen")
-#@export var win_menu: Control
-#@export var win_label: Label
-#@export var win_exit_button: Button
 
 var threads: Array[Thread] = []
 var tile_buttons: Array[TileButton] = []
@@ -82,8 +67,6 @@ func _ready() -> void:
 	user_interface.set_confirm_button(selected_fence_index, selected_tile_index)
 	current_player = 0
 	board.show()
-	
-	
 
 
 ## Disable all tiles, and reset their modulate
@@ -176,6 +159,7 @@ func confirm_place_fence(fence: int) -> void:
 
 #endregion
 
+
 #region Tiles
 ## Set the tiles of the board, based off the current player's turn
 func set_tiles(pawn_index: int) -> void:
@@ -194,6 +178,7 @@ func set_tile_button(tile: TileButton, is_disabled: bool) -> void:
 
 
 #endregion
+
 
 #region Pawns
 @warning_ignore("integer_division")
@@ -236,6 +221,7 @@ func confirm_move_pawn() -> void:
 
 
 #endregion
+
 
 #region Illegal Fence Check
 func get_illegal_fences() -> void:
