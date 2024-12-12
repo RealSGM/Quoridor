@@ -62,6 +62,7 @@ grow_vertical = 2
 color = Color(0.121569, 0.133333, 0.14902, 1)
 
 [node name="Foreground" type="ColorRect" parent="Background"]
+custom_minimum_size = Vector2(360, 0)
 layout_mode = 1
 anchors_preset = -1
 anchor_right = 1.0
@@ -216,6 +217,7 @@ layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_ayg4q")
 
 [node name="Label" type="Label" parent="Background/Foreground/BoardOptionsMenu/VBC/BoardOptions/BoardVBC/PlayerOneContainer/PlayerOneName/Panel"]
+custom_minimum_size = Vector2(360, 0)
 layout_mode = 2
 text = "Player 1 Name"
 horizontal_alignment = 1
@@ -237,6 +239,7 @@ layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_ayg4q")
 
 [node name="Label" type="Label" parent="Background/Foreground/BoardOptionsMenu/VBC/BoardOptions/BoardVBC/PlayerOneContainer/PlayerOneColour/Panel"]
+custom_minimum_size = Vector2(360, 0)
 layout_mode = 2
 text = "Player 1 Colour"
 horizontal_alignment = 1
@@ -271,6 +274,7 @@ layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_ayg4q")
 
 [node name="Label" type="Label" parent="Background/Foreground/BoardOptionsMenu/VBC/BoardOptions/BoardVBC/PlayerTwoContainer/PlayerTwoName/Panel"]
+custom_minimum_size = Vector2(360, 0)
 layout_mode = 2
 text = "Player 2 Name"
 horizontal_alignment = 1
@@ -293,6 +297,7 @@ layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_ayg4q")
 
 [node name="Label" type="Label" parent="Background/Foreground/BoardOptionsMenu/VBC/BoardOptions/BoardVBC/PlayerTwoContainer/PlayerTwoColour/Panel"]
+custom_minimum_size = Vector2(360, 0)
 layout_mode = 2
 text = "Player 2 Colour"
 horizontal_alignment = 1
@@ -326,6 +331,7 @@ layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_ayg4q")
 
 [node name="Label" type="Label" parent="Background/Foreground/BoardOptionsMenu/VBC/BoardOptions/BoardVBC/BotContainer/BotType/Panel"]
+custom_minimum_size = Vector2(360, 0)
 layout_mode = 2
 text = "Bot Type"
 horizontal_alignment = 1
@@ -352,6 +358,7 @@ layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_ayg4q")
 
 [node name="Label" type="Label" parent="Background/Foreground/BoardOptionsMenu/VBC/BoardOptions/BoardVBC/BotContainer/BotColours/Panel"]
+custom_minimum_size = Vector2(360, 0)
 layout_mode = 2
 text = "Bot Colour"
 horizontal_alignment = 1
@@ -382,6 +389,7 @@ layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_ayg4q")
 
 [node name="Label" type="Label" parent="Background/Foreground/BoardOptionsMenu/VBC/BoardOptions/BoardVBC/BoardSizeContainer/Panel"]
+custom_minimum_size = Vector2(360, 0)
 layout_mode = 2
 text = "Board Size"
 horizontal_alignment = 1
