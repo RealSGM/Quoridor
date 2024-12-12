@@ -53,6 +53,7 @@ var move_history: String = ''
 	set(val):
 		current_player = val
 		board.CurrentPlayer = val
+		set_current_player(val)
 
 
 func _ready() -> void:
@@ -147,8 +148,7 @@ func confirm_place_fence(fence: int) -> void:
 	board.PlaceFence(selected_fence_index, Global.fence_direction, current_player)
 	
 	# Update the UI
-	user_interface.update_fence(current_player, selected_fence_index, board.FenceCounts[current_player])
-	update_fence_buttons()
+	move_history += user_interface.update_fence(current_player, selected_fence_index, board.FenceCounts[current_player])
 	
 	# Update the fence button
 	fence_button.fence_placed = true
@@ -214,7 +214,7 @@ func confirm_move_pawn() -> void:
 	has_won = board.MovePawn(selected_tile_index)
 	
 	# Update the UI
-	user_interface.update_move(current_player, selected_tile_index)
+	move_history += user_interface.update_move(current_player, selected_tile_index)
 	
 	selected_tile_index = -1
 

@@ -19,7 +19,6 @@ class_name UserInterface extends Control
 @export_category("Chat")
 @export var chat_container: VBoxContainer
 
-var move_history: String = ''
 
 func _input(event: InputEvent) -> void:
 	if event.is_action_pressed("confirm") and !confirm_button.disabled:
@@ -45,15 +44,15 @@ func update_win(player: int) -> void:
 
 
 ## Add move to the chat
-func update_fence(player: int, fence: int, count: int) -> void:
-	move_history += "%sf%s;" % [player, fence]
+func update_fence(player: int, fence: int, count: int) -> String:
 	add_message("Add Fence: " + str(fence), player)
 	fence_count_labels[player].text = str(count)
+	return "%sf%s;" % [player, fence]
 
 
-func update_move(player: int, tile: int) -> void:
-	move_history += "%sm%s;" % [player, tile]
+func update_move(player: int, tile: int) -> String:
 	add_message("Move Pawn: " + str(tile), player)
+	return "%sm%s;" % [player, tile]
 
 
 func update_turn(player: int) -> void:
