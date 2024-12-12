@@ -81,7 +81,7 @@ func _input(event: InputEvent) -> void:
 	if event.is_action_pressed("pause"):
 		pause_menu.visible = !pause_menu.visible
 	if event.is_action_pressed("test"):
-		print(move_history)
+		pass
 
 
 func _ready() -> void:
@@ -128,7 +128,8 @@ func add_to_chat(fence: int, tile: int) -> void:
 		
 	move_history += ";"
 		
-	chat.add_message(msg)
+	chat.add_message(msg, current_player)
+
 
 ## Setup the board with the selected size
 func setup_board(board_size: int) -> void:
@@ -345,12 +346,11 @@ func _on_confirm_pressed() -> void:
 	add_to_chat(selected_fence_index, selected_tile_index)
 	
 	if selected_fence_index > -1:
-		confirm_place_fence(selected_fence_index)
 		fence_count_labels[current_player].text = str(board.FenceCounts[current_player])
+		confirm_place_fence(selected_fence_index)
 	elif selected_tile_index:
-		confirm_move_pawn()
 		has_won = board.CheckWin(selected_tile_index)
-		
+		confirm_move_pawn()
 	
 	# Check if the pawn has reached end goal
 	if has_won:
