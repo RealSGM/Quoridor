@@ -8,20 +8,20 @@ public partial class BoardState : Node
 {
 	[Export]
 	public int[] FenceCounts { get; set; }
+	// Stores if the button should be disabled for each direction based off latest DFS
+	public bool[][] DFSDisabledFences { get; set;}
+	// Stores if the button should be disabled for each direction based off it the adjacent fence is placed or not
+	public bool[][] DirDisabledFences { get; set;}
+	public bool[] PlacedFences { get; set;}
+	public int[][][][] Fences { get; set; }
 	[Export]
 	public int[] PawnPositions { get; set; }
-	public int[][][][] Fences { get; set; }
 	public int[][] Tiles { get; set; }
 	[Export]
 	public int[] AdjacentOffsets { get; set; }
 	public int[][] WinPositions { get; set; }
 	[Export]
 	public int CurrentPlayer { get; set; }
-	// Stores if the button should be disabled for each direction based off latest DFS
-	public bool[][] DFSDisabledFences { get; set;}
-	// Stores if the button should be disabled for each direction based off it the adjacent fence is placed or not
-	public bool[][] DirDisabledFences { get; set;}
-	public bool[] PlacedFences { get; set;}
 
 	#region Initialization
 
