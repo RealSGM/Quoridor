@@ -27,18 +27,20 @@ public partial class BoardState : Node
 
 	public BoardState Clone()
 	{
-		BoardState boardState = new BoardState();
-		boardState.FenceCounts = FenceCounts.ToArray();
-		boardState.PawnPositions = PawnPositions.ToArray();
-		boardState.Fences = Fences.Select(fence => fence.Select(direction => direction.Select(connection => connection.ToArray()).ToArray()).ToArray()).ToArray();
-		boardState.Tiles = Tiles.Select(tile => tile.ToArray()).ToArray();
-		boardState.AdjacentOffsets = AdjacentOffsets.ToArray();
-		boardState.WinPositions = WinPositions.Select(winPosition => winPosition.ToArray()).ToArray();
-		boardState.CurrentPlayer = CurrentPlayer;
-		boardState.DirDisabledFences = DirDisabledFences.ToArray();
-		boardState.DFSDisabledFences = DFSDisabledFences.ToArray();
-		boardState.PlacedFences = PlacedFences.ToArray();
-		return boardState;
+        BoardState boardState = new()
+        {
+            FenceCounts = FenceCounts.ToArray(),
+            PawnPositions = PawnPositions.ToArray(),
+            Fences = Fences.Select(fence => fence.Select(direction => direction.Select(connection => connection.ToArray()).ToArray()).ToArray()).ToArray(),
+            Tiles = Tiles.Select(tile => tile.ToArray()).ToArray(),
+            AdjacentOffsets = AdjacentOffsets.ToArray(),
+            WinPositions = WinPositions.Select(winPosition => winPosition.ToArray()).ToArray(),
+            CurrentPlayer = CurrentPlayer,
+            DirDisabledFences = DirDisabledFences.ToArray(),
+            DFSDisabledFences = DFSDisabledFences.ToArray(),
+            PlacedFences = PlacedFences.ToArray()
+        };
+        return boardState;
 	}
 
 	public void SetFenceCounts(int fencesPerPlayer, int playerCount)
