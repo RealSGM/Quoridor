@@ -53,12 +53,6 @@ var move_history: String = ''
 	set(val):
 		current_player = val
 		board.CurrentPlayer = val
-		reset_board()
-		set_tiles(board.PawnPositions[current_player])
-		get_illegal_fences()
-		update_fence_buttons()
-		user_interface.update_turn(val)
-		board.CurrentPlayer = val
 
 
 func _ready() -> void:
@@ -67,6 +61,10 @@ func _ready() -> void:
 	user_interface.set_confirm_button(selected_fence_index, selected_tile_index)
 	current_player = 0
 	board.show()
+
+
+func set_current_player(_val: int) -> void:
+	pass
 
 
 ## Disable all tiles, and reset their modulate
@@ -150,6 +148,7 @@ func confirm_place_fence(fence: int) -> void:
 	
 	# Update the UI
 	user_interface.update_fence(current_player, selected_fence_index, board.FenceCounts[current_player])
+	update_fence_buttons()
 	
 	# Update the fence button
 	fence_button.fence_placed = true
@@ -298,6 +297,7 @@ func _on_tile_pressed(tile: int) -> void:
 func _on_directional_button_pressed() -> void:
 	selected_fence_index = -1
 	Global.fence_direction = 1 - Global.fence_direction
+	user_interface.update_direction()
 	update_fence_buttons()
 
 

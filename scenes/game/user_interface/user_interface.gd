@@ -32,15 +32,12 @@ func _ready() -> void:
 	win_exit_button.pressed.connect(SignalManager.exit_pressed.emit)
 	pause_exit.pressed.connect(SignalManager.exit_pressed.emit)
 	pause_return.pressed.connect(func(): pause_menu.hide())
-	toggle_direction_button.pressed.connect(_on_direction_toggled)
+	toggle_direction_button.pressed.connect(SignalManager.direction_toggled.emit)
 	confirm_button.pressed.connect(SignalManager.confirm_pressed.emit)
 	
 	pause_menu.hide()
 	win_menu.hide()
-	
-	await get_parent().ready
-	_on_direction_toggled()
-	
+
 
 func update_win(player: int) -> void:
 	win_label.text = Global.players[player]["name"] + " Wins!"
@@ -78,6 +75,5 @@ func set_confirm_button(fence: int, tile: int) -> void:
 #region Signals
 #endregion
 
-func _on_direction_toggled() -> void:
+func update_direction() -> void:
 	toggle_direction_button.text = 'Horizontal' if Global.fence_direction == 0 else 'Vertical'
-	SignalManager.direction_toggled.emit()

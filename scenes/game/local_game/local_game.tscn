@@ -1,0 +1,7 @@
+[gd_scene load_steps=3 format=3 uid="uid://ifm64tbovo6x"]
+
+[ext_resource type="PackedScene" uid="uid://g12um5raoqio" path="res://scenes/game/base_game/base_game.tscn" id="1_h0cyb"]
+[ext_resource type="Script" path="res://scenes/game/local_game/local_game.gd" id="2_eb2pu"]
+
+[node name="LocalGame" instance=ExtResource("1_h0cyb")]
+script = ExtResource("2_eb2pu")
