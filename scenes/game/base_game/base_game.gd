@@ -16,7 +16,6 @@ class_name BaseGame extends Control
 var tile_buttons: Array[TileButton] = []
 var fence_buttons: Array[FenceButton] = []
 var has_won: bool = false
-var move_history: String = ''
 
 ## Update the selected fence, and the confirm button
 @onready var selected_fence_index: int = -1:
@@ -152,7 +151,7 @@ func confirm_place_fence(fence: int) -> void:
 	board.PlaceFence(selected_fence_index, Global.fence_direction, current_player)
 	
 	# Update the UI
-	move_history += user_interface.update_fence(current_player, selected_fence_index, board.FenceCounts[current_player])
+	board.AddMove(user_interface.update_fence(current_player, selected_fence_index, board.FenceCounts[current_player]))
 	
 	# Update the fence button
 	board.SetFencePlaced(selected_fence_index)
@@ -218,7 +217,7 @@ func confirm_move_pawn() -> void:
 	has_won = board.MovePawn(selected_tile_index)
 	
 	# Update the UI
-	move_history += user_interface.update_move(current_player, selected_tile_index)
+	board.AddMove(user_interface.update_move(current_player, selected_tile_index))
 	
 	selected_tile_index = -1
 

@@ -1,15 +1,18 @@
 using Godot;
-using System;
 using System.Linq;
 using System.Collections.Generic;
-using System.Runtime.InteropServices;
 
 [GlobalClass]
 public partial class MiniMax : Node
 {
-	public void CreateGameTree(Godot.Collections.Dictionary<int, int[]> possibleMoves, BoardState originalBoard)
+	public void CreateGameTree(BoardState originalBoard)
 	{
-		// Create a Tree
+		Dictionary<int, int[]> possibleMoves = originalBoard.GetPossibleMoves();
+
+		// Create a Tree based off moves
+		Tree tree = new();
+
+
 		// Loop through possibleMoves
 		// Generate a BoardState for each move
 		// Add to Tree

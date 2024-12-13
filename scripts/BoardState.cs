@@ -2,10 +2,14 @@ using Godot;
 using System;
 using System.Linq;
 using System.Collections.Generic;
+using System.Text;
 
 [GlobalClass]
 public partial class BoardState : Node
 {
+	[Export] public int[] PawnPositions { get; set; }
+	[Export] public int[] AdjacentOffsets { get; set; }
+	[Export] public int CurrentPlayer { get; set; }
 	[Export] public int[] FenceCounts { get; set; }
 	// Stores if the button should be disabled for each direction based off latest DFS
 	public bool[][] DFSDisabledFences { get; set;}
@@ -13,12 +17,10 @@ public partial class BoardState : Node
 	public bool[][] DirDisabledFences { get; set;}
 	public bool[] PlacedFences { get; set;}
 	public int[][][][] Fences { get; set; }
-	[Export] public int[] PawnPositions { get; set; }
 	public int[][] Tiles { get; set; }
-	[Export] public int[] AdjacentOffsets { get; set; }
 	public int[][] WinPositions { get; set; }
-	[Export] public int CurrentPlayer { get; set; }
-
+	public StringBuilder MoveHistory { get; set; }
+	
 	#region Initialization
 
 	public BoardState Clone()
@@ -175,6 +177,11 @@ public partial class BoardState : Node
 		return GetFencePlaced(fence) || GetDFSDisabled(fence, direction) || GetDirDisabled(fence, direction);
 	}
 
+	public string GetMoveHistory()
+	{
+		return MoveHistory.ToString();
+	}
+
 	#endregion
 
 	#region Selectable Tiles
@@ -318,9 +325,9 @@ public partial class BoardState : Node
 		return WinPositions[CurrentPlayer].Contains(tileIndex);
 	}
 
-	public Godot.Collections.Dictionary GetPossibleMoves()
+	public Dictionary<int, int[]> GetPossibleMoves()
 	{
-		Godot.Collections.Dictionary possibleMoves = new() { };
+		Dictionary<int, int[]> possibleMoves = new();
 		int[] bits = new int[2] {0, 1};
 
 		// Loop through both directions
@@ -336,5 +343,10 @@ public partial class BoardState : Node
 		possibleMoves.Add(2, GetAdjacentTiles(PawnPositions[CurrentPlayer]));
 
 		return possibleMoves;
+	}
+
+	public void AddMove(string moveToAdd)
+	{
+		MoveHistory.Append(moveToAdd + ";");
 	}
 }

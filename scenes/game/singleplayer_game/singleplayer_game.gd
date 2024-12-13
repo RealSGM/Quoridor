@@ -16,10 +16,4 @@ func set_current_player(val: int) -> void:
 	
 	# Bot's Turn
 	if val == 1:
-		start_minimax()
-
-
-func start_minimax() -> void:
-	var possible_moves: Dictionary = board.GetPossibleMoves()
-	# Create the game tree
-	mini_max.CreateGameTree(possible_moves, board)
+		mini_max.CreateGameTree(board)
