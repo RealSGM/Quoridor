@@ -79,7 +79,7 @@ public partial class BoardState : Node
 		Fences[index][1] = new int[2][] { new int[2] { topLeft, topRight }, new int[2] { bottomLeft, bottomRight } }; // Vertical Fences
 	}
 	
-	public static int[] InitialiseConnections(int index, int size)
+	public int[] InitialiseConnections(int index, int size)
 	{
 		int[] connections = new int[4];
 		connections[0] = index >= size ? index - size : -1; // North Tile

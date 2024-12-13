@@ -144,7 +144,7 @@ func confirm_place_fence(fence: int) -> void:
 	
 	# Disable the adjacents buttons, for that direction
 	for indexes: int in disabled_indexes:
-		var adj_fences: Array = Array(board.GetConnections(fence, Global.board_size-1))
+		var adj_fences: Array = Array(board.InitialiseConnections(fence, Global.board_size-1))
 		var index: int = adj_fences[indexes]
 		if index > -1:
 			board.SetDirDisabled(index, Global.fence_direction, true)
