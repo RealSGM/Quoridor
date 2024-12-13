@@ -12,7 +12,7 @@ config_version=5
 
 config/name="Quoridor"
 run/main_scene="res://scenes/main/main.tscn"
-config/features=PackedStringArray("4.3", "C#", "Mobile")
+config/features=PackedStringArray("4.4", "C#", "Mobile")
 config/icon="res://icon.png"
 
 [autoload]
