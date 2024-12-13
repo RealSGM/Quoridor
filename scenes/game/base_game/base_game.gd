@@ -67,7 +67,8 @@ func _ready() -> void:
 func set_current_player(val: int) -> void:
 	reset_board()
 	set_tiles(board.PawnPositions[current_player])
-	get_illegal_fences()
+	IllegalFenceCheck.GetIllegalFences(board)
+	
 	update_fence_buttons()
 	user_interface.update_turn(val)
 
@@ -144,7 +145,7 @@ func confirm_place_fence(fence: int) -> void:
 	
 	# Disable the adjacents buttons, for that direction
 	for indexes: int in disabled_indexes:
-		var adj_fences: Array = Array(board.GetConnections(fence, Global.board_size-1))
+		var adj_fences: Array = Array(board.InitialiseConnections(fence, Global.board_size-1))
 		var index: int = adj_fences[indexes]
 		if index > -1:
 			board.SetDirDisabled(index, Global.fence_direction, true)
@@ -256,7 +257,6 @@ func get_illegal_fences() -> void:
 			for player: int in Global.BITS:
 				var thread: Thread = Thread.new()
 				threads.append(thread)
-				# Replace 0 with player
 				thread.start(_illegal_fence_check_threaded.bind(fence, fence_dir, player))
 	
 	# Store results from threads into dictionary

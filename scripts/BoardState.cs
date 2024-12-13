@@ -6,6 +6,9 @@ using System.Collections.Generic;
 [GlobalClass]
 public partial class BoardState : Node
 {
+	[Export] public int[] PawnPositions { get; set; }
+	[Export] public int[] AdjacentOffsets { get; set; }
+	[Export] public int CurrentPlayer { get; set; }
 	[Export] public int[] FenceCounts { get; set; }
 	// Stores if the button should be disabled for each direction based off latest DFS
 	public bool[][] DFSDisabledFences { get; set;}
@@ -13,11 +16,8 @@ public partial class BoardState : Node
 	public bool[][] DirDisabledFences { get; set;}
 	public bool[] PlacedFences { get; set;}
 	public int[][][][] Fences { get; set; }
-	[Export] public int[] PawnPositions { get; set; }
 	public int[][] Tiles { get; set; }
-	[Export] public int[] AdjacentOffsets { get; set; }
 	public int[][] WinPositions { get; set; }
-	[Export] public int CurrentPlayer { get; set; }
 
 	#region Initialization
 
@@ -79,7 +79,7 @@ public partial class BoardState : Node
 		Fences[index][1] = new int[2][] { new int[2] { topLeft, topRight }, new int[2] { bottomLeft, bottomRight } }; // Vertical Fences
 	}
 	
-	public static int[] InitialiseConnections(int index, int size)
+	public int[] InitialiseConnections(int index, int size)
 	{
 		int[] connections = new int[4];
 		connections[0] = index >= size ? index - size : -1; // North Tile
@@ -238,48 +238,6 @@ public partial class BoardState : Node
 
 		return leapedTiles;
 	}
-	#endregion
-
-	#region Illegal Fence Check
-	public bool CheckIllegalFence(int fenceIndex, int direction, int playerIndex)
-	{
-		// Create a duplicate of the current board state
-		BoardState boardState = Clone();
-		boardState.PlaceFence(fenceIndex, direction, playerIndex);
-
-		int startIndex = PawnPositions[playerIndex];
-		int[] goalTiles = WinPositions[playerIndex];
-
-		return RecursiveDFS(startIndex, goalTiles, new HashSet<int>(), boardState);
-	}
-
-	public bool RecursiveDFS(int currentIndex, int[] goalTiles, HashSet<int> visitedTiles, BoardState boardState)
-	{
-		// Check if the current index is in the goal tiles
-		if (goalTiles.Contains(currentIndex))
-		{
-			return true;
-		}
-
-		// Add the current index to the visited tiles
-		visitedTiles.Add(currentIndex);
-
-		// Loop through all connected tiles
-		foreach (int connectedTile in boardState.Tiles[currentIndex])
-		{
-			// Check if the connected tile is not empty and not visited
-			if (connectedTile != -1 && !visitedTiles.Contains(connectedTile))
-			{
-				// Recursively call the function with the connected tile
-				if (RecursiveDFS(connectedTile, goalTiles, visitedTiles, boardState))
-				{
-					return true;
-				}
-			}
-		}
-		return false;
-	}
-
 	#endregion
 
 	public bool IsFenceAvailable(int playerIndex)
