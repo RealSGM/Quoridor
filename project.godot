@@ -20,7 +20,6 @@ config/icon="res://icon.png"
 Resources="*res://autoload/resources.tscn"
 SignalManager="*res://autoload/signal_manager.gd"
 Global="*res://autoload/global.gd"
-IllegalFenceCheck="*res://scripts/IllegalFenceCheck.cs"
 
 [debug]
 

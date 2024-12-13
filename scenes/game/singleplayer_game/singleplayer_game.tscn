@@ -6,6 +6,8 @@
 [node name="SingleplayerGame" node_paths=PackedStringArray("bot_cover") instance=ExtResource("1_q7ens")]
 script = ExtResource("2_ysh73")
 bot_cover = NodePath("UserInterface/BotCover")
+fence_amount = null
+player_amount = null
 
 [node name="BotCover" type="Control" parent="UserInterface" index="3"]
 layout_mode = 1
