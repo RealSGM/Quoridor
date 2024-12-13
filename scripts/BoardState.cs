@@ -19,10 +19,10 @@ public partial class BoardState : Node
 	public int[][][][] Fences { get; set; }
 	public int[][] Tiles { get; set; }
 	public int[][] WinPositions { get; set; }
-	public StringBuilder MoveHistory { get; set; }
+	public StringBuilder MoveHistory { get; set; } = new();
 	
 	#region Initialization
-
+	
 	public BoardState Clone()
 	{
 		BoardState boardState = new()
@@ -182,6 +182,10 @@ public partial class BoardState : Node
 		return MoveHistory.ToString();
 	}
 
+	public bool GetWinner(int playerIndex)
+	{
+		return WinPositions[playerIndex].Contains(PawnPositions[playerIndex]);
+	}
 	#endregion
 
 	#region Selectable Tiles
@@ -249,11 +253,11 @@ public partial class BoardState : Node
 
 	#region Illegal Fence Check
 	
-	public bool CheckIllegalFence(int fenceIndex, int direction, int playerIndex)
+	public bool CheckIllegalFence(int fenceIndex, int playerIndex)
 	{
 		// Create a duplicate of the current board state
 		BoardState boardState = Clone();
-		boardState.PlaceFence(fenceIndex, direction, playerIndex);
+		boardState.PlaceFence(fenceIndex, playerIndex);
 
 		int startIndex = PawnPositions[playerIndex];
 		HashSet<int> goalTiles = WinPositions[playerIndex].ToHashSet();
@@ -301,8 +305,11 @@ public partial class BoardState : Node
 		return FenceCounts[playerIndex] > 0;
 	}
 
-	public void PlaceFence(int fenceIndex, int direction, int currentPlayer)
+	public void PlaceFence(int fenceIndex, int currentPlayer)
 	{
+		int direction = fenceIndex < 0 ? 0 : 1;
+		fenceIndex = Math.Abs(fenceIndex);
+
 		foreach (var connection in Fences[fenceIndex][direction])
 		{
 			RemoveTileConnection(connection, 0);
@@ -310,6 +317,7 @@ public partial class BoardState : Node
 		}
 
 		FenceCounts[currentPlayer]--;
+		SetFencePlaced(fenceIndex);
 	}
 
 	public void RemoveTileConnection(int[] connection, int index)
@@ -319,10 +327,9 @@ public partial class BoardState : Node
 		Tiles[tileIndex][Array.IndexOf(Tiles[tileIndex], removingIndex)] = -1;
 	}
 
-	public bool MovePawn(int tileIndex)
+	public void MovePawn(int tileIndex, int currentPlayer)
 	{
-		PawnPositions[CurrentPlayer] = tileIndex;
-		return WinPositions[CurrentPlayer].Contains(tileIndex);
+		PawnPositions[currentPlayer] = tileIndex;
 	}
 
 	public Dictionary<int, int[]> GetPossibleMoves()
@@ -345,8 +352,21 @@ public partial class BoardState : Node
 		return possibleMoves;
 	}
 
-	public void AddMove(string moveToAdd)
+	public void AddMove(string code)
 	{
-		MoveHistory.Append(moveToAdd + ";");
+		MoveHistory.Append(code + ";");
+
+		int currentPlayer = int.Parse(code[0].ToString());
+		char moveType = code[1];
+		int value = int.Parse(code[2..]);
+
+		if (moveType == 'm')
+		{
+			MovePawn(value, currentPlayer);
+		}
+		else
+		{
+			PlaceFence(value, currentPlayer);
+		}
 	}
 }

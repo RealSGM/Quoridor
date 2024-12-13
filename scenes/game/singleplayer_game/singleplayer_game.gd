@@ -2,12 +2,12 @@ class_name SingleplayerGame extends BaseGame
 
 @export var bot_cover: Control
 
-var mini_max: MiniMax
+#var mini_max: MiniMaxAlgorithm
 
 func _ready() -> void:
 	super._ready()
 	bot_cover.hide()
-	mini_max = MiniMax.new()
+	#mini_max = MiniMaxAlgorithm.new()
 
 
 func set_current_player(val: int) -> void:
@@ -16,4 +16,5 @@ func set_current_player(val: int) -> void:
 	
 	# Bot's Turn
 	if val == 1:
-		mini_max.CreateGameTree(board)
+		#mini_max.CreateGameTree(board)
+		pass
