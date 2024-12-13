@@ -43,18 +43,6 @@ func update_win(player: int) -> void:
 	win_menu.show()
 
 
-## Add move to the chat
-func update_fence(player: int, fence: int, count: int) -> String:
-	add_message("Add Fence: " + str(fence), player)
-	fence_count_labels[player].text = str(count)
-	return "%sf%s" % [player, fence]
-
-
-func update_move(player: int, tile: int) -> String:
-	add_message("Move Pawn: " + str(tile), player)
-	return "%sm%s" % [player, tile]
-
-
 func update_turn(player: int) -> void:
 	turn_label.text = str(Global.players[player]["name"]) + "'s Turn"
 

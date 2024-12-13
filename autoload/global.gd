@@ -16,3 +16,8 @@ var board_size: int
 var main: Control
 
 var players: Array[Dictionary] = [{}, {}]
+
+## Converts fence direction which is [0, 1]
+## To [-1, 1] for notation
+func map_fence_direction(fence: int) -> int:
+	return fence * ((2 * fence_direction) - 1)
