@@ -13,7 +13,6 @@ class_name BaseGame extends Control
 @export var fence_button_container: GridContainer
 @export var user_interface: UserInterface
 
-var threads: Array[Thread] = []
 var tile_buttons: Array[TileButton] = []
 var fence_buttons: Array[FenceButton] = []
 var has_won: bool = false
@@ -67,7 +66,7 @@ func _ready() -> void:
 func set_current_player(val: int) -> void:
 	reset_board()
 	set_tiles(board.PawnPositions[current_player])
-	get_illegal_fences()
+	get_illegal_fences(board);
 	update_fence_buttons()
 	user_interface.update_turn(val)
 
@@ -228,36 +227,39 @@ func confirm_move_pawn() -> void:
 
 
 #region Illegal Fence Check
-func get_illegal_fences() -> void:
+
+func get_illegal_fences(current_board: BoardState) -> void:
+	var threads: Array[Thread] = []
+	
 	# Stop if current player has no more fences
-	if board.FenceCounts[current_player] <= 0:
+	if current_board.FenceCounts[board.CurrentPlayer] <= 0:
 		return
 	
 	var illegal_fences: Dictionary = { 0: {}, 1: {} }
 	
 	# Check each fence button, to see if it is possible
-	for fence: int in range(board.GetFenceAmount()):
+	for fence: int in range(current_board.GetFenceAmount()):
+		
 		
 		# Reset DFS Array
-		board.SetDFSDisabled(fence, 0, false)
-		board.SetDFSDisabled(fence, 1, false)
+		current_board.SetDFSDisabled(fence, 0, false)
+		current_board.SetDFSDisabled(fence, 1, false)
 		
 		# Ignore any placed fences
-		if board.GetFencePlaced(fence):
+		if current_board.GetFencePlaced(fence):
 			continue
 
 		# Loop for both, horizontal and vertical fences
 		for fence_dir: int in Global.BITS:
 			# Ignore fences adjacent to placed fences
-			if board.GetDirDisabled(fence, fence_dir):
+			if current_board.GetDirDisabled(fence, fence_dir):
 				continue
 				
 			# Loop for each player
 			for player: int in Global.BITS:
 				var thread: Thread = Thread.new()
 				threads.append(thread)
-				# Replace 0 with player
-				thread.start(_illegal_fence_check_threaded.bind(fence, fence_dir, player))
+				thread.start(_illegal_fence_check_threaded.bind(fence, fence_dir, player, board))
 	
 	# Store results from threads into dictionary
 	for thread: Thread in threads:
@@ -274,10 +276,10 @@ func get_illegal_fences() -> void:
 			board.SetDFSDisabled(fence, direction, true)
 
 
-func _illegal_fence_check_threaded(fence: int, fence_dir: int, player: int) -> Array:
-	if board.CheckIllegalFence(fence, fence_dir, player):
+func _illegal_fence_check_threaded(fence: int, fence_dir: int, player: int, current_board: BoardState) -> Array:
+	if current_board.CheckIllegalFence(fence, fence_dir, player):
 		return []
-	board.SetDFSDisabled(fence, fence_dir, true)
+	current_board.SetDFSDisabled(fence, fence_dir, true)
 	return [fence_dir, fence]
 
 

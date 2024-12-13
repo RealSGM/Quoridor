@@ -241,6 +241,7 @@ public partial class BoardState : Node
 	#endregion
 
 	#region Illegal Fence Check
+	
 	public bool CheckIllegalFence(int fenceIndex, int direction, int playerIndex)
 	{
 		// Create a duplicate of the current board state
@@ -248,32 +249,38 @@ public partial class BoardState : Node
 		boardState.PlaceFence(fenceIndex, direction, playerIndex);
 
 		int startIndex = PawnPositions[playerIndex];
-		int[] goalTiles = WinPositions[playerIndex];
+		HashSet<int> goalTiles = WinPositions[playerIndex].ToHashSet();
 
-		return RecursiveDFS(startIndex, goalTiles, new HashSet<int>(), boardState);
+		return IterativeDFS(startIndex, goalTiles, boardState);
 	}
 
-	public bool RecursiveDFS(int currentIndex, int[] goalTiles, HashSet<int> visitedTiles, BoardState boardState)
+	public bool IterativeDFS(int startIndex, HashSet<int> goalTiles, BoardState boardState)
 	{
-		// Check if the current index is in the goal tiles
-		if (goalTiles.Contains(currentIndex))
-		{
-			return true;
-		}
+		Stack<int> stack = new();
+		HashSet<int> visitedTiles = new();
 
-		// Add the current index to the visited tiles
-		visitedTiles.Add(currentIndex);
+		stack.Push(startIndex);
 
-		// Loop through all connected tiles
-		foreach (int connectedTile in boardState.Tiles[currentIndex])
+		while (stack.Count > 0)
 		{
-			// Check if the connected tile is not empty and not visited
-			if (connectedTile != -1 && !visitedTiles.Contains(connectedTile))
+			int currentIndex = stack.Pop();
+
+			// Check if the current index is in the goal tiles
+			if (goalTiles.Contains(currentIndex))
 			{
-				// Recursively call the function with the connected tile
-				if (RecursiveDFS(connectedTile, goalTiles, visitedTiles, boardState))
+				return true;
+			}
+
+			// Add the current index to the visited tiles
+			visitedTiles.Add(currentIndex);
+
+			// Loop through all connected tiles
+			foreach (int connectedTile in boardState.Tiles[currentIndex])
+			{
+				// Check if the connected tile is not empty and not visited
+				if (connectedTile != -1 && !visitedTiles.Contains(connectedTile))
 				{
-					return true;
+					stack.Push(connectedTile);
 				}
 			}
 		}
