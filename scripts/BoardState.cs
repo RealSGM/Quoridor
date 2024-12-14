@@ -355,6 +355,6 @@ public partial class BoardState : Node
 	// Converts fence direction which is [0, 1] to [-1, 1] for notation
 	public static int GetMappedFenceIndex(int fenceIndex, int direction)
 	{
-		return fenceIndex * (2 + direction - 1);
+		return fenceIndex * (2 * direction - 1);
 	}
 }
