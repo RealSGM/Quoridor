@@ -73,18 +73,18 @@ public partial class IllegalFenceCheck : Node
 
 	private List<int> IllegalFenceCheckThreaded(int fence, int direction, int player, BoardState currentBoard)
 	{
-		if (CheckIllegalFence(BoardState.GetMappedFenceIndex(fence, direction), player, currentBoard)) return new List<int>();
+		if (CheckIllegalFence(fence, direction, player, currentBoard)) return new List<int>();
 		return new List<int> { direction, fence };
 	}
 
-	public bool CheckIllegalFence(int fenceIndex, int playerIndex, BoardState board)
+	public bool CheckIllegalFence(int fence, int direction, int player, BoardState board)
 	{
 		// Create a duplicate of the current board state
 		BoardState boardState = board.Clone();
-		boardState.PlaceFence(fenceIndex, playerIndex);
+		boardState.PlaceFence(BoardState.GetMappedFenceIndex(fence, direction), player);
 
-		int startIndex = boardState.PawnPositions[playerIndex];
-		HashSet<int> goalTiles = boardState.WinPositions[playerIndex].ToHashSet();
+		int startIndex = boardState.PawnPositions[player];
+		HashSet<int> goalTiles = boardState.WinPositions[player].ToHashSet();
 
 		return IterativeDFS(startIndex, goalTiles, boardState);
 	}
