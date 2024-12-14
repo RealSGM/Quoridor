@@ -7,118 +7,85 @@ using System.Threading.Tasks;
 public partial class IllegalFenceCheck : Node
 {
 	[Signal] public delegate void CheckCompletedEventHandler();
+	int[] bits = { 0, 1 };
 
 	public void GetIllegalFences(BoardState board)
 	{
-		// Stop if current player has no more fences
-		if (board.FenceCounts[board.CurrentPlayer] <= 0) return;
-
-		List<Task<List<int>>> tasks = new();
-		int[] bits = { 0, 1 };
-		Dictionary<int, HashSet<int>> illegalFences = new()
-		{
-			{ 0, new HashSet<int>() },
-			{ 1, new HashSet<int>() }
-		};
-
-		// Check each fence button, to see if it is possible
+		// Check if the current player has any fences left
+		if (!board.IsFenceAvailable(board.CurrentPlayer)) return;
+		
+		// Loop through all the fences on the board
 		for (int fence = 0; fence < board.GetFenceAmount(); fence++)
 		{
-			// Reset DFS Array
+			// Reset the DFS Enabled Array
 			board.SetDFSDisabled(fence, 0, false);
 			board.SetDFSDisabled(fence, 1, false);
 
 			// Ignore any placed fences
 			if (board.GetFencePlaced(fence)) continue;
 
-			// Loop for both, horizontal and vertical fences
+			// Loop through both horizontal and vertical directions
 			foreach (int direction in bits)
 			{
-				// Ignore fences adjacent to placed fences
+				// Ignore any disabled directions
 				if (board.GetDirDisabled(fence, direction)) continue;
 
 				// Loop for each player
 				foreach (int player in bits)
 				{
-					// Run DFS check in parallel
-					var task = Task.Run(() => IllegalFenceCheckThreaded(fence, direction, player, board));
-					tasks.Add(task);
-				}
-			}
-		}
+					if (!IsFenceIllegal(board, fence, direction, player)) continue;
 
-		// Store results from tasks into dictionary
-		Task.WhenAll(tasks).ContinueWith(t =>
-		{
-			foreach (var task in tasks)
-			{
-				var result = task.Result;
-				if (result.Count == 0)
-				{
-					continue;
-				}
-				illegalFences[result[0]].Add(result[1]);
-			}
-
-			// Set results into fence buttons
-			foreach (var direction in illegalFences.Keys)
-			{
-				foreach (var fence in illegalFences[direction])
-				{
 					board.SetDFSDisabled(fence, direction, true);
 				}
 			}
-		}).Wait();
+		}
 	}
 
-	private List<int> IllegalFenceCheckThreaded(int fence, int direction, int player, BoardState currentBoard)
-	{
-		if (CheckIllegalFence(fence, direction, player, currentBoard)) return new List<int>();
-		return new List<int> { direction, fence };
-	}
+    private bool IsFenceIllegal(BoardState board, int fence, int direction, int player)
+    {
+		// Clone the boardState so it can't be modified
+		BoardState boardClone = board.Clone();
+		int mappedFence = BoardState.GetMappedFenceIndex(fence, direction);
+		
+		// Place the fence on the cloned board
+		boardClone.PlaceFence(mappedFence, player, true);
+		
+		int start = boardClone.PawnPositions[player];
+		HashSet<int> goalTiles = boardClone.WinPositions[player].ToHashSet();
 
-	public bool CheckIllegalFence(int fence, int direction, int player, BoardState board)
-	{
-		// Create a duplicate of the current board state
-		BoardState boardState = board.Clone();
-		boardState.PlaceFence(BoardState.GetMappedFenceIndex(fence, direction), player);
+        return IterativeDFS(boardClone, player, start, goalTiles);
+    }
 
-		int startIndex = boardState.PawnPositions[player];
-		HashSet<int> goalTiles = boardState.WinPositions[player].ToHashSet();
-
-		return IterativeDFS(startIndex, goalTiles, boardState);
-	}
-
-	public bool IterativeDFS(int startIndex, HashSet<int> goalTiles, BoardState boardState)
-	{
+    private bool IterativeDFS(BoardState board, int player, int start, HashSet<int> goalTiles)
+    {
 		Stack<int> stack = new();
-		HashSet<int> visitedTiles = new();
+		HashSet<int> visited = new();
 
-		stack.Push(startIndex);
+		stack.Push(start);
 
 		while (stack.Count > 0)
 		{
-			int currentIndex = stack.Pop();
+			// Pop the current tile
+			int current = stack.Pop();
 
-			// Check if the current index is in the goal tiles
-			if (goalTiles.Contains(currentIndex))
-			{
-				return true;
-			}
+			// Check if the current tile is a goal node
+			if (goalTiles.Contains(current)) return false;
+			
+			// Check if the current tile has been visited
+			if (visited.Contains(current)) continue;
 
-			// Add the current index to the visited tiles
-			visitedTiles.Add(currentIndex);
+			visited.Add(current);
 
 			// Loop through all connected tiles
-			foreach (int connectedTile in boardState.Tiles[currentIndex])
+			foreach (int connectedTile in board.Tiles[current])
 			{
-				// Check if the connected tile is not empty and not visited
-				if (connectedTile != -1 && !visitedTiles.Contains(connectedTile))
-				{
-					stack.Push(connectedTile);
-				}
+				// Check if the connected tile has been visited
+				if (visited.Contains(connectedTile) || connectedTile == -1) continue;
+
+				// Push the connected tile to the stack
+				stack.Push(connectedTile);
 			}
 		}
-		return false;
-	}
+        return true;
+    }
 }

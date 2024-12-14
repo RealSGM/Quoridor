@@ -4,15 +4,16 @@ using System.Linq;
 using System.Collections.Generic;
 using System.Text;
 
+
 [GlobalClass]
 public partial class BoardState : Node
 {
-	[Export] public bool boardReady { get; set; } = false;
-	[Export] public int boardSize { get; set; }
-	[Export] public int[] PawnPositions { get; set; }
-	[Export] public int[] AdjacentOffsets { get; set; }
-	[Export] public int CurrentPlayer { get; set; }
-	[Export] public int[] FenceCounts { get; set; }
+	public bool boardReady { get; set; } = false;
+	public int boardSize { get; set; }
+	public int[] PawnPositions { get; set; }
+	public int[] AdjacentOffsets { get; set; }
+	public int CurrentPlayer { get; set; }
+	public int[] FenceCounts { get; set; }
 	// Stores if the button should be disabled for each direction based off latest DFS
 	public bool[][] DFSDisabledFences { get; set;}
 	// Stores if the button should be disabled for each direction based off it the adjacent fence is placed or not
@@ -32,16 +33,17 @@ public partial class BoardState : Node
 	{
 		BoardState boardState = new()
 		{
-			FenceCounts = FenceCounts.ToArray(),
-			PawnPositions = PawnPositions.ToArray(),
-			Fences = Fences.Select(fence => fence.Select(direction => direction.Select(connection => connection.ToArray()).ToArray()).ToArray()).ToArray(),
-			Tiles = Tiles.Select(tile => tile.ToArray()).ToArray(),
-			AdjacentOffsets = AdjacentOffsets.ToArray(),
-			WinPositions = WinPositions.Select(winPosition => winPosition.ToArray()).ToArray(),
+			FenceCounts = (int[])FenceCounts.Clone(),
+			PawnPositions = (int[])PawnPositions.Clone(),
+			Fences = Fences.Select(fence => fence.Select(direction => direction.Select(connection => (int[])connection.Clone()).ToArray()).ToArray()).ToArray(),
+			Tiles = Tiles.Select(tile => (int[])tile.Clone()).ToArray(),
+			AdjacentOffsets = (int[])AdjacentOffsets.Clone(),
+			WinPositions = WinPositions.Select(winPosition => (int[])winPosition.Clone()).ToArray(),
 			CurrentPlayer = CurrentPlayer,
-			DirDisabledFences = DirDisabledFences.ToArray(),
-			DFSDisabledFences = DFSDisabledFences.ToArray(),
-			PlacedFences = PlacedFences.ToArray()
+			DirDisabledFences = DirDisabledFences.Select(dir => (bool[])dir.Clone()).ToArray(),
+			DFSDisabledFences = DFSDisabledFences.Select(dfs => (bool[])dfs.Clone()).ToArray(),
+			PlacedFences = (bool[])PlacedFences.Clone(),
+			MoveHistory = new StringBuilder(MoveHistory.ToString())
 		};
 		return boardState;
 	}
@@ -261,7 +263,7 @@ public partial class BoardState : Node
 		return FenceCounts[playerIndex] > 0;
 	}
 
-	public void PlaceFence(int fenceIndex, int currentPlayer)
+	public void PlaceFence(int fenceIndex, int currentPlayer, bool isIFS = false)
 	{
 		// Get the fence index
 		int direction = fenceIndex < 0 ? 1 : 0;
@@ -273,6 +275,9 @@ public partial class BoardState : Node
 			RemoveTileConnection(connection, 0);
 			RemoveTileConnection(connection, 1);
 		}
+
+		// Continue if User or AI is placing the fence
+		if (isIFS) return;
 
 		// Flip the index (for NESW adjustment)
 		int flipped_index = 1 - direction;
