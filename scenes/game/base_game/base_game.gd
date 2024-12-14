@@ -40,6 +40,7 @@ var has_won: bool = false
 		move_code = val
 		user_interface.set_confirm_button(val)
 
+
 func _ready() -> void:
 	SignalManager.confirm_pressed.connect(_on_confirm_pressed)
 	SignalManager.direction_toggled.connect(_on_directional_button_pressed)
