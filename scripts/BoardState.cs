@@ -7,6 +7,7 @@ using System.Text;
 [GlobalClass]
 public partial class BoardState : Node
 {
+	[Export] public bool boardReady { get; set; } = false;
 	[Export] public int[] PawnPositions { get; set; }
 	[Export] public int[] AdjacentOffsets { get; set; }
 	[Export] public int CurrentPlayer { get; set; }
@@ -21,6 +22,11 @@ public partial class BoardState : Node
 	public int[][] WinPositions { get; set; }
 	public StringBuilder MoveHistory { get; set; } = new();
 	
+
+	// Signals
+	[Signal] 
+	public delegate void BoardUpdatedEventHandler();
+
 	#region Initialization
 	
 	public BoardState Clone()
@@ -318,6 +324,8 @@ public partial class BoardState : Node
 
 		FenceCounts[currentPlayer]--;
 		SetFencePlaced(fenceIndex);
+		boardReady = true;
+		EmitSignal(SignalName.BoardUpdated);
 	}
 
 	public void RemoveTileConnection(int[] connection, int index)
@@ -330,6 +338,8 @@ public partial class BoardState : Node
 	public void MovePawn(int tileIndex, int currentPlayer)
 	{
 		PawnPositions[currentPlayer] = tileIndex;
+		boardReady = true;
+		EmitSignal(SignalName.BoardUpdated);
 	}
 
 	public Dictionary<int, int[]> GetPossibleMoves()
@@ -354,6 +364,8 @@ public partial class BoardState : Node
 
 	public void AddMove(string code)
 	{
+		boardReady = false;
+
 		MoveHistory.Append(code + ";");
 
 		int currentPlayer = int.Parse(code[0].ToString());

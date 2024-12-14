@@ -179,7 +179,6 @@ func set_tile_button(tile: TileButton, is_disabled: bool) -> void:
 
 #endregion
 
-
 #region Pawns
 @warning_ignore("integer_division")
 @warning_ignore("narrowing_conversion")
@@ -223,14 +222,13 @@ func confirm_move_pawn(tile: int) -> void:
 	
 #endregion
 
-
 #region Illegal Fence Check
 
 func get_illegal_fences(current_board: BoardState) -> void:
 	var threads: Array[Thread] = []
 	
 	# Stop if current player has no more fences
-	if current_board.FenceCounts[board.CurrentPlayer] <= 0:
+	if current_board.FenceCounts[current_board.CurrentPlayer] <= 0:
 		return
 	
 	var illegal_fences: Dictionary = { 0: {}, 1: {} }
@@ -314,6 +312,9 @@ func _on_confirm_pressed() -> void:
 		confirm_place_fence(selected_fence)
 	elif selected_tile > -1:
 		confirm_move_pawn(selected_tile)
+	
+	if !board.boardReady:
+		await board.BoardUpdatedEventHandler
 	
 	# Check if the pawn has reached end goal
 	if has_won:
