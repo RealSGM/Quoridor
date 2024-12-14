@@ -256,55 +256,6 @@ public partial class BoardState : Node
 	}
 	#endregion
 
-	#region Illegal Fence Check
-	
-	public bool CheckIllegalFence(int fenceIndex, int playerIndex)
-	{
-		// Create a duplicate of the current board state
-		BoardState boardState = Clone();
-		boardState.PlaceFence(fenceIndex, playerIndex);
-
-		int startIndex = PawnPositions[playerIndex];
-		HashSet<int> goalTiles = WinPositions[playerIndex].ToHashSet();
-
-		return IterativeDFS(startIndex, goalTiles, boardState);
-	}
-
-	public bool IterativeDFS(int startIndex, HashSet<int> goalTiles, BoardState boardState)
-	{
-		Stack<int> stack = new();
-		HashSet<int> visitedTiles = new();
-
-		stack.Push(startIndex);
-
-		while (stack.Count > 0)
-		{
-			int currentIndex = stack.Pop();
-
-			// Check if the current index is in the goal tiles
-			if (goalTiles.Contains(currentIndex))
-			{
-				return true;
-			}
-
-			// Add the current index to the visited tiles
-			visitedTiles.Add(currentIndex);
-
-			// Loop through all connected tiles
-			foreach (int connectedTile in boardState.Tiles[currentIndex])
-			{
-				// Check if the connected tile is not empty and not visited
-				if (connectedTile != -1 && !visitedTiles.Contains(connectedTile))
-				{
-					stack.Push(connectedTile);
-				}
-			}
-		}
-		return false;
-	}
-
-	#endregion
-
 	public bool IsFenceAvailable(int playerIndex)
 	{
 		return FenceCounts[playerIndex] > 0;
@@ -313,7 +264,7 @@ public partial class BoardState : Node
 	public void PlaceFence(int fenceIndex, int currentPlayer)
 	{
 		// Get the fence index
-		int direction = fenceIndex < 0 ? 0 : 1;
+		int direction = fenceIndex < 0 ? 1 : 0;
 		fenceIndex = Math.Abs(fenceIndex);
 
 		// Get the adjacent tiles and remove the connections
@@ -323,18 +274,21 @@ public partial class BoardState : Node
 			RemoveTileConnection(connection, 1);
 		}
 
+		// Flip the index (for NESW adjustment)
 		int flipped_index = 1 - direction;
-		int[] disabledIndexes = new int[] { flipped_index, flipped_index + 2 };
 
-		// Disable the adjacent fences
-		foreach (int index in disabledIndexes)
+
+		// Get the adjacent directionals
+		int[] disabled_indexes = new int[2] { flipped_index, flipped_index + 2 };
+
+		// Disable the adjacents buttons, for that direction
+		foreach (int indexes in disabled_indexes)
 		{
-			int[] adjFences = InitialiseConnections(fenceIndex, boardSize - 1);
-			int adjIndex = adjFences[index];
-
-			if (adjIndex > -1)
+			int[] adj_fences = InitialiseConnections(fenceIndex, boardSize - 1);
+			int index = adj_fences[indexes];
+			if (index > -1)
 			{
-				SetDirDisabled(adjIndex, direction, true);
+				SetDirDisabled(index, direction, true);
 			}
 		}
 
@@ -397,5 +351,11 @@ public partial class BoardState : Node
 		{
 			PlaceFence(value, currentPlayer);
 		}
+	}
+
+	// Converts fence direction which is [0, 1] to [-1, 1] for notation
+	public static int GetMappedFenceIndex(int fenceIndex, int direction)
+	{
+		return fenceIndex * (2 + direction - 1);
 	}
 }

@@ -51,7 +51,6 @@ func _ready() -> void:
 func set_current_player(val: int) -> void:
 	reset_board()
 	set_tiles(board.PawnPositions[current_player])
-	#get_illegal_fences(board);
 	update_fence_buttons()
 	user_interface.update_turn(val)
 
@@ -180,64 +179,6 @@ func confirm_move_pawn(tile: int) -> void:
 	user_interface.add_message("Move Pawn: " + str(tile), current_player)
 
 
-#region Illegal Fence Check
-#endregion
-
-func get_illegal_fences(current_board: BoardState) -> void:
-	var threads: Array[Thread] = []
-	
-	# Stop if current player has no more fences
-	if current_board.FenceCounts[current_board.CurrentPlayer] <= 0:
-		return
-	
-	var illegal_fences: Dictionary = { 0: {}, 1: {} }
-	
-	# Check each fence button, to see if it is possible
-	for fence: int in range(current_board.GetFenceAmount()):
-		
-		
-		# Reset DFS Array
-		current_board.SetDFSDisabled(fence, 0, false)
-		current_board.SetDFSDisabled(fence, 1, false)
-		
-		# Ignore any placed fences
-		if current_board.GetFencePlaced(fence):
-			continue
-
-		# Loop for both, horizontal and vertical fences
-		for fence_dir: int in Global.BITS:
-			# Ignore fences adjacent to placed fences
-			if current_board.GetDirDisabled(fence, fence_dir):
-				continue
-				
-			# Loop for each player
-			for player: int in Global.BITS:
-				var thread: Thread = Thread.new()
-				threads.append(thread)
-				thread.start(_illegal_fence_check_threaded.bind(fence, fence_dir, player, board))
-	
-	# Store results from threads into dictionary
-	for thread: Thread in threads:
-		var result: Array = thread.wait_to_finish()
-		if result.is_empty():
-			continue
-		illegal_fences[result[0]][result[1]] = true
-
-	threads.clear()
-	
-	# Set results into fence buttons
-	for direction: int in illegal_fences:
-		for fence: int in illegal_fences[direction]:
-			board.SetDFSDisabled(fence, direction, true)
-
-
-func _illegal_fence_check_threaded(fence: int, fence_dir: int, player: int, current_board: BoardState) -> Array:
-	if current_board.CheckIllegalFence(Global.map_fence_direction(fence), player):
-		return []
-	current_board.SetDFSDisabled(fence, fence_dir, true)
-	return [fence_dir, fence]
-
-
 #region Signals
 #endregion
 
@@ -250,7 +191,7 @@ func _on_directional_button_pressed() -> void:
 
 
 func _on_fence_button_pressed(fence: int) -> void:
-	move_code = "%sf%s" % [current_player, Global.map_fence_direction(fence)]
+	move_code = "%sf%s" % [current_player, BoardState.GetMappedFenceIndex(fence, Global.fence_direction)]
 
 	var fence_button: FenceButton = fence_buttons[fence]
 	fence_button.h_fence.visible = Global.fence_direction == 0
@@ -280,9 +221,16 @@ func _on_confirm_pressed() -> void:
 	board.AddMove(move_code)
 	move_code = ''
 	
+	if not board.boardReady:
+		await board.BoardUpdated
+	
 	# Check if the pawn has reached end goal
 	if has_won:
 		user_interface.update_win(current_player)
 	# Switch to next player
 	else:
+		# Complete IFS before switching player
+		#IllegalFenceCheck.GetIllegalFences(board)
+		#await IllegalFenceCheck.CheckCompleted
+		
 		current_player = 1 - current_player
