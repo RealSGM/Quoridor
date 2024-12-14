@@ -17,35 +17,6 @@ var tile_buttons: Array[TileButton] = []
 var fence_buttons: Array[FenceButton] = []
 var has_won: bool = false
 
-## Update the selected fence, and the confirm button
-@onready var selected_fence: int = -1:
-	set(val):
-		# Clear current fence
-		if selected_fence > -1:
-			fence_buttons[selected_fence].clear_fences(board.GetFencePlaced(selected_fence))
-		
-		# Validate the confirm button
-		selected_fence = val
-		user_interface.set_confirm_button(val, selected_tile)
-
-
-## Update the selected tile, and the confirm button
-@onready var selected_tile: int = -1:
-	set(val):
-		# Clear the current pawn
-		if selected_tile > -1:
-			tile_buttons[selected_tile].clear_pawns()
-		
-		# Validate the confirm button
-		selected_tile = val
-		user_interface.set_confirm_button(selected_fence, val)
-		
-		if val > -1:
-			var pawn: Panel = tile_buttons[selected_tile].pawns[current_player]
-			pawn.modulate.a = 0.5
-			pawn.show()
-
-
 ## Update board when the player is changed
 @onready var current_player: int:
 	set(val):
@@ -54,10 +25,25 @@ var has_won: bool = false
 		set_current_player(val)
 
 
+@onready var move_code: String = '':
+	set(val):
+		if not move_code.is_empty():
+			var index: int = abs(move_code.substr(2,-1).to_int())
+			match  move_code[1]:
+				# Clear current fence
+				'f':
+					if !board.GetFencePlaced(index):
+						fence_buttons[index].clear_fences()
+				# Clear current tile
+				'm':
+					tile_buttons[index].clear_pawns()
+		move_code = val
+		user_interface.set_confirm_button(val)
+
 func _ready() -> void:
 	SignalManager.confirm_pressed.connect(_on_confirm_pressed)
 	SignalManager.direction_toggled.connect(_on_directional_button_pressed)
-	user_interface.set_confirm_button(selected_fence, selected_tile)
+	move_code = ''
 	current_player = 0
 	board.show()
 
@@ -81,7 +67,7 @@ func reset_board() -> void:
 
 ## Setup the board with the selected size
 func setup_board(board_size: int) -> void:
-	Global.board_size = board_size
+	board.boardSize = board_size
 	board.InitialiseAdjacentOffsets(board_size)
 	board.GenerateTiles(board_size)
 	board.GenerateFences(board_size - 1)
@@ -123,6 +109,8 @@ func instance_tile_buttons(board_size: int) -> void:
 
 
 #region Fences
+#endregion
+
 func update_fence_buttons() -> void:
 	for fence: int in range(board.GetFenceAmount()):
 		var fence_button: FenceButton = fence_buttons[fence]
@@ -132,35 +120,13 @@ func update_fence_buttons() -> void:
 
 
 func confirm_place_fence(fence: int) -> void:
-	var fence_button: FenceButton = fence_buttons[fence]
-	
-	# Flip the index (for NESW adjustment)
-	var flipped_index: int = 1 - Global.fence_direction
-	
-	# Get the adjacent directionals
-	var disabled_indexes: Array[int] = [flipped_index, flipped_index + 2]
-	
-	# Disable the adjacents buttons, for that direction
-	for indexes: int in disabled_indexes:
-		var adj_fences: Array = Array(board.InitialiseConnections(fence, Global.board_size-1))
-		var index: int = adj_fences[indexes]
-		if index > -1:
-			board.SetDirDisabled(index, Global.fence_direction, true)
-	
-	# Update Board
-	board.AddMove("%sf%s" % [current_player, Global.map_fence_direction(fence)])
-	
-	# Update UI
 	user_interface.add_message("Add Fence: " + str(fence), current_player)
 	user_interface.fence_count_labels[current_player].text = str(board.FenceCounts[current_player])
-	
-	fence_button.disabled = true
-	selected_fence = -1
 
-
-#endregion
 
 #region Tiles
+#endregion
+
 ## Set the tiles of the board, based off the current player's turn
 func set_tiles(tile: int) -> void:
 	tile_buttons[tile].disabled = true
@@ -177,11 +143,9 @@ func set_tile_button(tile: TileButton, is_disabled: bool) -> void:
 	tile.focus_mode = Control.FOCUS_NONE if is_disabled else Control.FOCUS_CLICK
 
 
+#region Pawns
 #endregion
 
-#region Pawns
-@warning_ignore("integer_division")
-@warning_ignore("narrowing_conversion")
 func spawn_pawns() -> void:
 	# For each tile, instance a pawn for both players
 	for tile_button: TileButton in tile_buttons:
@@ -210,19 +174,14 @@ func confirm_move_pawn(tile: int) -> void:
 	tile_button.pawns[current_player].modulate.a = 1
 	tile_button.pawn_moved = true 
 	
-	# Update the Board
-	board.AddMove("%sm%s" % [current_player, tile])
-	
 	has_won = board.GetWinner(current_player)
 	
 	# Update UI
 	user_interface.add_message("Move Pawn: " + str(tile), current_player)
-	selected_tile = -1
-	
-	
-#endregion
+
 
 #region Illegal Fence Check
+#endregion
 
 func get_illegal_fences(current_board: BoardState) -> void:
 	var threads: Array[Thread] = []
@@ -279,12 +238,19 @@ func _illegal_fence_check_threaded(fence: int, fence_dir: int, player: int, curr
 	return [fence_dir, fence]
 
 
+#region Signals
 #endregion
+
+## Flip the rotation of the fence
+func _on_directional_button_pressed() -> void:
+	move_code = ''
+	Global.fence_direction = 1 - Global.fence_direction
+	user_interface.update_direction()
+	update_fence_buttons()
 
 
 func _on_fence_button_pressed(fence: int) -> void:
-	selected_fence = fence
-	selected_tile = -1
+	move_code = "%sf%s" % [current_player, Global.map_fence_direction(fence)]
 
 	var fence_button: FenceButton = fence_buttons[fence]
 	fence_button.h_fence.visible = Global.fence_direction == 0
@@ -292,29 +258,27 @@ func _on_fence_button_pressed(fence: int) -> void:
 
 
 func _on_tile_pressed(tile: int) -> void:
-	selected_tile = tile
-	selected_fence = -1
-
-
-## Flip the rotation of the fence
-func _on_directional_button_pressed() -> void:
-	selected_fence = -1
-	Global.fence_direction = 1 - Global.fence_direction
-	user_interface.update_direction()
-	update_fence_buttons()
+	move_code = "%sm%s" % [current_player, tile]
+	
+	var pawn: Panel = tile_buttons[tile].pawns[current_player]
+	pawn.modulate.a = 0.5
+	pawn.show()
 
 
 func _on_confirm_pressed() -> void:
 	# Reset Board
 	reset_board()
 	
-	if selected_fence > -1:
-		confirm_place_fence(selected_fence)
-	elif selected_tile > -1:
-		confirm_move_pawn(selected_tile)
+	var index: int = abs(move_code.substr(2,-1).to_int())
+
+	match  move_code[1]:
+		'f':
+			confirm_place_fence(index)
+		'm':
+			confirm_move_pawn(index)
 	
-	if !board.boardReady:
-		await board.BoardUpdatedEventHandler
+	board.AddMove(move_code)
+	move_code = ''
 	
 	# Check if the pawn has reached end goal
 	if has_won:

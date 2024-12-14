@@ -10,9 +10,6 @@ func _ready() -> void:
 	h_fence.hide()
 	v_fence.hide()
 
-func clear_fences(fence_placed: bool) -> void:
-	if fence_placed:
-		return
-	
+func clear_fences() -> void:
 	h_fence.visible = false
 	v_fence.visible = false

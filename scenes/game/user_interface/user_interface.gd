@@ -55,8 +55,8 @@ func add_message(msg: String, player: int) -> void:
 
 
 ## Disable the confirm button when neither option is selected
-func set_confirm_button(fence: int, tile: int) -> void:
-	confirm_button.disabled = !(fence >= 0 || tile >= 0)
+func set_confirm_button(move_code: String) -> void:
+	confirm_button.disabled = move_code == ''
 
 
 #region Signals

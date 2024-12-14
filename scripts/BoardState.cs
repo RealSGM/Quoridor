@@ -8,6 +8,7 @@ using System.Text;
 public partial class BoardState : Node
 {
 	[Export] public bool boardReady { get; set; } = false;
+	[Export] public int boardSize { get; set; }
 	[Export] public int[] PawnPositions { get; set; }
 	[Export] public int[] AdjacentOffsets { get; set; }
 	[Export] public int CurrentPlayer { get; set; }
@@ -22,10 +23,8 @@ public partial class BoardState : Node
 	public int[][] WinPositions { get; set; }
 	public StringBuilder MoveHistory { get; set; } = new();
 	
-
 	// Signals
-	[Signal] 
-	public delegate void BoardUpdatedEventHandler();
+	[Signal] public delegate void BoardUpdatedEventHandler();
 
 	#region Initialization
 	
@@ -313,17 +312,35 @@ public partial class BoardState : Node
 
 	public void PlaceFence(int fenceIndex, int currentPlayer)
 	{
+		// Get the fence index
 		int direction = fenceIndex < 0 ? 0 : 1;
 		fenceIndex = Math.Abs(fenceIndex);
 
+		// Get the adjacent tiles and remove the connections
 		foreach (var connection in Fences[fenceIndex][direction])
 		{
 			RemoveTileConnection(connection, 0);
 			RemoveTileConnection(connection, 1);
 		}
 
+		int flipped_index = 1 - direction;
+		int[] disabledIndexes = new int[] { flipped_index, flipped_index + 2 };
+
+		// Disable the adjacent fences
+		foreach (int index in disabledIndexes)
+		{
+			int[] adjFences = InitialiseConnections(fenceIndex, boardSize - 1);
+			int adjIndex = adjFences[index];
+
+			if (adjIndex > -1)
+			{
+				SetDirDisabled(adjIndex, direction, true);
+			}
+		}
+
 		FenceCounts[currentPlayer]--;
 		SetFencePlaced(fenceIndex);
+
 		boardReady = true;
 		EmitSignal(SignalName.BoardUpdated);
 	}
