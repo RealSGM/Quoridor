@@ -277,7 +277,6 @@ public partial class BoardState : Node
 		// Flip the index (for NESW adjustment)
 		int flipped_index = 1 - direction;
 
-
 		// Get the adjacent directionals
 		int[] disabled_indexes = new int[2] { flipped_index, flipped_index + 2 };
 

@@ -121,5 +121,4 @@ public partial class IllegalFenceCheck : Node
 		}
 		return false;
 	}
-
 }
