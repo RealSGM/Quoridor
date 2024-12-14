@@ -282,7 +282,7 @@ public partial class BoardState : Node
 		// Disable the adjacents buttons, for that direction
 		foreach (int indexes in disabled_indexes)
 		{
-			int[] adj_fences = InitialiseConnections(fenceIndex, boardSize - 1);
+			int[] adj_fences = InitialiseConnections(fenceIndex, BoardSize - 1);
 			int index = adj_fences[indexes];
 			if (index > -1)
 			{

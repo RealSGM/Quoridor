@@ -67,7 +67,7 @@ func reset_board() -> void:
 
 ## Setup the board with the selected size
 func setup_board(board_size: int) -> void:
-	board.InitialiseBoard(board_size)
+	board.InitialiseBoard(board_size, fence_amount, player_amount)
 	
 	board.GenerateTiles(board_size)
 	board.GenerateFences(board_size - 1)
@@ -120,7 +120,7 @@ func update_fence_buttons() -> void:
 
 func confirm_place_fence(fence: int) -> void:
 	user_interface.add_message("Add Fence: " + str(fence), current_player)
-	user_interface.fence_count_labels[current_player].text = str(board.FenceCounts[current_player])
+	user_interface.fence_count_labels[current_player].text = str(board.FenceCounts[current_player] - 1)
 
 
 #region Tiles
