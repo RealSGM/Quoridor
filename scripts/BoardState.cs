@@ -8,8 +8,8 @@ using System.Text;
 [GlobalClass]
 public partial class BoardState : Node
 {
-	public bool boardReady { get; set; } = false;
-	public int boardSize { get; set; }
+	public bool BoardReady { get; set; } = false;
+	public int BoardSize { get; set; }
 	public int[] PawnPositions { get; set; }
 	public int[] AdjacentOffsets { get; set; }
 	public int CurrentPlayer { get; set; }
@@ -24,7 +24,6 @@ public partial class BoardState : Node
 	public int[][] WinPositions { get; set; }
 	public StringBuilder MoveHistory { get; set; } = new();
 	
-	// Signals
 	[Signal] public delegate void BoardUpdatedEventHandler();
 
 	#region Initialization
@@ -48,9 +47,19 @@ public partial class BoardState : Node
 		return boardState;
 	}
 
-	public void InitialiseFenceCounts(int fencesPerPlayer, int playerCount)
+	public void InitialiseBoard(int boardSize, int fencesPerPlayer, int playerCount)
 	{
+		this.BoardSize = boardSize;
+		CurrentPlayer = 0;
+
 		FenceCounts = Enumerable.Repeat(fencesPerPlayer, playerCount).ToArray();
+		AdjacentOffsets = new int[4] { -boardSize, 1, boardSize, -1 };
+
+		InitialisePawnPositions(playerCount, boardSize);
+		InitialiseWinPositions(boardSize, playerCount);
+
+		GenerateTiles(boardSize);
+		GenerateFences(boardSize - 1);
 	}
 
 	public void InitialisePawnPositions(int playerCount, int boardSize)
@@ -58,11 +67,6 @@ public partial class BoardState : Node
 		PawnPositions = new int[playerCount];
 		PawnPositions[0] = (int)(boardSize * (boardSize - 0.5));
 		PawnPositions[1] = boardSize / 2;
-	}
-
-	public void InitialiseAdjacentOffsets(int boardSize)
-	{
-		AdjacentOffsets = new int[4] { -boardSize, 1, boardSize, -1 };
 	}
 
 	public void InitialiseWinPositions(int boardSize, int playerCount)
@@ -88,16 +92,6 @@ public partial class BoardState : Node
 		Fences[index][1] = new int[2][] { new int[2] { topLeft, topRight }, new int[2] { bottomLeft, bottomRight } }; // Vertical Fences
 	}
 	
-	public int[] InitialiseConnections(int index, int size)
-	{
-		int[] connections = new int[4];
-		connections[0] = index >= size ? index - size : -1; // North Tile
-		connections[1] = (index + 1) % size != 0 ? index + 1 : -1; // East Tile
-		connections[2] = index < size * (size - 1) ? index + size : -1; // South Tile
-		connections[3] = index % size != 0 ? index - 1 : -1; // West Tile
-		return connections;
-	}
-
 	public void GenerateTiles(int boardSize)
 	{
 		int totalTiles = boardSize * boardSize;
@@ -299,7 +293,7 @@ public partial class BoardState : Node
 		FenceCounts[currentPlayer]--;
 		SetFencePlaced(fenceIndex);
 
-		boardReady = true;
+		BoardReady = true;
 		EmitSignal(SignalName.BoardUpdated);
 	}
 
@@ -313,7 +307,7 @@ public partial class BoardState : Node
 	public void MovePawn(int tileIndex, int currentPlayer)
 	{
 		PawnPositions[currentPlayer] = tileIndex;
-		boardReady = true;
+		BoardReady = true;
 		EmitSignal(SignalName.BoardUpdated);
 	}
 
@@ -339,7 +333,7 @@ public partial class BoardState : Node
 
 	public void AddMove(string code)
 	{
-		boardReady = false;
+		BoardReady = false;
 
 		MoveHistory.Append(code + ";");
 
@@ -361,5 +355,15 @@ public partial class BoardState : Node
 	public static int GetMappedFenceIndex(int fenceIndex, int direction)
 	{
 		return direction == 0 ? fenceIndex : -fenceIndex;
+	}
+
+	public int[] InitialiseConnections(int index, int size)
+	{
+		int[] connections = new int[4];
+		connections[0] = index >= size ? index - size : -1; // North Tile
+		connections[1] = (index + 1) % size != 0 ? index + 1 : -1; // East Tile
+		connections[2] = index < size * (size - 1) ? index + size : -1; // South Tile
+		connections[3] = index % size != 0 ? index - 1 : -1; // West Tile
+		return connections;
 	}
 }

@@ -67,11 +67,10 @@ func reset_board() -> void:
 
 ## Setup the board with the selected size
 func setup_board(board_size: int) -> void:
-	board.boardSize = board_size
-	board.InitialiseAdjacentOffsets(board_size)
+	board.InitialiseBoard(board_size)
+	
 	board.GenerateTiles(board_size)
 	board.GenerateFences(board_size - 1)
-	board.InitialiseFenceCounts(fence_amount, player_amount)
 	board.InitialisePawnPositions(player_amount, board_size)
 	board.InitialiseWinPositions(board_size, player_amount)
 	
@@ -222,7 +221,7 @@ func _on_confirm_pressed() -> void:
 	board.AddMove(move_code)
 	move_code = ''
 	
-	if not board.boardReady:
+	if not board.BoardReady:
 		await board.BoardUpdated
 	
 	# Check if the pawn has reached end goal
