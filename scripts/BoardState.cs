@@ -137,61 +137,38 @@ public partial class BoardState : Node
 
 	#region Getters
 	
-	public bool GetDFSDisabled(int fence, int direction)
-	{
-		return DFSDisabledFences[fence][direction];
-	}
-
-	public int[] GetTileConnections(int tile)
-	{
-		return Tiles[tile];
-	}
-
-	public bool GetFencePlaced(int fence, int direction)
-	{
-		return Fences[fence][direction];
-	}
-
-	public int GetFenceAmount()
-	{
-		return Fences.Length;
-	}
-
-	public int GetFenceCount(int playerIndex)
-	{
-		return FenceCounts[playerIndex];
-	}
-
 	public bool GetFenceEnabled(int fence, int direction)
 	{
 		return GetFencePlaced(fence, direction) || GetDFSDisabled(fence, direction);
 	}
 
-	public string GetMoveHistory()
-	{
-		return MoveHistory.ToString();
-	}
+	public bool GetDFSDisabled(int fence, int direction) => DFSDisabledFences[fence][direction];
 
-	public bool GetWinner(int playerIndex)
-	{
-		return WinPositions[playerIndex].Contains(PawnPositions[playerIndex]);
-	}
+	public int[] GetTileConnections(int tile) => Tiles[tile];
+
+	public bool GetFencePlaced(int fence, int direction) => Fences[fence][direction];
+
+	public int GetFenceAmount() => Fences.Length;
+
+	public int GetFenceCount(int index) => FenceCounts[index];
+
+	public string GetMoveHistory() => MoveHistory.ToString();
+
+	public bool GetWinner(int index) => WinPositions[index].Contains(PawnPositions[index]);
 	
-	public int GetPawnPosition(int playerIndex)
-	{
-        return PawnPositions[playerIndex];
-	}
+	public int GetPawnPosition(int index) => PawnPositions[index];
 
-	public int[] GetWinPositions(int playerIndex) => WinPositions[playerIndex];
+	public int[] GetWinPositions(int index) => WinPositions[index];
 
 	#endregion
 
-	#region Selectable Tiles
-	public int[] GetReachableTiles(int playerIndex)
+	#region Reachable Tiles
+	
+	public int[] GetReachableTiles(int index)
 	{
-		int playerPawnPosition = PawnPositions[playerIndex];
+		int playerPawnPosition = PawnPositions[index];
 		int[] playerPawnTile = Tiles[playerPawnPosition];
-		int[] reachableTiles = new int[0];
+		List<int> reachableTiles = new();
 
 		// Loop through all tiles
 		foreach (int connectedTile in playerPawnTile)
@@ -199,18 +176,19 @@ public partial class BoardState : Node
 			// Check if the tile is not empty
 			if (connectedTile == -1) continue;
 
-			reachableTiles = reachableTiles.Concat(CheckForEnemy(connectedTile)).ToArray();
+			// CheckFor Enemy and merge list
+			reachableTiles.AddRange(CheckForEnemy(connectedTile));
 		}
-		return reachableTiles;
+		return reachableTiles.ToArray();
 	}
 
-	public int[] CheckForEnemy(int connectedTile)
+	public List<int> CheckForEnemy(int connectedTile)
 	{
 		int enemyPawnPosition = PawnPositions[1 - CurrentPlayer];
 		// Check if the enemy pawn is not on the tile
 		if (enemyPawnPosition != connectedTile)
 		{
-			return new int[] { connectedTile };
+			return new List<int> { connectedTile };
 		}
 
 		// Get the direction of the enemy pawn
@@ -220,11 +198,11 @@ public partial class BoardState : Node
 		int leapedTileIndex = connectedTile + AdjacentOffsets[directionIndex];
 		if (leapedTileIndex < 0 || leapedTileIndex >= Tiles.Length)
 		{
-			// Return an empty array, as the leaped tile is out of boundaries
-			return Array.Empty<int>();
+			// Return an empty list, as the leaped tile is out of boundaries
+			return new List<int>();
 		}
 
-		return GetLeapedTiles(PawnPositions[CurrentPlayer], leapedTileIndex, connectedTile, directionIndex);
+		return GetLeapedTiles(PawnPositions[CurrentPlayer], leapedTileIndex, connectedTile, directionIndex).ToList();
 	}
 
 	public int[] GetLeapedTiles(int playerIndex, int leapedTileIndex, int tileIndex, int dirIndex)
@@ -330,13 +308,14 @@ public partial class BoardState : Node
 		char moveType = code[1];
 		int value = int.Parse(code[2..]);
 
-		if (moveType == 'm')
+		switch (moveType)
 		{
-			MovePawn(value, currentPlayer);
-		}
-		else
-		{
-			PlaceFence(value, currentPlayer);
+			case 'm':
+				MovePawn(value, currentPlayer);
+				break;
+			case 'f':
+				PlaceFence(value, currentPlayer);
+				break;
 		}
 	}
 
