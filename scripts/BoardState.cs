@@ -19,7 +19,7 @@ public partial class BoardState : Node
 	public StringBuilder MoveHistory { get; set; } = new();
 
 	private int[][] Tiles { get; set; }
-	private bool[][] Fences { get; set; }
+	public bool[][] Fences { get; set; }
 	/// Stores if the fence should be disabled for each direction based off latest DFS
 	private bool[][] DFSDisabledFences { get; set;}
 	private int[] PawnPositions { get; set; }
@@ -61,6 +61,7 @@ public partial class BoardState : Node
 			DFSDisabledFences = DFSDisabledFences.Select(dfs => (bool[])dfs.Clone()).ToArray(),
 			MoveHistory = new StringBuilder(MoveHistory.ToString()),
 			Fences = Fences.Select(fence => (bool[])fence.Clone()).ToArray(),
+			BoardSize = BoardSize
 		};
 		return boardState;
 	}
@@ -238,8 +239,7 @@ public partial class BoardState : Node
 		int direction = fenceIndex < 0 ? 1 : 0;
 		fenceIndex = Math.Abs(fenceIndex);
 
-		// Match the fence button index to the index of the Top-Left Tile in 2x2 Grid
-		int convertedIndex = fenceIndex + fenceIndex / (BoardSize - 1);
+		int convertedIndex = fenceIndex + (fenceIndex / (BoardSize - 1));
 
 		// Get possible tile indexes in 2x2 grid
 		int[] tileGrid = GetTileGrid(convertedIndex);

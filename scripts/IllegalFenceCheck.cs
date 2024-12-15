@@ -10,9 +10,8 @@ public partial class IllegalFenceCheck : Node
 
 	public void GetIllegalFences(BoardState board)
 	{
-		GD.Print("Checking illegal fences");
+		GD.Print("Checking for illegal fences...");
 		long startTime = DateTime.Now.Ticks;
-
 		if (board.GetFenceCount(board.CurrentPlayer) == 0) return;
 
 		for (int fence = 0; fence < board.GetFenceAmount(); fence++)
@@ -26,16 +25,10 @@ public partial class IllegalFenceCheck : Node
 
 				foreach (int player in _bits)
 				{
-					if (IsFenceIllegal(board, fence, direction, player))
-					{
-						GD.Print($"Illegal Fence Found: {fence} {direction} {player}");
-						board.SetDFSDisabled(fence, direction, true);
-					}
-					break;
+					if (!IsFenceIllegal(board, fence, direction, player)) continue;
+					board.SetDFSDisabled(fence, direction, true);
 				}
-			// break;
 			}
-		// break;
 		}
 
 		GD.Print("Illegal fence check took: " + (DateTime.Now.Ticks - startTime) / 10000 + "ms");
@@ -64,14 +57,14 @@ public partial class IllegalFenceCheck : Node
 		while (stack.Count > 0)
 		{
 			int current = stack.Pop();
-
+			
 			if (goalTiles.Contains(current)) return false;
 
 			if (visited.Contains(current)) continue;
 
 			visited.Add(current);
 
-			foreach (int connectedTile in board.GetTileConnections(current))
+			foreach (int connectedTile in board.GetTileConnections(current).Reverse())
 			{
 				if (visited.Contains(connectedTile) || connectedTile == -1) continue;
 
