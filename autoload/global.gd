@@ -13,3 +13,13 @@ const COLORS: Array[Color] = [
 var fence_direction: int = 0
 var game: BaseGame
 var players: Array[Dictionary] = [{}, {}]
+
+
+func a_function() -> String:
+	return "A Function"
+
+func b_function() -> String:
+	return "B Function"
+
+func c_function() -> String:
+	return "C Function"

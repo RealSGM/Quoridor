@@ -56,6 +56,10 @@ var game_type: String
 	"Local": [player_two_container]
 }
 
+func _input(event: InputEvent) -> void:
+	if event.is_action_pressed('toggle_console'):
+		Console.visible = !Console.visible
+
 
 func _ready() -> void:
 	setup_menus()

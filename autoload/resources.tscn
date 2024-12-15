@@ -1,5 +1,6 @@
-[gd_scene load_steps=8 format=3 uid="uid://cm0hndv0iu6qm"]
+[gd_scene load_steps=9 format=3 uid="uid://cm0hndv0iu6qm"]
 
+[ext_resource type="PackedScene" uid="uid://cjavkdu6b7w66" path="res://autoload/console/command.tscn" id="1_6aasd"]
 [ext_resource type="PackedScene" uid="uid://b6l2hysgj8hny" path="res://scenes/game/singleplayer_game/singleplayer_game.tscn" id="1_72np1"]
 [ext_resource type="PackedScene" uid="uid://g12um5raoqio" path="res://scenes/game/base_game/base_game.tscn" id="1_cuwpg"]
 [ext_resource type="PackedScene" uid="uid://rfqpiq385m6l" path="res://scenes/game/fence_button/fence_button.tscn" id="1_ev0q0"]
@@ -12,4 +13,4 @@
 process_thread_group = 2
 process_thread_group_order = 0
 process_thread_messages = 0
-resources = [PackedStringArray("comment", "fence_button", "game", "local_game", "pawn", "singleplayer_game", "tile_button"), [ExtResource("1_mux7d"), ExtResource("1_ev0q0"), ExtResource("1_cuwpg"), ExtResource("4_2yahu"), ExtResource("3_e76re"), ExtResource("1_72np1"), ExtResource("8_bdlgi")]]
+resources = [PackedStringArray("command", "comment", "fence_button", "game", "local_game", "pawn", "singleplayer_game", "tile_button"), [ExtResource("1_6aasd"), ExtResource("1_mux7d"), ExtResource("1_ev0q0"), ExtResource("1_cuwpg"), ExtResource("4_2yahu"), ExtResource("3_e76re"), ExtResource("1_72np1"), ExtResource("8_bdlgi")]]
