@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Text;
 
 [GlobalClass]
-public partial class BoardState : Node
+public partial class BoardState : Control
 {
 	private static readonly int[][][] DefaultTileGridConnections = new int[][][]
 	{
@@ -161,6 +161,8 @@ public partial class BoardState : Node
 
 	public int[] GetWinPositions(int index) => WinPositions[index];
 
+	public int GetBoardSize() => BoardSize;
+	
 	#endregion
 
 	#region Reachable Tiles

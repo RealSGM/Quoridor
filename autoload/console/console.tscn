@@ -3,7 +3,7 @@
 [ext_resource type="Script" path="res://autoload/console/console.gd" id="1_xxsvo"]
 [ext_resource type="Theme" uid="uid://de0xnp067hvt3" path="res://resources/themes/console_theme.tres" id="2_5qv1p"]
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_36abp"]
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_t7mix"]
 bg_color = Color(0.129412, 0.129412, 0.129412, 1)
 anti_aliasing = false
 
@@ -21,7 +21,7 @@ initial_position = 1
 size = Vector2i(960, 540)
 always_on_top = true
 script = ExtResource("1_xxsvo")
-history_vbc = NodePath("BG/VBC/MC/SC/History")
+history_vbc = NodePath("BG/VBC/Panel/PC/SC/History")
 input = NodePath("BG/VBC/BG/FG/Input")
 
 [node name="BG" type="Panel" parent="."]
@@ -33,29 +33,36 @@ grow_vertical = 2
 theme = ExtResource("2_5qv1p")
 
 [node name="VBC" type="VBoxContainer" parent="BG"]
-layout_mode = 2
-offset_right = 960.0
-offset_bottom = 540.0
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="MC" type="MarginContainer" parent="BG/VBC"]
-layout_mode = 2
-size_flags_vertical = 3
-theme_override_constants/margin_left = 4
-theme_override_constants/margin_top = 4
-theme_override_constants/margin_right = 4
-theme_override_constants/margin_bottom = 4
-
-[node name="Panel" type="Panel" parent="BG/VBC/MC"]
-layout_mode = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_36abp")
-
-[node name="SC" type="ScrollContainer" parent="BG/VBC/MC"]
+[node name="Panel" type="Panel" parent="BG/VBC"]
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="History" type="VBoxContainer" parent="BG/VBC/MC/SC"]
+[node name="PC" type="PanelContainer" parent="BG/VBC/Panel"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 4.0
+offset_top = 4.0
+offset_right = -4.0
+offset_bottom = -4.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_vertical = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_t7mix")
+
+[node name="SC" type="ScrollContainer" parent="BG/VBC/Panel/PC"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="History" type="VBoxContainer" parent="BG/VBC/Panel/PC/SC"]
 layout_mode = 2
 
 [node name="BG" type="Panel" parent="BG/VBC"]
@@ -92,6 +99,7 @@ wait_time = 0.1
 autostart = true
 
 [connection signal="close_requested" from="." to="." method="_on_close_requested"]
+[connection signal="visibility_changed" from="." to="." method="_on_visibility_changed"]
 [connection signal="text_changed" from="BG/VBC/BG/FG/Input" to="." method="_on_input_text_changed"]
 [connection signal="text_submitted" from="BG/VBC/BG/FG/Input" to="." method="_on_input_text_submitted"]
 [connection signal="timeout" from="Timer" to="." method="_on_timer_timeout"]

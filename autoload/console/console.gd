@@ -41,7 +41,6 @@ func _ready() -> void:
 	# Get methods within Global function, exclude _ready
 	global_methods = base_inst.get_script().get_script_method_list().map(func(x): return x.name)
 	global_methods.erase("_ready")
-	global_methods.push_front("help")
 
 
 func _input(event: InputEvent) -> void:
@@ -136,11 +135,12 @@ func add_entry(text: String, index: int = 0) -> void:
 func show_help() -> void:
 	var text: String = "Available Functions: \n"
 	for method: String in global_methods:
-		if method == 'help':
-			continue
 		text += method + "()\n"
 	entry_buffer.append([text, 0])
 
+
+func clear() -> void:
+	history_vbc.get_children().map(func(l: Label): l.queue_free())
 
 #region Signals
 #endregion
@@ -156,10 +156,7 @@ func _on_input_text_submitted(text: String) -> void:
 	if text.is_empty():
 		return
 		
-	if text == 'help()':
-		show_help()
-	else:
-		parse_expresion(text)
+	parse_expresion(text)
 	
 	# Add new entry for entry
 	history.append("current_input") 
