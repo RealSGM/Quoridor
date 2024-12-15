@@ -1,4 +1,5 @@
 using Godot;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -9,6 +10,9 @@ public partial class IllegalFenceCheck : Node
 
 	public void GetIllegalFences(BoardState board)
 	{
+		GD.Print("Checking illegal fences");
+		long startTime = DateTime.Now.Ticks;
+
 		if (board.GetFenceCount(board.CurrentPlayer) == 0) return;
 
 		for (int fence = 0; fence < board.GetFenceAmount(); fence++)
@@ -22,15 +26,23 @@ public partial class IllegalFenceCheck : Node
 
 				foreach (int player in _bits)
 				{
-					if (!IsFenceIllegal(board, fence, direction, player)) continue;
-					board.SetDFSDisabled(fence, direction, true);
+					if (IsFenceIllegal(board, fence, direction, player))
+					{
+						GD.Print($"Illegal Fence Found: {fence} {direction} {player}");
+						board.SetDFSDisabled(fence, direction, true);
+					}
+					break;
 				}
+			// break;
 			}
+		// break;
 		}
+
+		GD.Print("Illegal fence check took: " + (DateTime.Now.Ticks - startTime) / 10000 + "ms");
 	}
 
 	private bool IsFenceIllegal(BoardState board, int fence, int direction, int player)
-	{
+	{	
 		BoardState boardClone = board.Clone();
 		int mappedFence = BoardState.GetMappedFenceIndex(fence, direction);
 

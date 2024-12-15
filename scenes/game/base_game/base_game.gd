@@ -15,7 +15,6 @@ class_name BaseGame extends Control
 
 var tile_buttons: Array[TileButton] = []
 var fence_buttons: Array[FenceButton] = []
-var has_won: bool = false
 
 ## Update board when the player is changed
 @onready var current_player: int:
@@ -169,8 +168,6 @@ func confirm_move_pawn(tile: int) -> void:
 	tile_button.pawns[current_player].modulate.a = 1
 	tile_button.pawn_moved = true 
 	
-	has_won = board.GetWinner(current_player)
-	
 	# Update UI
 	user_interface.add_message("Move Pawn: " + str(tile), current_player)
 
@@ -221,10 +218,10 @@ func _on_confirm_pressed() -> void:
 		await board.BoardUpdated
 	
 	# Check if the pawn has reached end goal
-	if has_won:
+	if board.GetWinner():
 		user_interface.update_win(current_player)
 	# Switch to next player
 	else:
 		# Complete IFS before switching player
-		#IllegalFenceCheck.GetIllegalFences(board)
+		IllegalFenceCheck.GetIllegalFences(board)
 		current_player = 1 - current_player

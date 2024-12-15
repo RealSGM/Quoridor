@@ -77,8 +77,8 @@ public partial class BoardState : Node
 		InitialiseFences(boardSize - 1);
 	}
 
-    private void InitialiseFences(int fenceSize)
-    {
+	private void InitialiseFences(int fenceSize)
+	{
 		Fences = new bool[fenceSize * fenceSize][];
 		DFSDisabledFences = new bool[fenceSize * fenceSize][];
 		for (int i = 0; i < fenceSize * fenceSize; i++)
@@ -86,9 +86,9 @@ public partial class BoardState : Node
 			Fences[i] = new bool[2];
 			DFSDisabledFences[i] = new bool[2];
 		}
-    }
+	}
 
-    public void InitialisePawnPositions(int playerCount, int boardSize)
+	public void InitialisePawnPositions(int playerCount, int boardSize)
 	{
 		PawnPositions = new int[playerCount];
 		PawnPositions[0] = (int)(boardSize * (boardSize - 0.5));
@@ -154,7 +154,7 @@ public partial class BoardState : Node
 
 	public string GetMoveHistory() => MoveHistory.ToString();
 
-	public bool GetWinner(int index) => WinPositions[index].Contains(PawnPositions[index]);
+	public bool GetWinner() => WinPositions[CurrentPlayer].Contains(PawnPositions[CurrentPlayer]);
 	
 	public int GetPawnPosition(int index) => PawnPositions[index];
 
@@ -286,8 +286,6 @@ public partial class BoardState : Node
 		if (index == -1) return;
 		connections[index] = -1;
 	}
-
-
 
 	#endregion
 
