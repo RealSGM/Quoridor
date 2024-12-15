@@ -4,27 +4,47 @@ using System.Linq;
 using System.Collections.Generic;
 using System.Text;
 
-
 [GlobalClass]
 public partial class BoardState : Node
 {
+	private static readonly int[][][] DefaultTileGridConnections = new int[][][]
+	{
+		new int[][] { new int[] { 0, 2 }, new int[] { 1, 3 } },
+		new int[][] { new int[] { 0, 1 }, new int[] { 2, 3 } }
+	};
+
 	public bool BoardReady { get; set; } = false;
 	public int BoardSize { get; set; }
-	public int[] PawnPositions { get; set; }
-	public int[] AdjacentOffsets { get; set; }
-	public int CurrentPlayer { get; set; }
-	public int[] FenceCounts { get; set; }
-	// Stores if the button should be disabled for each direction based off latest DFS
-	public bool[][] DFSDisabledFences { get; set;}
-	// Stores if the button should be disabled for each direction based off it the adjacent fence is placed or not
-	public bool[][] DirDisabledFences { get; set;}
-	public bool[] PlacedFences { get; set;}
-	public int[][][][] Fences { get; set; }
-	public int[][] Tiles { get; set; }
-	public int[][] WinPositions { get; set; }
+	public int CurrentPlayer { get; set; } = 0;
 	public StringBuilder MoveHistory { get; set; } = new();
+
+	private int[][] Tiles { get; set; }
+	private bool[][] Fences { get; set; }
+	/// Stores if the fence should be disabled for each direction based off latest DFS
+	private bool[][] DFSDisabledFences { get; set;}
+	private int[] PawnPositions { get; set; }
+	private int[] AdjacentOffsets { get; set; }
+	private int[] FenceCounts { get; set; }
+	private int[][] WinPositions { get; set; }
 	
 	[Signal] public delegate void BoardUpdatedEventHandler();
+
+	// Converts fence direction which is [0, 1] to [-1, 1] for notation
+	public static int GetMappedFenceIndex(int fenceIndex, int direction)
+	{
+		return direction == 0 ? fenceIndex : -fenceIndex;
+	}
+
+	// Initalise the NESW connections for given index
+	public static int[] InitialiseConnections(int index, int size)
+	{
+		int[] connections = new int[4];
+		connections[0] = index >= size ? index - size : -1; // North Tile
+		connections[1] = (index + 1) % size != 0 ? index + 1 : -1; // East Tile
+		connections[2] = index < size * (size - 1) ? index + size : -1; // South Tile
+		connections[3] = index % size != 0 ? index - 1 : -1; // West Tile
+		return connections;
+	}
 
 	#region Initialization
 	
@@ -34,35 +54,41 @@ public partial class BoardState : Node
 		{
 			FenceCounts = (int[])FenceCounts.Clone(),
 			PawnPositions = (int[])PawnPositions.Clone(),
-			Fences = Fences.Select(fence => fence.Select(direction => direction.Select(connection => (int[])connection.Clone()).ToArray()).ToArray()).ToArray(),
 			Tiles = Tiles.Select(tile => (int[])tile.Clone()).ToArray(),
 			AdjacentOffsets = (int[])AdjacentOffsets.Clone(),
 			WinPositions = WinPositions.Select(winPosition => (int[])winPosition.Clone()).ToArray(),
 			CurrentPlayer = CurrentPlayer,
-			DirDisabledFences = DirDisabledFences.Select(dir => (bool[])dir.Clone()).ToArray(),
 			DFSDisabledFences = DFSDisabledFences.Select(dfs => (bool[])dfs.Clone()).ToArray(),
-			PlacedFences = (bool[])PlacedFences.Clone(),
-			MoveHistory = new StringBuilder(MoveHistory.ToString())
+			MoveHistory = new StringBuilder(MoveHistory.ToString()),
+			Fences = Fences.Select(fence => (bool[])fence.Clone()).ToArray(),
 		};
 		return boardState;
 	}
 
 	public void InitialiseBoard(int boardSize, int fencesPerPlayer, int playerCount)
 	{
-		this.BoardSize = boardSize;
-		CurrentPlayer = 0;
-
+		BoardSize = boardSize;
 		FenceCounts = Enumerable.Repeat(fencesPerPlayer, playerCount).ToArray();
 		AdjacentOffsets = new int[4] { -boardSize, 1, boardSize, -1 };
 
 		InitialisePawnPositions(playerCount, boardSize);
 		InitialiseWinPositions(boardSize, playerCount);
-
-		GenerateTiles(boardSize);
-		GenerateFences(boardSize - 1);
+		InitialiseTiles(boardSize);
+		InitialiseFences(boardSize - 1);
 	}
 
-	public void InitialisePawnPositions(int playerCount, int boardSize)
+    private void InitialiseFences(int fenceSize)
+    {
+		Fences = new bool[fenceSize * fenceSize][];
+		DFSDisabledFences = new bool[fenceSize * fenceSize][];
+		for (int i = 0; i < fenceSize * fenceSize; i++)
+		{
+			Fences[i] = new bool[2];
+			DFSDisabledFences[i] = new bool[2];
+		}
+    }
+
+    public void InitialisePawnPositions(int playerCount, int boardSize)
 	{
 		PawnPositions = new int[playerCount];
 		PawnPositions[0] = (int)(boardSize * (boardSize - 0.5));
@@ -77,22 +103,7 @@ public partial class BoardState : Node
 		WinPositions[1] = Enumerable.Range(totalTiles - boardSize, boardSize).ToArray(); // Player 2's winning positions
 	}
 
-	public void InitialiseFenceTileConnections(int index, int fenceRows)
-	{
-		// Match the fence button index to the index of the Top-Left Tile in 2x2 Grid
-		int modifiedIndex = index + index / fenceRows;
-
-		int boardSize = fenceRows + 1;
-		int topLeft = modifiedIndex;
-		int topRight = modifiedIndex + 1;
-		int bottomLeft = modifiedIndex + boardSize;
-		int bottomRight = modifiedIndex + 1 + boardSize;
-		
-		Fences[index][0] = new int[2][] { new int[2] { topLeft, bottomLeft }, new int[2] { topRight, bottomRight } }; // Horizontal Fences
-		Fences[index][1] = new int[2][] { new int[2] { topLeft, topRight }, new int[2] { bottomLeft, bottomRight } }; // Vertical Fences
-	}
-	
-	public void GenerateTiles(int boardSize)
+	public void InitialiseTiles(int boardSize)
 	{
 		int totalTiles = boardSize * boardSize;
 		
@@ -108,64 +119,37 @@ public partial class BoardState : Node
 		}
 	}
 
-	public void GenerateFences(int fenceRows)
-	{
-		int totalFences = fenceRows * fenceRows;
-
-		// Generate empty fences in the form of a 3D array
-		Fences = new int[totalFences][][][];
-		PlacedFences = new bool[totalFences];
-		DFSDisabledFences = new bool[totalFences][];
-		DirDisabledFences = new bool[totalFences][];
-		
-		for (int i = 0; i < totalFences; i++)
-		{
-			Fences[i] = new int[2][][];
-			InitialiseFenceTileConnections(i, fenceRows);
-			DFSDisabledFences[i] = new bool[] { false, false };
-			DirDisabledFences[i] = new bool[] { false, false };
-		}
-	}
-
 	#endregion
 
 	#region Setters
+
 	public void SetDFSDisabled(int fence, int direction, bool val)
 	{
 		DFSDisabledFences[fence][direction] = val;
 	}
 
-	public void SetDirDisabled(int fence, int direction, bool val)
+	public void SetFencePlaced(int fence, int direction)
 	{
-		DirDisabledFences[fence][direction] = val;
-	}
-
-	public void SetFencePlaced(int fence)
-	{
-		PlacedFences[fence] = true;
+		Fences[fence][direction] = true;
 	}
 
 	#endregion
 
 	#region Getters
+	
 	public bool GetDFSDisabled(int fence, int direction)
 	{
 		return DFSDisabledFences[fence][direction];
 	}
 
-	public bool GetDirDisabled(int fence, int direction)
-	{
-		return DirDisabledFences[fence][direction];
-	}
-
-	public int[] GetAdjacentTiles(int tile)
+	public int[] GetTileConnections(int tile)
 	{
 		return Tiles[tile];
 	}
 
-	public bool GetFencePlaced(int fence)
+	public bool GetFencePlaced(int fence, int direction)
 	{
-		return PlacedFences[fence];
+		return Fences[fence][direction];
 	}
 
 	public int GetFenceAmount()
@@ -173,9 +157,14 @@ public partial class BoardState : Node
 		return Fences.Length;
 	}
 
+	public int GetFenceCount(int playerIndex)
+	{
+		return FenceCounts[playerIndex];
+	}
+
 	public bool GetFenceEnabled(int fence, int direction)
 	{
-		return GetFencePlaced(fence) || GetDFSDisabled(fence, direction) || GetDirDisabled(fence, direction);
+		return GetFencePlaced(fence, direction) || GetDFSDisabled(fence, direction);
 	}
 
 	public string GetMoveHistory()
@@ -187,50 +176,55 @@ public partial class BoardState : Node
 	{
 		return WinPositions[playerIndex].Contains(PawnPositions[playerIndex]);
 	}
+	
+	public int GetPawnPosition(int playerIndex)
+	{
+        return PawnPositions[playerIndex];
+	}
+
+	public int[] GetWinPositions(int playerIndex) => WinPositions[playerIndex];
+
 	#endregion
 
 	#region Selectable Tiles
-	public int[] GetSelectableTiles(int playerIndex)
+	public int[] GetReachableTiles(int playerIndex)
 	{
 		int playerPawnPosition = PawnPositions[playerIndex];
 		int[] playerPawnTile = Tiles[playerPawnPosition];
-		int[] tilesToSelect = new int[0];
+		int[] reachableTiles = new int[0];
 
 		// Loop through all tiles
 		foreach (int connectedTile in playerPawnTile)
 		{
 			// Check if the tile is not empty
-			if (connectedTile != -1)
-			{
-				tilesToSelect = tilesToSelect.Concat(CheckForEnemy(connectedTile)).ToArray();
-			}
+			if (connectedTile == -1) continue;
+
+			reachableTiles = reachableTiles.Concat(CheckForEnemy(connectedTile)).ToArray();
 		}
-		return tilesToSelect;
+		return reachableTiles;
 	}
 
 	public int[] CheckForEnemy(int connectedTile)
 	{
-		int enemyPawnPosition = PawnPositions[1-CurrentPlayer];
-		// Check enemy pawn is not on the tile
+		int enemyPawnPosition = PawnPositions[1 - CurrentPlayer];
+		// Check if the enemy pawn is not on the tile
 		if (enemyPawnPosition != connectedTile)
 		{
 			return new int[] { connectedTile };
 		}
 
 		// Get the direction of the enemy pawn
-		int dirIndex = Array.IndexOf(Tiles[PawnPositions[CurrentPlayer]], enemyPawnPosition);
+		int directionIndex = Array.IndexOf(Tiles[PawnPositions[CurrentPlayer]], enemyPawnPosition);
 		
-		// Check if leaped tile is in boundary
-		int leapedTileIndex = connectedTile + AdjacentOffsets[dirIndex];
+		// Check if the leaped tile is within boundaries
+		int leapedTileIndex = connectedTile + AdjacentOffsets[directionIndex];
 		if (leapedTileIndex < 0 || leapedTileIndex >= Tiles.Length)
 		{
-			// Return empty array, as leaped tile is out of boundary, pawn is taken
+			// Return an empty array, as the leaped tile is out of boundaries
 			return Array.Empty<int>();
 		}
 
-		// return Array.Empty<int>();
-
-		return GetLeapedTiles(PawnPositions[CurrentPlayer], leapedTileIndex, connectedTile, dirIndex);
+		return GetLeapedTiles(PawnPositions[CurrentPlayer], leapedTileIndex, connectedTile, directionIndex);
 	}
 
 	public int[] GetLeapedTiles(int playerIndex, int leapedTileIndex, int tileIndex, int dirIndex)
@@ -238,10 +232,7 @@ public partial class BoardState : Node
 		int[] leapedTile = Tiles[leapedTileIndex];
 
 		// Check no fence blocking it
-		if (Tiles[tileIndex][dirIndex] == leapedTileIndex)
-		{
-			return new int[] { leapedTileIndex };
-		}
+		if (Tiles[tileIndex][dirIndex] == leapedTileIndex) return new int[] { leapedTileIndex };
 
 		// Fence blocking it, check adjacent tiles over the enemy pawn
 		var leapedTiles = Tiles[tileIndex]
@@ -250,85 +241,83 @@ public partial class BoardState : Node
 
 		return leapedTiles;
 	}
+	
 	#endregion
 
-	public bool IsFenceAvailable(int playerIndex)
-	{
-		return FenceCounts[playerIndex] > 0;
+	#region Fence Placement
+	
+	public int[] GetTileGrid(int index){
+		int topLeft = index;
+		int topRight = index + 1;
+		int bottomLeft = index + BoardSize;
+		int bottomRight = index + 1 + BoardSize;
+		return new int[] {topLeft, topRight, bottomLeft, bottomRight};
 	}
 
 	public void PlaceFence(int fenceIndex, int currentPlayer, bool isIFS = false)
 	{
-		// Get the fence index
+		// Separate the fence index and direction
 		int direction = fenceIndex < 0 ? 1 : 0;
 		fenceIndex = Math.Abs(fenceIndex);
 
-		// Get the adjacent tiles and remove the connections
-		foreach (var connection in Fences[fenceIndex][direction])
+		// Match the fence button index to the index of the Top-Left Tile in 2x2 Grid
+		int convertedIndex = fenceIndex + fenceIndex / (BoardSize - 1);
+
+		// Get possible tile indexes in 2x2 grid
+		int[] tileGrid = GetTileGrid(convertedIndex);
+
+		foreach (int[] pair in DefaultTileGridConnections[direction])
 		{
-			RemoveTileConnection(connection, 0);
-			RemoveTileConnection(connection, 1);
+			RemoveTileConnection(tileGrid[pair[0]], tileGrid[pair[1]]);
+			RemoveTileConnection(tileGrid[pair[1]], tileGrid[pair[0]]);
 		}
 
 		// Continue if User or AI is placing the fence
 		if (isIFS) return;
 
-		// Flip the index (for NESW adjustment)
-		int flipped_index = 1 - direction;
-
-		// Get the adjacent directionals
-		int[] disabled_indexes = new int[2] { flipped_index, flipped_index + 2 };
-
-		// Disable the adjacents buttons, for that direction
-		foreach (int indexes in disabled_indexes)
-		{
-			int[] adj_fences = InitialiseConnections(fenceIndex, BoardSize - 1);
-			int index = adj_fences[indexes];
-			if (index > -1)
-			{
-				SetDirDisabled(index, direction, true);
-			}
-		}
-
 		FenceCounts[currentPlayer]--;
-		SetFencePlaced(fenceIndex);
+		SetFencePlaced(fenceIndex, direction);
+		SetFencePlaced(fenceIndex, 1 - direction);
+
+		// Disable adjacent fences
+		DisableAdjacentFences(fenceIndex, direction);
 
 		BoardReady = true;
 		EmitSignal(SignalName.BoardUpdated);
 	}
 
-	public void RemoveTileConnection(int[] connection, int index)
+	public void DisableAdjacentFences(int fenceIndex, int direction)
 	{
-		int tileIndex = connection[index];
-		int removingIndex = connection[1 - index];
-		Tiles[tileIndex][Array.IndexOf(Tiles[tileIndex], removingIndex)] = -1;
+		int flippedIndex = 1 - direction; // Flip the index (for NESW adjustment)
+		int[] disabledIndexes = new int[2] { flippedIndex, flippedIndex + 2 };
+		int[] adjacentFences = InitialiseConnections(fenceIndex, BoardSize - 1);
+
+		foreach (int index in disabledIndexes)
+		{
+			int adjFenceIndex = adjacentFences[index];
+			if (adjFenceIndex == -1) continue;
+
+			SetFencePlaced(adjFenceIndex, direction);
+		}
 	}
+
+	public void RemoveTileConnection(int tile, int tileToRemove)
+	{
+		int[] connections = Tiles[tile];
+		int index = Array.IndexOf(connections, tileToRemove);
+		if (index == -1) return;
+		connections[index] = -1;
+	}
+
+
+
+	#endregion
 
 	public void MovePawn(int tileIndex, int currentPlayer)
 	{
 		PawnPositions[currentPlayer] = tileIndex;
 		BoardReady = true;
 		EmitSignal(SignalName.BoardUpdated);
-	}
-
-	public Dictionary<int, int[]> GetPossibleMoves()
-	{
-		Dictionary<int, int[]> possibleMoves = new();
-		int[] bits = new int[2] {0, 1};
-
-		// Loop through both directions
-		foreach	(int direction in bits)
-		{
-			var moves = Enumerable.Range(0, GetFenceAmount())
-				.Where(fence => !GetFenceEnabled(fence, direction))
-				.ToArray();
-			possibleMoves[direction] = moves;
-		}
-		
-		// Add the tile connections as index 2
-		possibleMoves.Add(2, GetAdjacentTiles(PawnPositions[CurrentPlayer]));
-
-		return possibleMoves;
 	}
 
 	public void AddMove(string code)
@@ -351,19 +340,23 @@ public partial class BoardState : Node
 		}
 	}
 
-	// Converts fence direction which is [0, 1] to [-1, 1] for notation
-	public static int GetMappedFenceIndex(int fenceIndex, int direction)
+	public Dictionary<int, int[]> GetPossibleMoves()
 	{
-		return direction == 0 ? fenceIndex : -fenceIndex;
-	}
+		Dictionary<int, int[]> possibleMoves = new();
+		int[] bits = new int[2] {0, 1};
 
-	public int[] InitialiseConnections(int index, int size)
-	{
-		int[] connections = new int[4];
-		connections[0] = index >= size ? index - size : -1; // North Tile
-		connections[1] = (index + 1) % size != 0 ? index + 1 : -1; // East Tile
-		connections[2] = index < size * (size - 1) ? index + size : -1; // South Tile
-		connections[3] = index % size != 0 ? index - 1 : -1; // West Tile
-		return connections;
+		// Loop through both directions
+		foreach	(int direction in bits)
+		{
+			var moves = Enumerable.Range(0, GetFenceAmount())
+				.Where(fence => !GetFenceEnabled(fence, direction))
+				.ToArray();
+			possibleMoves[direction] = moves;
+		}
+		
+		// Add the tile connections as index 2
+		possibleMoves.Add(2, GetTileConnections(PawnPositions[CurrentPlayer]));
+
+		return possibleMoves;
 	}
 }

@@ -32,7 +32,8 @@ var has_won: bool = false
 			match  move_code[1]:
 				# Clear current fence
 				'f':
-					if !board.GetFencePlaced(index):
+					var direction: int = 0 if index < 0 else 1
+					if !board.GetFencePlaced(index, direction):
 						fence_buttons[index].clear_fences()
 				# Clear current tile
 				'm':
@@ -51,7 +52,7 @@ func _ready() -> void:
 
 func set_current_player(val: int) -> void:
 	reset_board()
-	set_tiles(board.PawnPositions[current_player])
+	set_tiles(board.GetPawnPosition(current_player))
 	update_fence_buttons()
 	user_interface.update_turn(val)
 
@@ -68,11 +69,6 @@ func reset_board() -> void:
 ## Setup the board with the selected size
 func setup_board(board_size: int) -> void:
 	board.InitialiseBoard(board_size, fence_amount, player_amount)
-	
-	board.GenerateTiles(board_size)
-	board.GenerateFences(board_size - 1)
-	board.InitialisePawnPositions(player_amount, board_size)
-	board.InitialiseWinPositions(board_size, player_amount)
 	
 	instance_tile_buttons(board_size)
 	instance_fence_buttons(board_size - 1)
@@ -113,14 +109,14 @@ func instance_tile_buttons(board_size: int) -> void:
 func update_fence_buttons() -> void:
 	for fence: int in range(board.GetFenceAmount()):
 		var fence_button: FenceButton = fence_buttons[fence]
-		fence_button.disabled = board.GetFenceEnabled(fence, Global.fence_direction) if board.IsFenceAvailable(current_player) else true
+		fence_button.disabled = board.GetFenceEnabled(fence, Global.fence_direction) if board.GetFenceCount(current_player) > 0 else true
 		# Disable mouse filter if the button is disabled
 		fence_button.mouse_filter = Control.MOUSE_FILTER_IGNORE if fence_button.disabled else Control.MOUSE_FILTER_STOP
 
 
 func confirm_place_fence(fence: int) -> void:
 	user_interface.add_message("Add Fence: " + str(fence), current_player)
-	user_interface.fence_count_labels[current_player].text = str(board.FenceCounts[current_player] - 1)
+	user_interface.fence_count_labels[current_player].text = str(board.GetFenceCount(current_player) - 1)
 
 
 #region Tiles
@@ -129,7 +125,7 @@ func confirm_place_fence(fence: int) -> void:
 ## Set the tiles of the board, based off the current player's turn
 func set_tiles(tile: int) -> void:
 	tile_buttons[tile].disabled = true
-	var enabled_tiles: Array = Array(board.GetSelectableTiles(current_player))
+	var enabled_tiles: Array = Array(board.GetReachableTiles(current_player))
 	
 	for index: int in range(tile_buttons.size()):
 		set_tile_button(tile_buttons[index], index not in enabled_tiles)
@@ -230,5 +226,5 @@ func _on_confirm_pressed() -> void:
 	# Switch to next player
 	else:
 		# Complete IFS before switching player
-		IllegalFenceCheck.GetIllegalFences(board)
+		#IllegalFenceCheck.GetIllegalFences(board)
 		current_player = 1 - current_player

@@ -9,25 +9,21 @@ public partial class IllegalFenceCheck : Node
 
 	public void GetIllegalFences(BoardState board)
 	{
-		if (!board.IsFenceAvailable(board.CurrentPlayer)) return;
+		if (board.GetFenceCount(board.CurrentPlayer) == 0) return;
 
 		for (int fence = 0; fence < board.GetFenceAmount(); fence++)
 		{
 			board.SetDFSDisabled(fence, 0, false);
 			board.SetDFSDisabled(fence, 1, false);
 
-			if (board.GetFencePlaced(fence)) continue;
-
 			foreach (int direction in _bits)
 			{
-				if (board.GetDirDisabled(fence, direction)) continue;
+				if (board.GetFencePlaced(fence, direction)) continue;
 
 				foreach (int player in _bits)
 				{
-					if (IsFenceIllegal(board, fence, direction, player))
-					{
-						board.SetDFSDisabled(fence, direction, true);
-					}
+					if (!IsFenceIllegal(board, fence, direction, player)) continue;
+					board.SetDFSDisabled(fence, direction, true);
 				}
 			}
 		}
@@ -40,13 +36,13 @@ public partial class IllegalFenceCheck : Node
 
 		boardClone.PlaceFence(mappedFence, player, true);
 
-		int start = boardClone.PawnPositions[player];
-		HashSet<int> goalTiles = boardClone.WinPositions[player].ToHashSet();
+		int start = boardClone.GetPawnPosition(player);
+		HashSet<int> goalTiles = boardClone.GetWinPositions(player).ToHashSet();
 
-		return IterativeDFS(boardClone, player, start, goalTiles);
+		return IterativeDFS(boardClone, start, goalTiles);
 	}
 
-	private bool IterativeDFS(BoardState board, int player, int start, HashSet<int> goalTiles)
+	private bool IterativeDFS(BoardState board, int start, HashSet<int> goalTiles)
 	{
 		Stack<int> stack = new();
 		HashSet<int> visited = new();
@@ -63,12 +59,11 @@ public partial class IllegalFenceCheck : Node
 
 			visited.Add(current);
 
-			foreach (int connectedTile in board.Tiles[current])
+			foreach (int connectedTile in board.GetTileConnections(current))
 			{
-				if (!visited.Contains(connectedTile) && connectedTile != -1)
-				{
-					stack.Push(connectedTile);
-				}
+				if (visited.Contains(connectedTile) || connectedTile == -1) continue;
+
+				stack.Push(connectedTile);
 			}
 		}
 		return true;
