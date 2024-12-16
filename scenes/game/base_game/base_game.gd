@@ -217,9 +217,6 @@ func _on_confirm_pressed() -> void:
 	board.AddMove(move_code)
 	move_code = ''
 	
-	if not board.BoardReady:
-		await board.BoardUpdated
-	
 	# Check if the pawn has reached end goal
 	if board.GetWinner(current_player):
 		user_interface.update_win(current_player)

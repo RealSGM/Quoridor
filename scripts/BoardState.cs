@@ -7,16 +7,13 @@ using System.Text;
 [GlobalClass]
 public partial class BoardState : Control
 {
-	[Signal] public delegate void BoardUpdatedEventHandler();
-
 	private static readonly int[][][] DefaultTileGridConnections = new int[][][]
 	{
 		new int[][] { new int[] { 0, 2 }, new int[] { 1, 3 } },
 		new int[][] { new int[] { 0, 1 }, new int[] { 2, 3 } }
 	};
-	public static int[] bits = new int[2] {0, 1};
+	public static readonly int[] Bits = new int[2] {0, 1};
 
-	public bool BoardReady { get; set; } = false;
 	public int BoardSize { get; set; }
 	public int CurrentPlayer { get; set; } = 0;
 	public StringBuilder MoveHistory { get; set; } = new();
@@ -262,9 +259,6 @@ public partial class BoardState : Control
 
 		// Disable adjacent fences
 		DisableAdjacentFences(fenceIndex, direction);
-
-		BoardReady = true;
-		EmitSignal(SignalName.BoardUpdated);
 	}
 
 	public void DisableAdjacentFences(int fenceIndex, int direction)
@@ -319,14 +313,10 @@ public partial class BoardState : Control
 	public void MovePawn(int tileIndex, int currentPlayer)
 	{
 		PawnPositions[currentPlayer] = tileIndex;
-		BoardReady = true;
-		EmitSignal(SignalName.BoardUpdated);
 	}
 
 	public void AddMove(string code)
 	{
-		BoardReady = false;
-
 		MoveHistory.Append(code + ";");
 
 		int currentPlayer = int.Parse(code[0].ToString());
@@ -349,7 +339,7 @@ public partial class BoardState : Control
 		StringBuilder allMoves = new();
 
 		// Loop through both directions and add all possible fence placements
-		foreach (var direction in bits)
+		foreach (var direction in Bits)
 		{
 			for (int i = 0; i < GetFenceAmount(); i++)
 			{
