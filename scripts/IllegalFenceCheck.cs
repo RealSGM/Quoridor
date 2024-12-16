@@ -1,7 +1,9 @@
 using Godot;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 [GlobalClass]
 public partial class IllegalFenceCheck : Node
@@ -16,22 +18,22 @@ public partial class IllegalFenceCheck : Node
 
 		if (board.GetFenceCount(board.CurrentPlayer) == 0) return;
 
-		for (int fence = 0; fence < board.GetFenceAmount(); fence++)
+		Parallel.For(0, board.GetFenceAmount(), fence =>
 		{
 			board.SetDFSDisabled(fence, 0, false);
 			board.SetDFSDisabled(fence, 1, false);
 
-			foreach (int direction in _bits)
+			Parallel.ForEach(_bits, direction =>
 			{
-				if (board.GetFencePlaced(fence, direction)) continue;
+				if (board.GetFencePlaced(fence, direction)) return;
 
-				foreach (int player in _bits)
+				Parallel.ForEach(_bits, player =>
 				{
-					if (!IsFenceIllegal(board, fence, direction, player)) continue;
+					if (!IsFenceIllegal(board, fence, direction, player)) return;
 					board.SetDFSDisabled(fence, direction, true);
-				}
-			}
-		}
+				});
+			});
+		});
 
 		Console.Call("add_entry", "Illegal fence check took: " + (DateTime.Now.Ticks - startTime) / 10000 + "ms", 0);
 	}
