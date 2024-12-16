@@ -1,7 +1,8 @@
-[gd_scene load_steps=6 format=3 uid="uid://g12um5raoqio"]
+[gd_scene load_steps=7 format=3 uid="uid://g12um5raoqio"]
 
 [ext_resource type="Theme" uid="uid://gl4viqpfcsgn" path="res://resources/themes/main_theme.tres" id="1_khihi"]
 [ext_resource type="Script" path="res://scenes/game/base_game/base_game.gd" id="2_8s0tt"]
+[ext_resource type="Script" path="res://scripts/IllegalFenceCheck.cs" id="3_hx0ce"]
 [ext_resource type="Script" path="res://scripts/BoardState.cs" id="3_kvsy8"]
 [ext_resource type="PackedScene" uid="uid://c6fyma6opa8b1" path="res://scenes/game/user_interface/user_interface.tscn" id="4_d4stq"]
 
@@ -12,7 +13,7 @@ expand_margin_top = 32.0
 expand_margin_right = 32.0
 expand_margin_bottom = 32.0
 
-[node name="Game" type="Control" node_paths=PackedStringArray("board", "tile_container", "board_container", "fence_button_container", "user_interface")]
+[node name="Game" type="Control" node_paths=PackedStringArray("board", "tile_container", "board_container", "fence_button_container", "user_interface", "illegal_fence_check")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -26,6 +27,10 @@ tile_container = NodePath("Board/BoardContainer/TileContainer")
 board_container = NodePath("Board/BoardContainer")
 fence_button_container = NodePath("Board/FenceButtonContainer")
 user_interface = NodePath("UserInterface")
+illegal_fence_check = NodePath("IllegalFenceCheck")
+
+[node name="IllegalFenceCheck" type="Node" parent="."]
+script = ExtResource("3_hx0ce")
 
 [node name="Board" type="Control" parent="."]
 layout_mode = 1

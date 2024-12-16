@@ -1,13 +1,16 @@
-[gd_scene load_steps=3 format=3 uid="uid://b6l2hysgj8hny"]
+[gd_scene load_steps=4 format=3 uid="uid://b6l2hysgj8hny"]
 
 [ext_resource type="PackedScene" uid="uid://g12um5raoqio" path="res://scenes/game/base_game/base_game.tscn" id="1_q7ens"]
 [ext_resource type="Script" path="res://scenes/game/singleplayer_game/singleplayer_game.gd" id="2_ysh73"]
+[ext_resource type="Script" path="res://scripts/MiniMaxAlgorithm.cs" id="3_v54nn"]
 
-[node name="SingleplayerGame" node_paths=PackedStringArray("bot_cover") instance=ExtResource("1_q7ens")]
+[node name="SingleplayerGame" node_paths=PackedStringArray("bot_cover", "mini_max") instance=ExtResource("1_q7ens")]
 script = ExtResource("2_ysh73")
 bot_cover = NodePath("UserInterface/BotCover")
-fence_amount = null
-player_amount = null
+mini_max = NodePath("MiniMaxAlgorithm")
+
+[node name="MiniMaxAlgorithm" type="Node" parent="." index="1"]
+script = ExtResource("3_v54nn")
 
 [node name="BotCover" type="Control" parent="UserInterface" index="3"]
 layout_mode = 1

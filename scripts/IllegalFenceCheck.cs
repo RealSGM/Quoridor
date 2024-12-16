@@ -3,15 +3,17 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
+[GlobalClass]
 public partial class IllegalFenceCheck : Node
 {
-	[Signal] public delegate void CheckCompletedEventHandler();
 	private readonly int[] _bits = { 0, 1 };
-
 	public void GetIllegalFences(BoardState board)
+
 	{
-		GD.Print("Checking for illegal fences...");
+		var Console = GetNode<Window>("/root/Console");
+		Console.Call("add_entry", "Checking for illegal fences...", 0);
 		long startTime = DateTime.Now.Ticks;
+
 		if (board.GetFenceCount(board.CurrentPlayer) == 0) return;
 
 		for (int fence = 0; fence < board.GetFenceAmount(); fence++)
@@ -31,7 +33,7 @@ public partial class IllegalFenceCheck : Node
 			}
 		}
 
-		GD.Print("Illegal fence check took: " + (DateTime.Now.Ticks - startTime) / 10000 + "ms");
+		Console.Call("add_entry", "Illegal fence check took: " + (DateTime.Now.Ticks - startTime) / 10000 + "ms", 0);
 	}
 
 	private bool IsFenceIllegal(BoardState board, int fence, int direction, int player)

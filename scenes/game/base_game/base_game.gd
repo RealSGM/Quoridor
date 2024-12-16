@@ -2,9 +2,10 @@ class_name BaseGame extends Control
 ## Handles the Interface for the BaseGame
 ## Sends signals to the board and user interface
 
+const PLAYER_AMOUNT: int = 2
+
 @export_category("Game Settings")
 @export var fence_amount: int = 10
-@export var player_amount: int = 2
 
 @export_category("Nodes")
 @export var board: BoardState
@@ -12,9 +13,11 @@ class_name BaseGame extends Control
 @export var board_container: PanelContainer
 @export var fence_button_container: GridContainer
 @export var user_interface: UserInterface
+@export var illegal_fence_check: IllegalFenceCheck
 
 var tile_buttons: Array[TileButton] = []
 var fence_buttons: Array[FenceButton] = []
+
 
 ## Update board when the player is changed
 @onready var current_player: int:
@@ -67,7 +70,7 @@ func reset_board() -> void:
 
 ## Setup the board with the selected size
 func setup_board(board_size: int) -> void:
-	board.InitialiseBoard(board_size, fence_amount, player_amount)
+	board.InitialiseBoard(board_size, fence_amount, PLAYER_AMOUNT)
 	
 	instance_tile_buttons(board_size)
 	instance_fence_buttons(board_size - 1)
@@ -218,10 +221,10 @@ func _on_confirm_pressed() -> void:
 		await board.BoardUpdated
 	
 	# Check if the pawn has reached end goal
-	if board.GetWinner():
+	if board.GetWinner(current_player):
 		user_interface.update_win(current_player)
 	# Switch to next player
 	else:
 		# Complete IFS before switching player
-		IllegalFenceCheck.GetIllegalFences(board)
+		illegal_fence_check.GetIllegalFences(board)
 		current_player = 1 - current_player

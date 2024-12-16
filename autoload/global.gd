@@ -60,3 +60,7 @@ func get_tiles() -> String:
 		if (index + 1) % game.board.BoardSize == 0:
 			text += '\n\n'
 	return text
+
+
+func get_move_history() -> String:
+	return game.board.GetMoveHistory()

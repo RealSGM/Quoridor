@@ -17,7 +17,6 @@ anti_aliasing = false
 
 [node name="Console" type="Window" node_paths=PackedStringArray("history_vbc", "input")]
 title = "Console"
-initial_position = 1
 size = Vector2i(960, 540)
 always_on_top = true
 script = ExtResource("1_xxsvo")

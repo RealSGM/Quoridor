@@ -7,11 +7,14 @@ using System.Text;
 [GlobalClass]
 public partial class BoardState : Control
 {
+	[Signal] public delegate void BoardUpdatedEventHandler();
+
 	private static readonly int[][][] DefaultTileGridConnections = new int[][][]
 	{
 		new int[][] { new int[] { 0, 2 }, new int[] { 1, 3 } },
 		new int[][] { new int[] { 0, 1 }, new int[] { 2, 3 } }
 	};
+	public static int[] bits = new int[2] {0, 1};
 
 	public bool BoardReady { get; set; } = false;
 	public int BoardSize { get; set; }
@@ -27,8 +30,6 @@ public partial class BoardState : Control
 	private int[] FenceCounts { get; set; }
 	private int[][] WinPositions { get; set; }
 	
-	[Signal] public delegate void BoardUpdatedEventHandler();
-
 	// Converts fence direction which is [0, 1] to [-1, 1] for notation
 	public static int GetMappedFenceIndex(int fenceIndex, int direction)
 	{
@@ -155,7 +156,7 @@ public partial class BoardState : Control
 
 	public string GetMoveHistory() => MoveHistory.ToString();
 
-	public bool GetWinner() => WinPositions[CurrentPlayer].Contains(PawnPositions[CurrentPlayer]);
+	public bool GetWinner(int player) => WinPositions[player].Contains(PawnPositions[player]);
 	
 	public int GetPawnPosition(int index) => PawnPositions[index];
 
@@ -291,6 +292,30 @@ public partial class BoardState : Control
 
 	#endregion
 
+	#region Minimax
+
+	/// Evaluate the board state, calculate the number of rows the player is from the goal and return a score
+	public float EvaluateBoard()
+	{
+		// If the player has won, return 100
+		if (GetWinner(CurrentPlayer)) return 100;
+		// If the player has lost, return -100
+		if (GetWinner(1 - CurrentPlayer)) return -100;
+
+		return GetManhattanDistance();
+	}
+
+	public float GetManhattanDistance()
+	{
+		int boardSize = GetBoardSize();
+		int startTile = GetPawnPosition(CurrentPlayer);
+		int[] goalTiles = GetWinPositions(CurrentPlayer);
+		int distance = goalTiles.Min(goalTile => Math.Abs(goalTile - startTile)) / boardSize;
+		return distance;
+	}
+
+	#endregion
+
 	public void MovePawn(int tileIndex, int currentPlayer)
 	{
 		PawnPositions[currentPlayer] = tileIndex;
@@ -319,23 +344,26 @@ public partial class BoardState : Control
 		}
 	}
 
-	public Dictionary<int, int[]> GetPossibleMoves()
+	public string GetAllMoves()
 	{
-		Dictionary<int, int[]> possibleMoves = new();
-		int[] bits = new int[2] {0, 1};
+		StringBuilder allMoves = new();
 
-		// Loop through both directions
-		foreach	(int direction in bits)
+		// Loop through both directions and add all possible fence placements
+		foreach (var direction in bits)
 		{
-			var moves = Enumerable.Range(0, GetFenceAmount())
-				.Where(fence => !GetFenceEnabled(fence, direction))
-				.ToArray();
-			possibleMoves[direction] = moves;
-		}
-		
-		// Add the tile connections as index 2
-		possibleMoves.Add(2, GetTileConnections(PawnPositions[CurrentPlayer]));
+			for (int i = 0; i < GetFenceAmount(); i++)
+			{
+				if (GetFenceEnabled(i, direction)) continue;
 
-		return possibleMoves;
+				int mappedFence = GetMappedFenceIndex(i, direction);
+				allMoves.Append($"{CurrentPlayer}f{mappedFence};");
+			}
+		}
+
+		// Add all possible pawn moves
+		GetReachableTiles(CurrentPlayer).ToList()
+			.ForEach(index => allMoves.Append($"{CurrentPlayer}m{index};"));
+
+		return allMoves.ToString();
 	}
 }
