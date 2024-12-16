@@ -334,6 +334,16 @@ public partial class BoardState : Control
 		}
 	}
 
+	public void BuildFromMoveHistory(string moveHistory)
+	{
+		string[] moves = moveHistory.Split(';');
+		foreach (string move in moves)
+		{
+			if (move == "") continue;
+			AddMove(move);
+		}
+	}
+
 	public string GetAllMoves()
 	{
 		StringBuilder allMoves = new();

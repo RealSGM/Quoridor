@@ -28,6 +28,8 @@ public partial class MiniMaxAlgorithm : Node
 		if (currentDepth >= maxDepth) return;
 
 		// Get all possible moves
+		IllegalFenceCheck illegalFenceCheck = GetParent().GetNode<IllegalFenceCheck>("IllegalFenceCheck");
+		illegalFenceCheck.GetIllegalFences(board);
 		string allMoves = board.GetAllMoves();
 
 		// Split the moves into individual moves and remove the last empty string
@@ -40,9 +42,8 @@ public partial class MiniMaxAlgorithm : Node
 			parent.AddChild(child);
 
 			// // Create a new board state
-			// BoardState newBoard = board.Clone();
-			// newBoard.AddMove(move);
-			// float score = newBoard.EvaluateBoard();
+			BoardState newBoard = board.Clone();
+			newBoard.AddMove(move);
 
 			// Recursively create subtrees
 			CreateSubTree(board, child, currentDepth + 1, maxDepth);
