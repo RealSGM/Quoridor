@@ -165,9 +165,9 @@ public partial class BoardState : Control
 
 	#region Reachable Tiles
 	
-	public int[] GetReachableTiles(int index)
+	public int[] GetReachableTiles(int player)
 	{
-		int playerPawnPosition = PawnPositions[index];
+		int playerPawnPosition = PawnPositions[player];
 		int[] playerPawnTile = Tiles[playerPawnPosition];
 		List<int> reachableTiles = new();
 
