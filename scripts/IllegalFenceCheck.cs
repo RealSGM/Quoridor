@@ -46,7 +46,7 @@ public partial class IllegalFenceCheck : Node
 		boardClone.PlaceFence(mappedFence, player, true);
 
 		int start = boardClone.GetPawnPosition(player);
-		HashSet<int> goalTiles = boardClone.GetWinPositions(player).ToHashSet();
+		HashSet<int> goalTiles = boardClone.GetGoalTiles(player).ToHashSet();
 
 		return IterativeDFS(boardClone, start, goalTiles);
 	}

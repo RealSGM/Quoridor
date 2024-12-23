@@ -51,13 +51,11 @@ var game_type: String
 
 @onready var menus: Array[PanelContainer] = [main_menu, play_menu, multiplayer_menu, board_options_menu]
 @onready var global_options: Array[BoxContainer] = [player_one_container, board_size_container]
-@onready var game_type_dict: Dictionary = {
-	"Singleplayer": [bot_container],
-	"Local": [player_two_container]
-}
+@onready var game_type_dict: Dictionary = {"Singleplayer": [bot_container], "Local": [player_two_container]}
+
 
 func _input(event: InputEvent) -> void:
-	if event.is_action_pressed('toggle_console'):
+	if event.is_action_pressed("toggle_console"):
 		Console.visible = !Console.visible
 
 
@@ -71,28 +69,28 @@ func _ready() -> void:
 func setup_menus() -> void:
 	menus.map(func(menu: PanelContainer): menu.hide())
 	show_main_menu()
-	
+
 	play_button.pressed.connect(_on_menu_button_pressed.bind(play_menu))
 	exit_button.pressed.connect(get_tree().quit)
-	
+
 	singleplayer_button.pressed.connect(_on_menu_button_pressed.bind(board_options_menu, singleplayer_button))
 	multiplayer_button.pressed.connect(_on_menu_button_pressed.bind(multiplayer_menu))
 	play_back_button.pressed.connect(_on_back_button_pressed)
-	
+
 	#online_button.pressed
 	local_button.pressed.connect(_on_menu_button_pressed.bind(board_options_menu, local_button))
 	multiplayer_back_button.pressed.connect(_on_back_button_pressed)
-	
+
 	start_game_button.pressed.connect(_on_start_game_pressed)
 	board_options_back_button.pressed.connect(_on_back_button_pressed)
-	
+
 	# Setup colour option buttons
-	p_one_colours.item_selected.connect(_on_colour_selected.bind(p_one_colours.selected,  p_two_colours,))
+	p_one_colours.item_selected.connect(_on_colour_selected.bind(p_one_colours.selected, p_two_colours))
 	p_two_colours.item_selected.connect(_on_colour_selected.bind(p_two_colours.selected, p_one_colours))
 	bot_colours.item_selected.connect(_on_colour_selected.bind(bot_colours.selected, p_one_colours))
 	p_one_colours.select(0)
 	p_two_colours.select(1)
-	
+
 	setup_board_sizes()
 
 
@@ -111,12 +109,12 @@ func show_main_menu() -> void:
 
 
 func set_game_data() -> void:
-	Global.players[0]['name'] = player_one_name.text
-	Global.players[0]['color'] = Global.COLORS[p_one_colours.selected]
-	
-	var selected_colour: int 
+	Global.players[0]["name"] = player_one_name.text
+	Global.players[0]["color"] = Global.COLORS[p_one_colours.selected]
+
+	var selected_colour: int
 	var selected_name: String
-	
+
 	match game_type:
 		"Local":
 			selected_colour = p_two_colours.selected
@@ -124,9 +122,9 @@ func set_game_data() -> void:
 		"Singleplayer":
 			selected_colour = bot_colours.selected
 			selected_name = "Bot"
-	
-	Global.players[1]['color'] = Global.COLORS[selected_colour]
-	Global.players[1]['name'] = selected_name
+
+	Global.players[1]["color"] = Global.COLORS[selected_colour]
+	Global.players[1]["name"] = selected_name
 
 
 func setup_board_options() -> void:
@@ -140,10 +138,10 @@ func _on_menu_button_pressed(menu: PanelContainer, prev_button: Button = null) -
 	menu_stack.back().hide()
 	menu_stack.append(menu)
 	menu.show()
-	
+
 	if !prev_button:
 		return
-	
+
 	game_type = prev_button.name.replace("Button", "")
 	setup_board_options()
 
