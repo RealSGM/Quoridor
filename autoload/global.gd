@@ -14,51 +14,52 @@ var fence_direction: int = 0
 var game: BaseGame
 var players: Array[Dictionary] = [{}, {}]
 
+
 func help() -> String:
 	Console.show_help()
-	return ' '
+	return " "
 
 
 func clear() -> String:
 	Console.clear()
-	return ''
+	return ""
 
 
 func get_fences() -> String:
 	if !game:
-		return 'Game not started'
-	
-	var text: String = ''
-	
+		return "Game not started"
+
+	var text: String = ""
+
 	var amount: int = game.board.GetFenceAmount()
 
 	for index: int in range(amount):
-		var h_fence: String = 'T' if game.board.GetFencePlaced(index, 0) else 'F'
-		var v_fence: String = 'T' if game.board.GetFencePlaced(index, 1) else 'F'
-		text += ' [%s %s] ' % [h_fence, v_fence]
+		var h_fence: String = "T" if game.board.GetFencePlaced(index, 0) else "F"
+		var v_fence: String = "T" if game.board.GetFencePlaced(index, 1) else "F"
+		text += " [%s %s] " % [h_fence, v_fence]
 		if (index + 1) % (game.board.BoardSize - 1) == 0:
-			text += '\n'
-	
+			text += "\n"
+
 	return text
 
 
 func get_tiles() -> String:
 	if !game:
-		return 'Game not started'
-	
-	var text: String = ''
-	
+		return "Game not started"
+
+	var text: String = ""
+
 	for index: int in range(game.board.GetBoardSize() * game.board.GetBoardSize()):
 		var tile: PackedInt32Array = game.board.GetTileConnections(index)
-		var connections_string: String = ''
-		
+		var connections_string: String = ""
+
 		for connection in tile:
-			connections_string += ' %s ' % connection
-		
-		text += '[ %s ]' % connections_string
+			connections_string += " %s " % connection
+
+		text += "[ %s ]" % connections_string
 
 		if (index + 1) % game.board.BoardSize == 0:
-			text += '\n\n'
+			text += "\n\n"
 	return text
 
 

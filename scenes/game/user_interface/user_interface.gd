@@ -33,7 +33,7 @@ func _ready() -> void:
 	pause_return.pressed.connect(func(): pause_menu.hide())
 	toggle_direction_button.pressed.connect(SignalManager.direction_toggled.emit)
 	confirm_button.pressed.connect(SignalManager.confirm_pressed.emit)
-	
+
 	pause_menu.hide()
 	win_menu.hide()
 
@@ -50,17 +50,18 @@ func update_turn(player: int) -> void:
 func add_message(msg: String, player: int) -> void:
 	var new_comment: Label = Resources.get_resource("comment").instantiate()
 	new_comment.text = msg
-	new_comment.modulate = Global.players[player]['color']
+	new_comment.modulate = Global.players[player]["color"]
 	chat_container.add_child(new_comment, true)
 
 
 ## Disable the confirm button when neither option is selected
 func set_confirm_button(move_code: String) -> void:
-	confirm_button.disabled = move_code == ''
+	confirm_button.disabled = move_code == ""
 
 
 #region Signals
 #endregion
 
+
 func update_direction() -> void:
-	toggle_direction_button.text = 'Horizontal' if Global.fence_direction == 0 else 'Vertical'
+	toggle_direction_button.text = "Horizontal" if Global.fence_direction == 0 else "Vertical"

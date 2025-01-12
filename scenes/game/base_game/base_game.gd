@@ -47,6 +47,7 @@ var fence_buttons: Array[FenceButton] = []
 func _ready() -> void:
 	SignalManager.confirm_pressed.connect(_on_confirm_pressed)
 	SignalManager.direction_toggled.connect(_on_directional_button_pressed)
+	_on_directional_button_pressed()
 	move_code = ''
 	current_player = 0
 	board.show()
@@ -186,12 +187,12 @@ func _on_directional_button_pressed() -> void:
 	update_fence_buttons()
 
 
-func _on_fence_button_pressed(fence: int) -> void:
+func _on_fence_button_pressed(fence: int, direction: int = Global.fence_direction) -> void:
 	move_code = "%sf%s" % [current_player, BoardState.GetMappedFenceIndex(fence, Global.fence_direction)]
 
 	var fence_button: FenceButton = fence_buttons[fence]
-	fence_button.h_fence.visible = Global.fence_direction == 0
-	fence_button.v_fence.visible = Global.fence_direction != 0
+	fence_button.h_fence.visible = direction == 0
+	fence_button.v_fence.visible = direction != 0
 
 
 func _on_tile_pressed(tile: int) -> void:
@@ -208,7 +209,7 @@ func _on_confirm_pressed() -> void:
 	
 	var index: int = abs(move_code.substr(2,-1).to_int())
 
-	match  move_code[1]:
+	match move_code[1]:
 		'f':
 			confirm_place_fence(index)
 		'm':

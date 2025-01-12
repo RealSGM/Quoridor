@@ -3,6 +3,7 @@ using System;
 using System.Linq;
 using System.Collections.Generic;
 using System.Text;
+using System.Formats.Asn1;
 
 [GlobalClass]
 public partial class BoardState : Control
@@ -23,9 +24,7 @@ public partial class BoardState : Control
 	/// Stores if the fence should be disabled for each direction based off latest DFS
 	private bool[][] DFSDisabledFences { get; set;}
 	private int[] PawnPositions { get; set; }
-	private int[] AdjacentOffsets { get; set; }
 	private int[] FenceCounts { get; set; }
-	private int[][] WinPositions { get; set; }
 	
 	// Converts fence direction which is [0, 1] to [-1, 1] for notation
 	public static int GetMappedFenceIndex(int fenceIndex, int direction)
@@ -53,8 +52,7 @@ public partial class BoardState : Control
 			FenceCounts = (int[])FenceCounts.Clone(),
 			PawnPositions = (int[])PawnPositions.Clone(),
 			Tiles = Tiles.Select(tile => (int[])tile.Clone()).ToArray(),
-			AdjacentOffsets = (int[])AdjacentOffsets.Clone(),
-			WinPositions = WinPositions.Select(winPosition => (int[])winPosition.Clone()).ToArray(),
+			// WinPositions = WinPositions.Select(winPosition => (int[])winPosition.Clone()).ToArray(),
 			CurrentPlayer = CurrentPlayer,
 			DFSDisabledFences = DFSDisabledFences.Select(dfs => (bool[])dfs.Clone()).ToArray(),
 			MoveHistory = new StringBuilder(MoveHistory.ToString()),
@@ -68,10 +66,9 @@ public partial class BoardState : Control
 	{
 		BoardSize = boardSize;
 		FenceCounts = Enumerable.Repeat(fencesPerPlayer, playerCount).ToArray();
-		AdjacentOffsets = new int[4] { -boardSize, 1, boardSize, -1 };
 
 		InitialisePawnPositions(playerCount, boardSize);
-		InitialiseWinPositions(boardSize, playerCount);
+		// InitialiseWinPositions(boardSize, playerCount);
 		InitialiseTiles(boardSize);
 		InitialiseFences(boardSize - 1);
 	}
@@ -94,13 +91,13 @@ public partial class BoardState : Control
 		PawnPositions[1] = boardSize / 2;
 	}
 
-	public void InitialiseWinPositions(int boardSize, int playerCount)
-	{
-		int totalTiles = boardSize * boardSize;
-		WinPositions = new int[playerCount][];
-		WinPositions[0] = Enumerable.Range(0, boardSize).ToArray(); // Player 1's winning positions
-		WinPositions[1] = Enumerable.Range(totalTiles - boardSize, boardSize).ToArray(); // Player 2's winning positions
-	}
+	// public void InitialiseWinPositions(int boardSize, int playerCount)
+	// {
+	// 	int totalTiles = boardSize * boardSize;
+	// 	WinPositions = new int[playerCount][];
+	// 	WinPositions[0] = Enumerable.Range(0, boardSize).ToArray(); // Player 1's winning positions
+	// 	WinPositions[1] = Enumerable.Range(totalTiles - boardSize, boardSize).ToArray(); // Player 2's winning positions
+	// }
 
 	public void InitialiseTiles(int boardSize)
 	{
@@ -153,11 +150,20 @@ public partial class BoardState : Control
 
 	public string GetMoveHistory() => MoveHistory.ToString();
 
-	public bool GetWinner(int player) => WinPositions[player].Contains(PawnPositions[player]);
+	public int[] GetGoalTiles(int player)
+	{
+		int startRow = player * (BoardSize - 1) * BoardSize;
+		int endRow = startRow + BoardSize;
+		return Enumerable.Range(startRow, endRow).ToArray();
+	}
+
+	public bool GetWinner(int player)
+	{
+		int tile = GetPawnPosition(player);
+		return GetGoalTiles(player).Contains(tile);
+	}
 	
 	public int GetPawnPosition(int index) => PawnPositions[index];
-
-	public int[] GetWinPositions(int index) => WinPositions[index];
 
 	public int GetBoardSize() => BoardSize;
 	
@@ -196,7 +202,9 @@ public partial class BoardState : Control
 		int directionIndex = Array.IndexOf(Tiles[PawnPositions[CurrentPlayer]], enemyPawnPosition);
 		
 		// Check if the leaped tile is within boundaries
+		int[] AdjacentOffsets = new int[4] { -BoardSize, 1, BoardSize, -1 };
 		int leapedTileIndex = connectedTile + AdjacentOffsets[directionIndex];
+
 		if (leapedTileIndex < 0 || leapedTileIndex >= Tiles.Length)
 		{
 			// Return an empty list, as the leaped tile is out of boundaries
@@ -303,9 +311,9 @@ public partial class BoardState : Control
 	{
 		int boardSize = GetBoardSize();
 		int startTile = GetPawnPosition(CurrentPlayer);
-		int[] goalTiles = GetWinPositions(CurrentPlayer);
-		int distance = goalTiles.Min(goalTile => Math.Abs(goalTile - startTile)) / boardSize;
-		return distance;
+		// int[] goalTiles = GetWinPositions(CurrentPlayer);
+		// int distance = goalTiles.Min(goalTile => Math.Abs(goalTile - startTile)) / boardSize;
+		return -1;
 	}
 
 	#endregion
@@ -322,7 +330,9 @@ public partial class BoardState : Control
 		int currentPlayer = int.Parse(code[0].ToString());
 		char moveType = code[1];
 		int value = int.Parse(code[2..]);
-
+		GD.Print($"Player {currentPlayer} made a move: {code}");
+		GD.Print($"String of Value: {code[2..]}");
+		GD.Print($"Value: {value}");
 		switch (moveType)
 		{
 			case 'm':
