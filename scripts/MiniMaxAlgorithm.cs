@@ -37,24 +37,22 @@ public partial class MiniMaxAlgorithm : Node
 		// Split the moves into individual moves and remove the last empty string
 		string[] moves = allMoves.Split(';', StringSplitOptions.RemoveEmptyEntries);
 
-		// foreach (string move in moves)
-		// {
-		// 	string moveHistory = board.GetMoveHistory() + move;
-		// 	TreeNode child = new(parent, moveHistory);
-		// 	parent.AddChild(child);
+		foreach (string move in moves)
+		{
+			string moveHistory = board.GetMoveHistory() + move;
+			TreeNode child = new(parent, moveHistory);
+			parent.AddChild(child);
 
-		// 	// // Create a new board state
-		// 	BoardState newBoard = board.Clone();
-		// 	newBoard.AddMove(move);
+			// // Create a new board state
+			BoardState newBoard = board.Clone();
+			newBoard.AddMove(move);
 
-		// 	// Recursively create subtrees
-		// 	CreateSubTree(board, child, currentDepth + 1, maxDepth);
-		// }
+			// Recursively create subtrees
+			CreateSubTree(board, child, currentDepth + 1, maxDepth);
+		}
 
 		// return random move in moves
 		// Pick random nuber between 0 and moves.Length
-		Random random = new();
-		int randomNumber = random.Next(0, moves.Length);
-		return moves[randomNumber];
+		return "";
 	}
 }
