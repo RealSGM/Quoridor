@@ -39,7 +39,7 @@ public partial class IllegalFenceCheck : Node
 	}
 
 	private bool IsFenceIllegal(BoardState board, int fence, int direction, int player)
-	{	
+	{
 		BoardState boardClone = board.Clone();
 		int mappedFence = BoardState.GetMappedFenceIndex(fence, direction);
 
@@ -61,7 +61,7 @@ public partial class IllegalFenceCheck : Node
 		while (stack.Count > 0)
 		{
 			int current = stack.Pop();
-			
+
 			if (goalTiles.Contains(current)) return false;
 
 			if (visited.Contains(current)) continue;

@@ -20,7 +20,7 @@ public partial class MiniMaxAlgorithm : Node
 		string move =  CreateSubTree(originalBoard, root, 0, MAX_DEPTH);
 
 		Console.Call("add_entry", "Game Tree created in " + (DateTime.Now.Ticks - startTime) / TimeSpan.TicksPerMillisecond + " ms", 0);
-		
+
 		return move;
 	}
 

@@ -25,7 +25,7 @@ public partial class BoardState : Control
 	private bool[][] DFSDisabledFences { get; set;}
 	private int[] PawnPositions { get; set; }
 	private int[] FenceCounts { get; set; }
-	
+
 	// Converts fence direction which is [0, 1] to [-1, 1] for notation
 	public static int GetMappedFenceIndex(int fenceIndex, int direction)
 	{
@@ -44,7 +44,7 @@ public partial class BoardState : Control
 	}
 
 	#region Initialization
-	
+
 	public BoardState Clone()
 	{
 		BoardState boardState = new()
@@ -102,7 +102,7 @@ public partial class BoardState : Control
 	public void InitialiseTiles(int boardSize)
 	{
 		int totalTiles = boardSize * boardSize;
-		
+
 		// Generate empty tiles in the form of a 2D array
 		Tiles = Enumerable.Range(0, totalTiles)
 			.Select(_ => new int[4])
@@ -132,7 +132,7 @@ public partial class BoardState : Control
 	#endregion
 
 	#region Getters
-	
+
 	public bool GetFenceEnabled(int fence, int direction)
 	{
 		return GetFencePlaced(fence, direction) || GetDFSDisabled(fence, direction);
@@ -162,15 +162,15 @@ public partial class BoardState : Control
 		int tile = GetPawnPosition(player);
 		return GetGoalTiles(player).Contains(tile);
 	}
-	
+
 	public int GetPawnPosition(int index) => PawnPositions[index];
 
 	public int GetBoardSize() => BoardSize;
-	
+
 	#endregion
 
 	#region Reachable Tiles
-	
+
 	public int[] GetReachableTiles(int player)
 	{
 		int playerPawnPosition = PawnPositions[player];
@@ -200,7 +200,7 @@ public partial class BoardState : Control
 
 		// Get the direction of the enemy pawn
 		int directionIndex = Array.IndexOf(Tiles[PawnPositions[CurrentPlayer]], enemyPawnPosition);
-		
+
 		// Check if the leaped tile is within boundaries
 		int[] AdjacentOffsets = new int[4] { -BoardSize, 1, BoardSize, -1 };
 		int leapedTileIndex = connectedTile + AdjacentOffsets[directionIndex];
@@ -228,11 +228,11 @@ public partial class BoardState : Control
 
 		return leapedTiles;
 	}
-	
+
 	#endregion
 
 	#region Fence Placement
-	
+
 	public int[] GetTileGrid(int index){
 		int topLeft = index;
 		int topRight = index + 1;
