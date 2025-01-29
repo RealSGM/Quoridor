@@ -1,10 +1,5 @@
 extends Window
 
-## TODO Add colours to text
-## Error - Red
-## Warning - Yellow ?
-## Success
-
 const COLORS: Array[Color] = [
 	Color("#B0BEC5"),  # Default
 	Color("#FF4C4C"),  # Error
