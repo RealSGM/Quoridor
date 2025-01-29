@@ -1,10 +1,10 @@
 [gd_scene load_steps=6 format=3 uid="uid://rmjhwmm8lagg"]
 
-[ext_resource type="StyleBox" uid="uid://xjrxqguwd6gy" path="res://resources/tile/tile_normal.tres" id="1_3mp2l"]
-[ext_resource type="StyleBox" uid="uid://c6l644kbapyt4" path="res://resources/tile/tile_pressed.tres" id="2_al77t"]
-[ext_resource type="StyleBox" uid="uid://v1kyd2jp1ujl" path="res://resources/tile/tile_hover.tres" id="3_i4yfd"]
-[ext_resource type="Script" uid="uid://b0ybj8xsnhwgx" path="res://scenes/game/tile_button/tile_button.gd" id="4_jgrqp"]
-[ext_resource type="Theme" uid="uid://gl4viqpfcsgn" path="res://resources/themes/main_theme.tres" id="5_hdjjh"]
+[ext_resource type="StyleBox" uid="uid://xjrxqguwd6gy" path="res://src/resources/tile/tile_normal.tres" id="1_3mp2l"]
+[ext_resource type="StyleBox" uid="uid://c6l644kbapyt4" path="res://src/resources/tile/tile_pressed.tres" id="2_al77t"]
+[ext_resource type="StyleBox" uid="uid://v1kyd2jp1ujl" path="res://src/resources/tile/tile_hover.tres" id="3_i4yfd"]
+[ext_resource type="Script" path="res://src/game/tile_button/tile_button.gd" id="4_jgrqp"]
+[ext_resource type="Theme" uid="uid://gl4viqpfcsgn" path="res://src/resources/themes/main_theme.tres" id="5_hdjjh"]
 
 [node name="TileButton" type="Button" node_paths=PackedStringArray("label")]
 custom_minimum_size = Vector2(64, 64)

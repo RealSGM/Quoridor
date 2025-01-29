@@ -1,10 +1,10 @@
 [gd_scene load_steps=8 format=3 uid="uid://rfqpiq385m6l"]
 
-[ext_resource type="StyleBox" uid="uid://8bjcyjmqqxs7" path="res://resources/fence/fence_disabled.tres" id="2_2flaf"]
-[ext_resource type="StyleBox" uid="uid://ftbivfna5m8m" path="res://resources/fence/fence_hover.tres" id="3_12f5i"]
-[ext_resource type="StyleBox" uid="uid://cue3j7ivreusm" path="res://resources/fence/fence_pressed.tres" id="3_lwelp"]
-[ext_resource type="StyleBox" uid="uid://c6r5krky1pues" path="res://resources/fence/fence_normal.tres" id="4_dqfgy"]
-[ext_resource type="Script" path="res://scenes/game/fence_button/fence_button.gd" id="5_3cfjt"]
+[ext_resource type="StyleBox" uid="uid://8bjcyjmqqxs7" path="res://src/resources/fence/fence_disabled.tres" id="2_2flaf"]
+[ext_resource type="StyleBox" uid="uid://ftbivfna5m8m" path="res://src/resources/fence/fence_hover.tres" id="3_12f5i"]
+[ext_resource type="StyleBox" uid="uid://cue3j7ivreusm" path="res://src/resources/fence/fence_pressed.tres" id="3_lwelp"]
+[ext_resource type="StyleBox" uid="uid://c6r5krky1pues" path="res://src/resources/fence/fence_normal.tres" id="4_dqfgy"]
+[ext_resource type="Script" path="res://src/game/fence_button/fence_button.gd" id="5_3cfjt"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_wjmnx"]
 
