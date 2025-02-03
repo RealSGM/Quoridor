@@ -3,7 +3,6 @@ using System;
 using System.Linq;
 using System.Collections.Generic;
 using System.Text;
-using System.Formats.Asn1;
 
 [GlobalClass]
 public partial class BoardState : Control
@@ -52,7 +51,6 @@ public partial class BoardState : Control
 			FenceCounts = (int[])FenceCounts.Clone(),
 			PawnPositions = (int[])PawnPositions.Clone(),
 			Tiles = Tiles.Select(tile => (int[])tile.Clone()).ToArray(),
-			// WinPositions = WinPositions.Select(winPosition => (int[])winPosition.Clone()).ToArray(),
 			CurrentPlayer = CurrentPlayer,
 			DFSDisabledFences = DFSDisabledFences.Select(dfs => (bool[])dfs.Clone()).ToArray(),
 			MoveHistory = new StringBuilder(MoveHistory.ToString()),
@@ -68,7 +66,6 @@ public partial class BoardState : Control
 		FenceCounts = Enumerable.Repeat(fencesPerPlayer, playerCount).ToArray();
 
 		InitialisePawnPositions(playerCount, boardSize);
-		// InitialiseWinPositions(boardSize, playerCount);
 		InitialiseTiles(boardSize);
 		InitialiseFences(boardSize - 1);
 	}
@@ -90,14 +87,6 @@ public partial class BoardState : Control
 		PawnPositions[0] = (int)(boardSize * (boardSize - 0.5));
 		PawnPositions[1] = boardSize / 2;
 	}
-
-	// public void InitialiseWinPositions(int boardSize, int playerCount)
-	// {
-	// 	int totalTiles = boardSize * boardSize;
-	// 	WinPositions = new int[playerCount][];
-	// 	WinPositions[0] = Enumerable.Range(0, boardSize).ToArray(); // Player 1's winning positions
-	// 	WinPositions[1] = Enumerable.Range(totalTiles - boardSize, boardSize).ToArray(); // Player 2's winning positions
-	// }
 
 	public void InitialiseTiles(int boardSize)
 	{
@@ -311,8 +300,6 @@ public partial class BoardState : Control
 	{
 		int boardSize = GetBoardSize();
 		int startTile = GetPawnPosition(CurrentPlayer);
-		// int[] goalTiles = GetWinPositions(CurrentPlayer);
-		// int distance = goalTiles.Min(goalTile => Math.Abs(goalTile - startTile)) / boardSize;
 		return -1;
 	}
 
@@ -375,5 +362,16 @@ public partial class BoardState : Control
 			.ForEach(index => allMoves.Append($"{CurrentPlayer}m{index};"));
 
 		return allMoves.ToString();
+	}
+
+	public int GetDistanceToGoal(int tileIndex, int player)
+	{
+		int[] goalTiles = GetGoalTiles(player);
+		int distance = 0;
+		foreach (int goalTile in goalTiles)
+		{
+			distance += Math.Abs(goalTile - tileIndex);
+		}
+		return distance;
 	}
 }
