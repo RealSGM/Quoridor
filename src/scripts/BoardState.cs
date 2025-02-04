@@ -317,9 +317,11 @@ public partial class BoardState : Control
 		int currentPlayer = int.Parse(code[0].ToString());
 		char moveType = code[1];
 		int value = int.Parse(code[2..]);
-		GD.Print($"Player {currentPlayer} made a move: {code}");
-		GD.Print($"String of Value: {code[2..]}");
-		GD.Print($"Value: {value}");
+
+		// GD.Print($"Player {currentPlayer} made a move: {code}");
+		// GD.Print($"String of Value: {code[2..]}");
+		// GD.Print($"Value: {value}");
+
 		switch (moveType)
 		{
 			case 'm':

@@ -53,6 +53,12 @@ public partial class MiniMaxAlgorithm : Node
 
 		// return random move in moves
 		// Pick random nuber between 0 and moves.Length
+		if (moves.Length > 0)
+		{
+			Random random = new();
+			int randomIndex = random.Next(0, moves.Length);
+			return moves[randomIndex];
+		}
 		return "";
 	}
 }
