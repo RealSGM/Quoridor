@@ -131,6 +131,14 @@ public partial class BoardState : Control
 
 	public int[] GetTileConnections(int tile) => Tiles[tile];
 
+	public int[] GetPathConnections(int tile, int player)
+	{
+		// Return NEWS connections for the bottom player
+		if (player == 0) return new int[] { Tiles[tile][0], Tiles[tile][1], Tiles[tile][3], Tiles[tile][2] };
+		// Return SNEW connections for the top player
+		else return new int[] { Tiles[tile][2], Tiles[tile][3], Tiles[tile][1], Tiles[tile][0] };
+	}
+
 	public bool GetFencePlaced(int fence, int direction) => Fences[fence][direction];
 
 	public int GetFenceAmount() => Fences.Length;

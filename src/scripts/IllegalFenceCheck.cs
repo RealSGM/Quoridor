@@ -10,6 +10,10 @@ public partial class IllegalFenceCheck : Node
 	public void GetIllegalFences(BoardState board)
 
 	{
+		var Console = GetNode<Window>("/root/Console");
+		Console.Call("add_entry", "Checking for illegal fences...", 0);
+		long startTime = DateTime.Now.Ticks;
+
 		int[] bits = { 0, 1 };
 
 		if (board.GetFenceCount(board.CurrentPlayer) == 0) return;
@@ -25,11 +29,13 @@ public partial class IllegalFenceCheck : Node
 
 				Parallel.ForEach(bits, player =>
 				{
-					if (!IsFenceIllegal(board, fence, direction, player)) return;
+					if (!IsFenceIllegal(board, fence, direction, 1 - player)) return;
 					board.SetDFSDisabled(fence, direction, true);
 				});
 			});
 		});
+
+		Console.Call("add_entry", "Illegal fence check took: " + (DateTime.Now.Ticks - startTime) / 100 + "ns", 0);
 	}
 
 	private bool IsFenceIllegal(BoardState board, int fence, int direction, int player)
@@ -42,10 +48,10 @@ public partial class IllegalFenceCheck : Node
 		int start = boardClone.GetPawnPosition(player);
 		HashSet<int> goalTiles = boardClone.GetGoalTiles(player).ToHashSet();
 
-		return RecursiveBFS(boardClone, start, goalTiles, new HashSet<int>());
+		return RecursiveBFS(boardClone, start, goalTiles, new HashSet<int>(), player);
 	}
 
-	private bool IterativeDFS(BoardState board, int start, HashSet<int> goalTiles)
+	private bool IterativeDFS(BoardState board, int start, HashSet<int> goalTiles, int player)
 	{
 		Stack<int> stack = new();
 		HashSet<int> visited = new();
@@ -62,7 +68,7 @@ public partial class IllegalFenceCheck : Node
 
 			visited.Add(current);
 
-			foreach (int connectedTile in board.GetTileConnections(current).Reverse())
+			foreach (int connectedTile in board.GetPathConnections(current, player))
 			{
 				if (visited.Contains(connectedTile) || connectedTile == -1) continue;
 
@@ -72,7 +78,7 @@ public partial class IllegalFenceCheck : Node
 		return true;
 	}
 
-	public bool RecursiveDFS(BoardState board, int current, HashSet<int> goalTiles, HashSet<int> visited)
+	private bool RecursiveDFS(BoardState board, int current, HashSet<int> goalTiles, HashSet<int> visited, int player)
 	{
 		if (goalTiles.Contains(current)) return false;
 
@@ -80,17 +86,17 @@ public partial class IllegalFenceCheck : Node
 
 		visited.Add(current);
 
-		foreach (int connectedTile in board.GetTileConnections(current).Reverse())
+		foreach (int connectedTile in board.GetPathConnections(current, player))
 		{
 			if (visited.Contains(connectedTile) || connectedTile == -1) continue;
 
-			if (!RecursiveDFS(board, connectedTile, goalTiles, visited)) return false;
+			if (!RecursiveDFS(board, connectedTile, goalTiles, visited, player)) return false;
 		}
 
 		return true;
 	}
 
-	public bool IterativeBFS(BoardState board, int start, HashSet<int> goalTiles)
+	private bool IterativeBFS(BoardState board, int start, HashSet<int> goalTiles, int player)
 	{
 		Queue<int> queue = new();
 		HashSet<int> visited = new();
@@ -107,7 +113,7 @@ public partial class IllegalFenceCheck : Node
 
 			visited.Add(current);
 
-			foreach (int connectedTile in board.GetTileConnections(current))
+			foreach (int connectedTile in board.GetPathConnections(current, player))
 			{
 				if (visited.Contains(connectedTile) || connectedTile == -1) continue;
 
@@ -117,7 +123,7 @@ public partial class IllegalFenceCheck : Node
 		return true;
 	}
 
-	public bool RecursiveBFS(BoardState board, int current, HashSet<int> goalTiles, HashSet<int> visited)
+	private bool RecursiveBFS(BoardState board, int current, HashSet<int> goalTiles, HashSet<int> visited, int player)
 	{
 		if (goalTiles.Contains(current)) return false;
 
@@ -125,17 +131,17 @@ public partial class IllegalFenceCheck : Node
 
 		visited.Add(current);
 
-		foreach (int connectedTile in board.GetTileConnections(current))
+		foreach (int connectedTile in board.GetPathConnections(current, player))
 		{
 			if (visited.Contains(connectedTile) || connectedTile == -1) continue;
 
-			if (!RecursiveBFS(board, connectedTile, goalTiles, visited)) return false;
+			if (!RecursiveBFS(board, connectedTile, goalTiles, visited, player)) return false;
 		}
 
 		return true;
 	}
 
-	public bool IterativeAStar(BoardState board, int start, HashSet<int> goalTiles, int player)
+	private bool IterativeAStar(BoardState board, int start, HashSet<int> goalTiles, int player)
 	{
 		HashSet<int> visited = new();
 		PriorityQueue<int, int> queue = new();
@@ -152,7 +158,7 @@ public partial class IllegalFenceCheck : Node
 
 			visited.Add(current);
 
-			foreach (int connectedTile in board.GetTileConnections(current))
+			foreach (int connectedTile in board.GetPathConnections(current, player))
 			{
 				if (visited.Contains(connectedTile) || connectedTile == -1) continue;
 
@@ -162,7 +168,7 @@ public partial class IllegalFenceCheck : Node
 		return true;
 	}
 
-	public bool RecursiveAStar(BoardState board, int current, HashSet<int> goalTiles, HashSet<int> visited, int player)
+	private bool RecursiveAStar(BoardState board, int current, HashSet<int> goalTiles, HashSet<int> visited, int player)
 	{
 		if (goalTiles.Contains(current)) return false;
 
@@ -170,7 +176,7 @@ public partial class IllegalFenceCheck : Node
 
 		visited.Add(current);
 
-		foreach (int connectedTile in board.GetTileConnections(current))
+		foreach (int connectedTile in board.GetPathConnections(current, player))
 		{
 			if (visited.Contains(connectedTile) || connectedTile == -1) continue;
 
