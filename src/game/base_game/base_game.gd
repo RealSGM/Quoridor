@@ -28,7 +28,7 @@ var fence_buttons: Array[FenceButton] = []
 @onready var move_code: String = "":
 	set(val):
 		if not move_code.is_empty():
-			var index: int = abs(move_code.substr(2, -1).to_int())
+			var index: int = abs(move_code.substr(2).to_int())
 			match move_code[1]:
 				# Clear current fence
 				"f":
@@ -191,7 +191,7 @@ func _on_directional_button_pressed() -> void:
 
 
 func _on_fence_button_pressed(fence: int, direction: int = Global.fence_direction) -> void:
-	move_code = "%sf%s" % [current_player, BoardState.GetMappedFenceIndex(fence, Global.fence_direction)]
+	move_code = "%sf%s" % [current_player, BoardState.GetMappedFenceIndex(fence, direction)]
 
 	var fence_button: FenceButton = fence_buttons[fence]
 	fence_button.h_fence.visible = direction == 0
@@ -210,7 +210,7 @@ func _on_confirm_pressed() -> void:
 	# Reset Board
 	reset_board()
 
-	var index: int = abs(move_code.substr(2, -1).to_int())
+	var index: int = abs(move_code.substr(2).to_int())
 
 	match move_code[1]:
 		"f":
