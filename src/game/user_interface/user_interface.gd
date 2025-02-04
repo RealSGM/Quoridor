@@ -25,6 +25,8 @@ func _input(event: InputEvent) -> void:
 		SignalManager.confirm_pressed.emit()
 	if event.is_action_pressed("pause"):
 		pause_menu.visible = !pause_menu.visible
+	if event.is_action_pressed("switch_direction"):
+		SignalManager.direction_toggled.emit()
 
 
 func _ready() -> void:
