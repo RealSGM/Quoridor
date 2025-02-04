@@ -15,6 +15,7 @@ func set_current_player(val: int) -> void:
 
 	# Bot's Turn
 	if val == 1:
+		await RenderingServer.frame_post_draw
 		move_code = mini_max.CreateGameTree(board)
 		_on_confirm_pressed()
 
