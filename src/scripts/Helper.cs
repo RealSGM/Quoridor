@@ -4,7 +4,15 @@ using System;
 [GlobalClass]
 public partial class Helper : Node
 {
+	public static readonly int PlayerCount = 2;
+
 	public static readonly int[] Bits = new int[2] {0, 1};
+
+	public static readonly int[][][] DefaultTileGridConnections = new int[][][]
+	{
+		new int[][] { new int[] { 0, 2 }, new int[] { 1, 3 } },
+		new int[][] { new int[] { 0, 1 }, new int[] { 2, 3 } }
+	};
 
 	// Converts fence direction which is [0, 1] to [-1, 1] for notation
 	public static int GetMappedFenceIndex(int fenceIndex, int direction) => direction == 0 ? fenceIndex : -fenceIndex;

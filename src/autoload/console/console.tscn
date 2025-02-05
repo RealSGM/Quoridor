@@ -17,9 +17,8 @@ anti_aliasing = false
 
 [node name="Console" type="Window" node_paths=PackedStringArray("history_vbc", "input")]
 title = "Console"
-initial_position = 3
-size = Vector2i(960, 540)
-current_screen = 0
+position = Vector2i(1620, 82)
+size = Vector2i(375, 941)
 always_on_top = true
 script = ExtResource("1_xxsvo")
 history_vbc = NodePath("BG/VBC/Panel/PC/SC/History")

@@ -7,14 +7,6 @@ using System.Text;
 [GlobalClass]
 public partial class BoardState : Control
 {
-	const int PlayerCount = 2;
-
-	private static readonly int[][][] DefaultTileGridConnections = new int[][][]
-	{
-		new int[][] { new int[] { 0, 2 }, new int[] { 1, 3 } },
-		new int[][] { new int[] { 0, 1 }, new int[] { 2, 3 } }
-	};
-
 	[Export] private int[] PlacedFences { get; set; } // Array of placed fences, index = fence, value = direction => [-1 = Empty, 0 = Horizontal Placed, 1 = Vertically Placed]
 	[Export] private int[] IllegalFences { get; set;} // Array of illegal fences, index = fence, value = direction => [-1 = Empty, 0 = Horizontally Illegal, 1 = Vertically Illegal]
 	[Export] private int[] PawnPositions { get; set; }
@@ -26,20 +18,20 @@ public partial class BoardState : Control
 	public int CurrentPlayer { get; set; } = 0;
 	public StringBuilder MoveHistory { get; set; } = new();
 
-	public BoardState Clone() => new()
-		{
-			FenceCounts = FenceCounts.Clone() as int[],
-			PawnPositions = PawnPositions.Clone() as int[],
-			Tiles = Tiles.Select(tile => tile.Clone() as int[]).ToArray(),
-			CurrentPlayer = CurrentPlayer,
-			IllegalFences = IllegalFences.Clone() as int[],
-			MoveHistory = new StringBuilder(MoveHistory.ToString()),
-			PlacedFences = PlacedFences.Clone() as int[],
-			BoardSize = BoardSize
-		};
-
 	#region Initialisation ---
 	#endregion
+
+	public BoardState Clone() => new()
+	{
+		FenceCounts = FenceCounts.Clone() as int[],
+		PawnPositions = PawnPositions.Clone() as int[],
+		Tiles = Tiles.Select(tile => tile.Clone() as int[]).ToArray(),
+		CurrentPlayer = CurrentPlayer,
+		IllegalFences = IllegalFences.Clone() as int[],
+		MoveHistory = new StringBuilder(MoveHistory.ToString()),
+		PlacedFences = PlacedFences.Clone() as int[],
+		BoardSize = BoardSize
+	};
 
 	public void InitialiseBoard(int boardSize, int fencesPerPlayer)
 	{
@@ -59,7 +51,7 @@ public partial class BoardState : Control
 
 	public void InitialisePawnPositions(int boardSize)
 	{
-		PawnPositions = new int[PlayerCount];
+		PawnPositions = new int[Helper.PlayerCount];
 		PawnPositions[0] = (int)(boardSize * (boardSize - 0.5));
 		PawnPositions[1] = boardSize / 2;
 	}
@@ -233,7 +225,7 @@ public partial class BoardState : Control
 		// Get possible tile indexes in 2x2 grid
 		int[] tileGrid = GetTileGrid(convertedIndex);
 
-		foreach (int[] pair in DefaultTileGridConnections[direction])
+		foreach (int[] pair in Helper.DefaultTileGridConnections[direction])
 		{
 			RemoveTileConnection(tileGrid[pair[0]], tileGrid[pair[1]]);
 			RemoveTileConnection(tileGrid[pair[1]], tileGrid[pair[0]]);
@@ -302,7 +294,7 @@ public partial class BoardState : Control
 		}
 	}
 
-	public string GetAllMoves()
+	public string[] GetAllMoves()
 	{
 		StringBuilder allMoves = new();
 
@@ -322,6 +314,8 @@ public partial class BoardState : Control
 		GetReachableTiles(CurrentPlayer).ToList()
 			.ForEach(index => allMoves.Append($"{CurrentPlayer}m{index};"));
 
-		return allMoves.ToString();
+		return allMoves.ToString().Split(';', StringSplitOptions.RemoveEmptyEntries);
 	}
+
+	public bool IsGameOver() => GetWinner(CurrentPlayer) || GetWinner(1 - CurrentPlayer);
 }
