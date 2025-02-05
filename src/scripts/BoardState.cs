@@ -18,8 +18,8 @@ public partial class BoardState : Control
 	public int CurrentPlayer { get; set; } = 0;
 	public StringBuilder MoveHistory { get; set; } = new();
 
-	private int[][] Tiles { get; set; }
 	public bool[][] Fences { get; set; }
+	private int[][] Tiles { get; set; }
 	/// Stores if the fence should be disabled for each direction based off latest DFS
 	private bool[][] DFSDisabledFences { get; set;}
 	private int[] PawnPositions { get; set; }
@@ -122,10 +122,11 @@ public partial class BoardState : Control
 
 	#region Getters
 
-	public bool GetFenceEnabled(int fence, int direction)
-	{
-		return GetFencePlaced(fence, direction) || GetDFSDisabled(fence, direction);
-	}
+	public int[] GetFencesOnBoard() => Enumerable.Range(0, Fences.Length)
+			.Where(i => Fences[i][0] && Fences[i][1])
+			.ToArray();
+
+	public bool GetFenceEnabled(int fence, int direction) => GetFencePlaced(fence, direction) || GetDFSDisabled(fence, direction);
 
 	public bool GetDFSDisabled(int fence, int direction) => DFSDisabledFences[fence][direction];
 
@@ -154,11 +155,7 @@ public partial class BoardState : Control
 		return Enumerable.Range(startRow, endRow).ToArray();
 	}
 
-	public bool GetWinner(int player)
-	{
-		int tile = GetPawnPosition(player);
-		return GetGoalTiles(player).Contains(tile);
-	}
+	public bool GetWinner(int player) => GetGoalTiles(player).Contains(GetPawnPosition(player));
 
 	public int GetPawnPosition(int index) => PawnPositions[index];
 
@@ -289,6 +286,19 @@ public partial class BoardState : Control
 		connections[index] = -1;
 	}
 
+	public List<int> GetSurroundingFences(int fenceIndex)
+	{
+		// Get horizontal and vertically adjacent fences
+		List<int> adjFences = InitialiseConnections(fenceIndex, BoardSize - 1).ToList();
+
+		adjFences.Add(adjFences[0] % (BoardSize - 1) != 0 ? adjFences[0] - 1 : -1); // Top Left
+		adjFences.Add((adjFences[0] + 1) % (BoardSize - 1) != 0 ? adjFences[0] + 1 : -1); // Top Right
+		adjFences.Add(adjFences[2] % (BoardSize - 1) != 0 ? adjFences[2] - 1 : -1); // Bottom Left
+		adjFences.Add((adjFences[2] + 1) % (BoardSize - 1) != 0 ? adjFences[2] + 1 : -1); // Bottom Right
+
+		return adjFences.Where(fence => fence > -1).ToList();
+	}
+
 	#endregion
 
 	#region Minimax
@@ -325,10 +335,6 @@ public partial class BoardState : Control
 		int currentPlayer = int.Parse(code[0].ToString());
 		char moveType = code[1];
 		int value = int.Parse(code[2..]);
-
-		// GD.Print($"Player {currentPlayer} made a move: {code}");
-		// GD.Print($"String of Value: {code[2..]}");
-		// GD.Print($"Value: {value}");
 
 		switch (moveType)
 		{

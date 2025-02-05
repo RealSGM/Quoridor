@@ -16,13 +16,19 @@ public partial class IllegalFenceCheck : Node
 
 		int[] bits = { 0, 1 };
 
-		if (board.GetFenceCount(board.CurrentPlayer) == 0) return;
+		// Ignore if player has no more fences
+		if (board.GetFenceCount(1 - board.CurrentPlayer) == 0) return;
+		
+		int[] placedFences = board.GetFencesOnBoard();
 
-		Parallel.For(0, board.GetFenceAmount(), fence =>
+		// Stores possible adjacent fences, using mapped directions
+		List<int> possibleFences = placedFences
+			.SelectMany(fence => board.GetSurroundingFences(fence))
+			.Where(adjacentFence => adjacentFence != -1 && !placedFences.Contains(adjacentFence))
+			.ToList();
+
+		Parallel.ForEach(possibleFences, fence =>
 		{
-			board.SetDFSDisabled(fence, 0, false);
-			board.SetDFSDisabled(fence, 1, false);
-
 			Parallel.ForEach(bits, direction =>
 			{
 				if (board.GetFencePlaced(fence, direction)) return;
@@ -48,7 +54,7 @@ public partial class IllegalFenceCheck : Node
 		int start = boardClone.GetPawnPosition(player);
 		HashSet<int> goalTiles = boardClone.GetGoalTiles(player).ToHashSet();
 
-		return RecursiveBFS(boardClone, start, goalTiles, new HashSet<int>(), player);
+		return RecursiveDFS(boardClone, start, goalTiles, new(), player);
 	}
 
 	private bool IterativeDFS(BoardState board, int start, HashSet<int> goalTiles, int player)
