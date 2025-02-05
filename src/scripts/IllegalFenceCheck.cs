@@ -21,10 +21,11 @@ public partial class IllegalFenceCheck : Node
 		
 		int[] placedFences = board.GetFencesOnBoard();
 
-		// Stores possible adjacent fences, using mapped directions
+		// Stores possible adjacent fences
 		List<int> possibleFences = placedFences
 			.SelectMany(fence => board.GetSurroundingFences(fence))
 			.Where(adjacentFence => adjacentFence != -1 && !placedFences.Contains(adjacentFence))
+			.Distinct() // Removes duplicates
 			.ToList();
 
 		Parallel.ForEach(possibleFences, fence =>
