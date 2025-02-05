@@ -42,11 +42,9 @@ var fence_buttons: Array[FenceButton] = []
 func _ready() -> void:
 	SignalManager.confirm_pressed.connect(_on_confirm_pressed)
 	SignalManager.direction_toggled.connect(_on_directional_button_pressed)
-	_on_directional_button_pressed()
-	move_code = ""
+	update_fence_direction()
 	current_player = 0
 	board.show()
-
 
 func set_current_player(val: int) -> void:
 	reset_board()
@@ -119,6 +117,12 @@ func confirm_place_fence(fence: int) -> void:
 	user_interface.fence_count_labels[current_player].text = str(board.GetFenceCount(current_player) - 1)
 
 
+func update_fence_direction() -> void:
+	move_code = ""
+	user_interface.update_direction()
+	update_fence_buttons()
+
+
 #region Tiles
 #endregion
 
@@ -181,10 +185,8 @@ func confirm_move_pawn(tile: int) -> void:
 
 ## Flip the rotation of the fence
 func _on_directional_button_pressed() -> void:
-	move_code = ""
 	Global.fence_direction = 1 - Global.fence_direction
-	user_interface.update_direction()
-	update_fence_buttons()
+	update_fence_direction()
 
 
 func _on_fence_button_pressed(fence: int, direction: int = Global.fence_direction) -> void:

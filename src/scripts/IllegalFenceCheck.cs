@@ -10,9 +10,9 @@ public partial class IllegalFenceCheck : Node
 	public void GetIllegalFences(BoardState board)
 
 	{
-		var Console = GetNode<Window>("/root/Console");
-		Console.Call("add_entry", "Checking for illegal fences...", 0);
-		long startTime = DateTime.Now.Ticks;
+		// var Console = GetNode<Window>("/root/Console");
+		// Console.Call("add_entry", "Checking for illegal fences...", 0);
+		// long startTime = DateTime.Now.Ticks;
 
 		// Ignore if player has no more fences
 		if (board.GetFenceCount(1 - board.CurrentPlayer) == 0) return;
@@ -27,9 +27,7 @@ public partial class IllegalFenceCheck : Node
 			.Distinct()
 			.ToList();
 
-		// possibleFences.ForEach(fence => board.SetIllegalFence(fence, -1));
-
-		GD.Print("Possible Fences: " + string.Join(", ", possibleFences));
+		possibleFences.ForEach(fence => board.SetIllegalFence(fence, -1));
 
 		Parallel.ForEach(possibleFences, fence =>
 		{
@@ -46,7 +44,7 @@ public partial class IllegalFenceCheck : Node
 			});
 		});
 
-		Console.Call("add_entry", "Illegal fence check took: " + (DateTime.Now.Ticks - startTime) / 100 + "ns", 0);
+		// Console.Call("add_entry", "Illegal fence check took: " + (DateTime.Now.Ticks - startTime) / 100 + "ns", 0);
 	}
 
 	private static bool IsFenceIllegal(BoardState board, int fence, int direction, int player)
@@ -62,7 +60,7 @@ public partial class IllegalFenceCheck : Node
 		return RecursiveDFS(boardClone, start, goalTiles, new(), player);
 	}
 
-	private static bool IterativeDFS(BoardState board, int start, HashSet<int> goalTiles, int player)
+	public static bool IterativeDFS(BoardState board, int start, HashSet<int> goalTiles, int player)
 	{
 		Stack<int> stack = new();
 		HashSet<int> visited = new();
@@ -89,11 +87,9 @@ public partial class IllegalFenceCheck : Node
 		return true;
 	}
 
-	private static bool RecursiveDFS(BoardState board, int current, HashSet<int> goalTiles, HashSet<int> visited, int player)
+	public static bool RecursiveDFS(BoardState board, int current, HashSet<int> goalTiles, HashSet<int> visited, int player)
 	{
 		if (goalTiles.Contains(current)) return false;
-
-		GD.Print("Visited: " + string.Join(", ", visited));
 
 		if (visited.Contains(current)) return true;
 
@@ -109,7 +105,7 @@ public partial class IllegalFenceCheck : Node
 		return true;
 	}
 
-	private static bool IterativeBFS(BoardState board, int start, HashSet<int> goalTiles, int player)
+	public static bool IterativeBFS(BoardState board, int start, HashSet<int> goalTiles, int player)
 	{
 		Queue<int> queue = new();
 		HashSet<int> visited = new();
@@ -136,7 +132,7 @@ public partial class IllegalFenceCheck : Node
 		return true;
 	}
 
-	private static bool RecursiveBFS(BoardState board, int current, HashSet<int> goalTiles, HashSet<int> visited, int player)
+	public static bool RecursiveBFS(BoardState board, int current, HashSet<int> goalTiles, HashSet<int> visited, int player)
 	{
 		if (goalTiles.Contains(current)) return false;
 

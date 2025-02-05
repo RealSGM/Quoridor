@@ -8,6 +8,8 @@ public partial class MiniMaxAlgorithm : Node
 {
 	const int MAX_DEPTH = 2;
 
+	[Export] int nodesVisited = 0;
+
 	public string CreateGameTree(BoardState originalBoard)
 	{
 		var Console = GetNode<Window>("/root/Console");
@@ -16,10 +18,13 @@ public partial class MiniMaxAlgorithm : Node
 
 		// Create a Tree based off moves
 		TreeNode root = new(originalBoard.MoveHistory.ToString());
+		nodesVisited = 1;
+
 		// Recursively create subtrees
 		string move =  CreateSubTree(originalBoard, root, 0, MAX_DEPTH);
 
 		Console.Call("add_entry", "Game Tree created in " + (DateTime.Now.Ticks - startTime) / TimeSpan.TicksPerMillisecond + " ms", 0);
+		Console.Call("add_entry", "Nodes visited: " + nodesVisited, 0);
 
 		return move;
 	}
@@ -46,6 +51,8 @@ public partial class MiniMaxAlgorithm : Node
 			// // Create a new board state
 			BoardState newBoard = board.Clone();
 			newBoard.AddMove(move);
+
+			nodesVisited++;
 
 			// Recursively create subtrees
 			CreateSubTree(board, child, currentDepth + 1, maxDepth);

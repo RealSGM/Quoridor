@@ -228,8 +228,6 @@ public partial class BoardState : Control
 		// Set the fence as placed
 		PlacedFences[fenceIndex] = direction;
 
-		if (isIFS) GD.Print("Placing Fence: " + fenceIndex + " Direction: " + direction);
-
 		// Convert the index to a 2D grid index
 		int convertedIndex = fenceIndex + (fenceIndex / (BoardSize - 1));
 		// Get possible tile indexes in 2x2 grid
@@ -313,7 +311,7 @@ public partial class BoardState : Control
 		{
 			for (int i = 0; i < GetFenceAmount(); i++)
 			{
-				if (GetFenceEnabled(i, direction)) continue;
+				if (!GetFenceEnabled(i, direction)) continue;
 
 				int mappedFence = Helper.GetMappedFenceIndex(i, direction);
 				allMoves.Append($"{CurrentPlayer}f{mappedFence};");
