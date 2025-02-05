@@ -2,8 +2,6 @@ class_name BaseGame extends Control
 ## Handles the Interface for the BaseGame
 ## Sends signals to the board and user interface
 
-const PLAYER_AMOUNT: int = 2
-
 @export_category("Game Settings")
 @export var fence_amount: int = 10
 
@@ -32,8 +30,7 @@ var fence_buttons: Array[FenceButton] = []
 			match move_code[1]:
 				# Clear current fence
 				"f":
-					var direction: int = 0 if index < 0 else 1
-					if !board.GetFencePlaced(index, direction):
+					if !board.IsFencePlaced(abs(index)):
 						fence_buttons[index].clear_fences()
 				# Clear current tile
 				"m":
@@ -70,7 +67,7 @@ func reset_board() -> void:
 
 ## Setup the board with the selected size
 func setup_board(board_size: int) -> void:
-	board.InitialiseBoard(board_size, fence_amount, PLAYER_AMOUNT)
+	board.InitialiseBoard(board_size, fence_amount)
 
 	instance_tile_buttons(board_size)
 	instance_fence_buttons(board_size - 1)
@@ -112,7 +109,7 @@ func instance_tile_buttons(board_size: int) -> void:
 func update_fence_buttons() -> void:
 	for fence: int in range(board.GetFenceAmount()):
 		var fence_button: FenceButton = fence_buttons[fence]
-		fence_button.disabled = board.GetFenceEnabled(fence, Global.fence_direction) if board.GetFenceCount(current_player) > 0 else true
+		fence_button.disabled = not board.GetFenceEnabled(fence, Global.fence_direction) if board.GetFenceCount(current_player) > 0 else true
 		# Disable mouse filter if the button is disabled
 		fence_button.mouse_filter = Control.MOUSE_FILTER_IGNORE if fence_button.disabled else Control.MOUSE_FILTER_STOP
 
@@ -191,7 +188,7 @@ func _on_directional_button_pressed() -> void:
 
 
 func _on_fence_button_pressed(fence: int, direction: int = Global.fence_direction) -> void:
-	move_code = "%sf%s" % [current_player, BoardState.GetMappedFenceIndex(fence, direction)]
+	move_code = "%sf%s" % [current_player, Helper.GetMappedFenceIndex(fence, direction)]
 
 	var fence_button: FenceButton = fence_buttons[fence]
 	fence_button.h_fence.visible = direction == 0

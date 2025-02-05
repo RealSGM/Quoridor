@@ -34,9 +34,8 @@ func get_fences() -> String:
 	var amount: int = game.board.GetFenceAmount()
 
 	for index: int in range(amount):
-		var h_fence: String = "T" if game.board.GetFencePlaced(index, 0) else "F"
-		var v_fence: String = "T" if game.board.GetFencePlaced(index, 1) else "F"
-		text += " [%s %s] " % [h_fence, v_fence]
+		var fence_string: String = "-" if game.board.GetPlacedFence(index) == 0 else "|"
+		text += " [%s %s] " % [fence_string]
 		if (index + 1) % (game.board.BoardSize - 1) == 0:
 			text += "\n"
 
