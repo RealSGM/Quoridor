@@ -384,4 +384,23 @@ public partial class BoardState : Control
 	}
 
 	public bool IsGameOver() => GetWinner(CurrentPlayer) || GetWinner(1 - CurrentPlayer);
+
+	public int EvaluateBoard(int currentPlayer, string lastMove)
+	{
+		int evaluation = 0;
+
+		// Run BFS to get the shortest path to the goal
+		int[] goalTiles = GetGoalTiles(currentPlayer);
+		int playerPosition = GetPawnPosition(currentPlayer);
+		var shortestPath = Algorithms.GetShortestPath(this, playerPosition, new HashSet<int>(goalTiles), currentPlayer);
+
+		// Evaluate the board based on the shortest path and other factors
+		evaluation += shortestPath.Count * 10; // Increase evaluation for shorter path
+		evaluation += lastMove[1] == 'm' ? 5 : 0; // Increase evaluation for moving a pawn
+		evaluation += lastMove[1] == 'f' ? 1 : 0; // Increase evaluation for placing a fence
+
+		// Add more evaluation factors based on the game rules and strategy
+
+		return evaluation;
+	}
 }

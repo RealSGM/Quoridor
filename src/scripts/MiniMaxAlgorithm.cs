@@ -2,6 +2,7 @@ using Godot;
 using System.Linq;
 using System.Collections.Generic;
 using System;
+using System.Reflection.Metadata;
 
 [GlobalClass]
 public partial class MiniMaxAlgorithm : Node
@@ -17,8 +18,8 @@ public partial class MiniMaxAlgorithm : Node
 		long startTime = DateTime.Now.Ticks;
 		nodesVisited = 1;
 
-
 		string[] possibleMoves = board.GetAllMoves();
+
 		string bestMove = "";
 		int bestValue = isMaximising ? int.MinValue : int.MaxValue;
 
@@ -27,7 +28,9 @@ public partial class MiniMaxAlgorithm : Node
 			BoardState newBoard = board.Clone();
 			newBoard.AddMove(move);
 
-			int value = MiniMax(newBoard, MAX_DEPTH, !isMaximising, int.MinValue, int.MaxValue);
+			int value = MiniMax(newBoard, MAX_DEPTH, !isMaximising, int.MinValue, int.MaxValue, board.CurrentPlayer, move);
+
+			GD.Print("Move: " + move + " Value: " + value);
 
 			if ((isMaximising && value > bestValue) || (!isMaximising && value < bestValue))
 			{
@@ -43,50 +46,55 @@ public partial class MiniMaxAlgorithm : Node
 		return bestMove;
 	}
 
-	public int MiniMax(BoardState board, int depth, bool isMaximising, int alpha, int beta)
+	private int MiniMax(BoardState board, int depth, bool isMaximising, int alpha, int beta, int currentPlayer, string lastMove)
 	{
 		nodesVisited++;
 
-		if (depth == 0 || board.GetWinner(board.CurrentPlayer))
+		if (depth == 0 || board.IsGameOver()) return board.EvaluateBoard(currentPlayer, lastMove);
+
+		if (isMaximising)
 		{
-			return EvaluateBoard(board);
+			int bestValue = int.MinValue;
+			string[] possibleMoves = board.GetAllMoves();
+
+			foreach (string move in possibleMoves)
+			{
+				BoardState newBoard = board.Clone();
+				newBoard.AddMove(move);
+
+				int value = MiniMax(newBoard, depth - 1, false, alpha, beta, 1 - currentPlayer, move);
+				bestValue = Math.Max(bestValue, value);
+				alpha = Math.Max(alpha, value);
+
+				if (beta <= alpha)
+				{
+					break;
+				}
+			}
+
+			return bestValue;
 		}
-
-		// Get all possible moves
-		IllegalFenceCheck illegalFenceCheck = GetParent().GetNode<IllegalFenceCheck>("IllegalFenceCheck");
-		illegalFenceCheck.GetIllegalFences(board);
-		
-		string[] moves = board.GetAllMoves();
-
-		return EvaluateMoves(moves, board, depth, isMaximising, isMaximising ? int.MinValue : int.MaxValue, alpha, beta, isMaximising ? Math.Max : Math.Min);
-	}
-
-	public int EvaluateMoves(string[] moves, BoardState board, int current_depth, bool isMaximising, int pruningValue, int alpha, int beta, Func<int, int, int> pruningFunction)
-	{
-		int evaluation = isMaximising ? int.MinValue : int.MaxValue;
-
-		foreach (string move in moves)
+		else
 		{
-			// Clone the board and add the move
-			BoardState newBoard = board.Clone();
-			newBoard.AddMove(move);
+			int bestValue = int.MaxValue;
+			string[] possibleMoves = board.GetAllMoves();
 
-			// Recusively Evaluate
-			int eval = MiniMax(newBoard, current_depth - 1, !isMaximising, alpha, beta);
+			foreach (string move in possibleMoves)
+			{
+				BoardState newBoard = board.Clone();
+				newBoard.AddMove(move);
 
-			// Update evaluation
-			evaluation = pruningFunction(evaluation, eval);
-			pruningValue = pruningFunction(pruningValue, eval);
+				int value = MiniMax(newBoard, depth - 1, true, alpha, beta, currentPlayer, move);
+				bestValue = Math.Min(bestValue, value);
+				beta = Math.Min(beta, value);
 
-			if (beta <= alpha) break;
+				if (beta <= alpha)
+				{
+					break;
+				}
+			}
+
+			return bestValue;
 		}
-
-		return evaluation;
 	}
-
-    private int EvaluateBoard(BoardState board)
-    {
-		return 0;
-    }
-
 }
