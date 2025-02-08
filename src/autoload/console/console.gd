@@ -56,7 +56,9 @@ func _input(event: InputEvent) -> void:
 
 
 func parse_expresion(text: String) -> void:
-	entry_buffer.append([text, 0])
+	# Ignore clear console from entry buffer
+	if text != "clear()":
+		entry_buffer.append([text, 0])
 
 	# Process the text
 	var err: int = expression.parse(text)
@@ -68,6 +70,11 @@ func parse_expresion(text: String) -> void:
 
 	# Successful Execution
 	var result = expression.execute([], base_inst)
+
+	# Ignore further outputs if clear console was requested
+	if text == "clear()":
+		return
+
 	if not expression.has_execute_failed():
 		entry_buffer.append([str(result), 2])
 		return
