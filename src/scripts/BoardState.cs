@@ -3,6 +3,7 @@ using System;
 using System.Linq;
 using System.Collections.Generic;
 using System.Text;
+using System.ComponentModel;
 
 [GlobalClass]
 public partial class BoardState : Control
@@ -14,6 +15,8 @@ public partial class BoardState : Control
 
 	private int[][] Tiles { get; set; }
 
+	[Export]
+	public string LastMove { get; set; }
 	public int BoardSize { get; set; }
 	public int CurrentPlayer { get; set; } = 0;
 	public StringBuilder MoveHistory { get; set; } = new();
@@ -36,7 +39,7 @@ public partial class BoardState : Control
 	public void InitialiseBoard(int boardSize, int fencesPerPlayer)
 	{
 		BoardSize = boardSize;
-		FenceCounts = Enumerable.Repeat(fencesPerPlayer, PlayerCount).ToArray();
+		FenceCounts = Enumerable.Repeat(fencesPerPlayer, Helper.PlayerCount).ToArray();
 
 		InitialisePawnPositions(boardSize);
 		InitialiseTiles(boardSize);
@@ -262,13 +265,74 @@ public partial class BoardState : Control
 		connections[index] = -1;
 	}
 
+	#region Undo Move ---
+	#endregion
+
+	public string UndoMove()
+	{
+		if (LastMove == null) return "";
+
+		char moveType = LastMove[1];
+		switch (moveType)
+		{
+			case 'm':
+				UndoPawnMove();
+				break;
+			case 'f':
+				UndoFenceMove();
+				break;
+		}
+
+		string returnLastMove = LastMove;
+
+		MoveHistory.Remove(MoveHistory.Length - LastMove.Length - 1, LastMove.Length + 1);
+		LastMove = MoveHistory.Length == 0 ? "" : MoveHistory.ToString().Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries).Last();
+		return returnLastMove;
+	}
+
+	private void UndoPawnMove()
+	{
+		int player = int.Parse(LastMove[0].ToString());
+		int position = int.Parse(LastMove.Split('_')[1]);
+		MovePawn(position, player);
+	}
+
+	private void UndoFenceMove()
+	{
+		int fence = int.Parse(LastMove[2..]);
+
+		// Separate the fence index and direction
+		int direction = fence < 0 ? 1 : 0;
+		fence = Math.Abs(fence);
+		PlacedFences[fence] = -1;
+
+		// Convert the index to a 2D grid index
+		int convertedIndex = fence + (fence / (BoardSize - 1));
+		// Get possible tile indexes in 2x2 grid
+		int[] tileGrid = GetTileGrid(convertedIndex);
+
+		foreach (int[] pair in Helper.DefaultTileGridConnections[direction])
+		{
+			AddTileConnection(tileGrid[pair[0]], tileGrid[pair[1]]);
+			AddTileConnection(tileGrid[pair[1]], tileGrid[pair[0]]);
+		}
+	}
+
+    private void AddTileConnection(int tile, int tileToAdd)
+    {
+        int[] connections = Tiles[tile];
+		int index = Array.IndexOf(connections, -1);
+
+		if (index == -1) return;
+		connections[index] = tileToAdd;
+    }
+
+
 	#region Turn ---
 	#endregion
 
 	public void AddMove(string code)
 	{
-		MoveHistory.Append(code + ";");
-
 		int currentPlayer = int.Parse(code[0].ToString());
 		char moveType = code[1];
 		int value = int.Parse(code[2..]);
@@ -276,15 +340,18 @@ public partial class BoardState : Control
 		switch (moveType)
 		{
 			case 'm':
+				code += "_" + GetPawnPosition(currentPlayer);
 				MovePawn(value, currentPlayer);
 				break;
 			case 'f':
 				PlaceFence(value, currentPlayer);
 				break;
 		}
+		LastMove = code;
+		MoveHistory.Append(code + ";");
 	}
 
-	public void BuildFromMoveHistory(string moveHistory)
+    public void BuildFromMoveHistory(string moveHistory)
 	{
 		string[] moves = moveHistory.Split(';');
 		foreach (string move in moves)
@@ -304,7 +371,6 @@ public partial class BoardState : Control
 			for (int i = 0; i < GetFenceAmount(); i++)
 			{
 				if (!GetFenceEnabled(i, direction)) continue;
-
 				int mappedFence = Helper.GetMappedFenceIndex(i, direction);
 				allMoves.Append($"{CurrentPlayer}f{mappedFence};");
 			}

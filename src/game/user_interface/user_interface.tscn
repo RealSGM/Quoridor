@@ -1,6 +1,7 @@
-[gd_scene load_steps=9 format=3 uid="uid://c6fyma6opa8b1"]
+[gd_scene load_steps=10 format=3 uid="uid://c6fyma6opa8b1"]
 
 [ext_resource type="Script" path="res://src/game/user_interface/user_interface.gd" id="1_j6xwu"]
+[ext_resource type="Theme" uid="uid://gl4viqpfcsgn" path="res://src/resources/themes/main_theme.tres" id="1_vpc43"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_d1llx"]
 bg_color = Color(0.129412, 0.129412, 0.129412, 1)
@@ -27,7 +28,7 @@ bg_color = Color(0.105882, 0.105882, 0.109804, 1)
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_50a8v"]
 bg_color = Color(0.172549, 0.184314, 0.2, 1)
 
-[node name="UserInterface" type="Control" node_paths=PackedStringArray("toggle_direction_button", "confirm_button", "turn_label", "pause_menu", "pause_exit", "pause_return", "chat", "fence_count_labels", "win_menu", "win_label", "win_exit_button", "chat_container")]
+[node name="UserInterface" type="Control" node_paths=PackedStringArray("toggle_direction_button", "confirm_button", "undo_button", "turn_label", "pause_menu", "pause_exit", "pause_return", "chat", "fence_count_labels", "win_menu", "win_label", "win_exit_button", "chat_container")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -35,9 +36,11 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
+theme = ExtResource("1_vpc43")
 script = ExtResource("1_j6xwu")
 toggle_direction_button = NodePath("ActionInterface/InterfaceVBC/ActionsVBC/TogglePanel/DirectionContainer/ToggleDirection")
 confirm_button = NodePath("ActionInterface/InterfaceVBC/ActionsVBC/ConfirmButton")
+undo_button = NodePath("Chat/VBoxContainer/UndoButton")
 turn_label = NodePath("TurnLabel")
 pause_menu = NodePath("PauseMenu")
 pause_exit = NodePath("PauseMenu/PanelContainer/VBoxContainer/ExitButton")
@@ -198,6 +201,10 @@ layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 4
 alignment = 1
+
+[node name="UndoButton" type="Button" parent="Chat/VBoxContainer"]
+layout_mode = 2
+text = "Undo"
 
 [node name="WinMenu" type="Control" parent="."]
 visible = false

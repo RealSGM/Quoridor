@@ -3,7 +3,9 @@ class_name UserInterface extends Control
 @export_category("Actions")
 @export var toggle_direction_button: Button
 @export var confirm_button: Button
+@export var undo_button: Button
 
+@export_category("Other")
 @export var turn_label: Label
 @export var pause_menu: Panel
 @export var pause_exit: Button
@@ -35,7 +37,9 @@ func _ready() -> void:
 	pause_return.pressed.connect(func(): pause_menu.hide())
 	toggle_direction_button.pressed.connect(SignalManager.direction_toggled.emit)
 	confirm_button.pressed.connect(SignalManager.confirm_pressed.emit)
+	undo_button.pressed.connect(SignalManager.undo_pressed.emit)
 
+	undo_button.disabled = true
 	pause_menu.hide()
 	win_menu.hide()
 

@@ -3,4 +3,5 @@ extends Node
 
 signal confirm_pressed
 signal exit_pressed
+signal undo_pressed
 signal direction_toggled
