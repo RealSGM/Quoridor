@@ -7,6 +7,7 @@ class_name SingleplayerGame extends BaseGame
 func _ready() -> void:
 	super._ready()
 	bot_cover.hide()
+	user_interface.undo_button.hide()
 
 
 func set_current_player(val: int) -> void:

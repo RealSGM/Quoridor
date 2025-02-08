@@ -367,7 +367,9 @@ public partial class BoardState : Control
 
 		// Loop through both directions and add all possible fence placements
 		foreach (var direction in Helper.Bits)
-		{
+		{	
+			if (FenceCounts[CurrentPlayer] == 0) continue;
+
 			for (int i = 0; i < GetFenceAmount(); i++)
 			{
 				if (!GetFenceEnabled(i, direction)) continue;
@@ -395,11 +397,7 @@ public partial class BoardState : Control
 		var shortestPath = Algorithms.GetShortestPath(this, playerPosition, new HashSet<int>(goalTiles), currentPlayer);
 
 		// Evaluate the board based on the shortest path and other factors
-		evaluation += shortestPath.Count * 10; // Increase evaluation for shorter path
-		evaluation += lastMove[1] == 'm' ? 5 : 0; // Increase evaluation for moving a pawn
-		evaluation += lastMove[1] == 'f' ? 1 : 0; // Increase evaluation for placing a fence
-
-		// Add more evaluation factors based on the game rules and strategy
+		evaluation += shortestPath.Count;
 
 		return evaluation;
 	}

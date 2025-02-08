@@ -1,13 +1,10 @@
 using Godot;
-using System.Linq;
-using System.Collections.Generic;
 using System;
-using System.Reflection.Metadata;
 
 [GlobalClass]
 public partial class MiniMaxAlgorithm : Node
 {
-	const int MAX_DEPTH = 2;
+	const int MAX_DEPTH = 1;
 
 	[Export] int nodesVisited = 0;
 
@@ -30,7 +27,7 @@ public partial class MiniMaxAlgorithm : Node
 
 			int value = MiniMax(newBoard, MAX_DEPTH, !isMaximising, int.MinValue, int.MaxValue, board.CurrentPlayer, move);
 
-			GD.Print("Move: " + move + " Value: " + value);
+			Console.Call("add_entry", "Move: " + move + " Value: " + value, 0);
 
 			if ((isMaximising && value > bestValue) || (!isMaximising && value < bestValue))
 			{
@@ -50,21 +47,28 @@ public partial class MiniMaxAlgorithm : Node
 	{
 		nodesVisited++;
 
-		if (depth == 0 || board.IsGameOver()) return board.EvaluateBoard(currentPlayer, lastMove);
+		// Return max or min value if game is over
+		if (board.IsGameOver()) return isMaximising ? int.MaxValue : int.MinValue;
+
+		// Return evaluation of board if max depth is reached
+		if (depth == 0) return board.EvaluateBoard(currentPlayer, lastMove);
+
+		string[] possibleMoves = board.GetAllMoves();
 
 		if (isMaximising)
 		{
 			int bestValue = int.MinValue;
-			string[] possibleMoves = board.GetAllMoves();
-
+			
 			foreach (string move in possibleMoves)
 			{
 				BoardState newBoard = board.Clone();
 				newBoard.AddMove(move);
 
-				int value = MiniMax(newBoard, depth - 1, false, alpha, beta, 1 - currentPlayer, move);
+				int value = MiniMax(newBoard, depth - 1, !isMaximising, alpha, beta, 1 - currentPlayer, move);
 				bestValue = Math.Max(bestValue, value);
 				alpha = Math.Max(alpha, value);
+
+				newBoard.Free();
 
 				if (beta <= alpha)
 				{
@@ -77,16 +81,17 @@ public partial class MiniMaxAlgorithm : Node
 		else
 		{
 			int bestValue = int.MaxValue;
-			string[] possibleMoves = board.GetAllMoves();
 
 			foreach (string move in possibleMoves)
 			{
 				BoardState newBoard = board.Clone();
 				newBoard.AddMove(move);
 
-				int value = MiniMax(newBoard, depth - 1, true, alpha, beta, currentPlayer, move);
+				int value = MiniMax(newBoard, depth - 1, !isMaximising, alpha, beta, 1 - currentPlayer, move);
 				bestValue = Math.Min(bestValue, value);
 				beta = Math.Min(beta, value);
+
+				newBoard.Free();
 
 				if (beta <= alpha)
 				{
