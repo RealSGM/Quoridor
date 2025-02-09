@@ -20,7 +20,7 @@ public partial class IllegalFenceCheck : Node
 				.Where(adjacentFence => adjacentFence >= 0 && adjacentFence < placedFences.Length && placedFences[adjacentFence] == -1))
 			.Distinct()
 			.ToList();
-
+		
 		possibleFences.ForEach(fence => board.SetIllegalFence(fence, -1));
 
 		Parallel.ForEach(possibleFences, fence =>

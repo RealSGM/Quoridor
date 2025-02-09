@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using Godot;
 
 [GlobalClass]
@@ -6,6 +8,7 @@ public partial class Helper : Node
 	public static readonly int PlayerCount = 2;
 
 	public static readonly int[] Bits = new int[2] {0, 1};
+	public static readonly int[] CardinalDirections = new int[4] {0, 1, 2, 3};
 
 	public static readonly int[][][] DefaultTileGridConnections = new int[][][]
 	{
@@ -13,8 +16,16 @@ public partial class Helper : Node
 		new int[][] { new int[] { 0, 1 }, new int[] { 2, 3 } }
 	};
 
-	// Converts fence direction which is [0, 1] to [-1, 1] for notation
-	public static int GetMappedFenceIndex(int fenceIndex, int direction) => direction == 0 ? fenceIndex : -fenceIndex;
+	public static readonly List<Func<int, int, int>> AdjacentFunctions = new()
+	{
+		GetNorthAdjacent,
+		GetEastAdjacent,
+		GetSouthAdjacent,
+		GetWestAdjacent
+	};
+	
+	// Converts fence direction which is [0, 1] to [-1, 1] for notation and ignores non-valid fences
+	public static int GetMappedFenceIndex(int fenceIndex, int direction) => direction == 0 || fenceIndex == -1 ? fenceIndex : -fenceIndex;
 
 	public static int GetNorthAdjacent(int index, int size) => index >= size ? index - size : -1;
 
@@ -32,4 +43,5 @@ public partial class Helper : Node
 		GetSouthAdjacent(index, size),
 		GetWestAdjacent(index, size)
 	};
+
 }

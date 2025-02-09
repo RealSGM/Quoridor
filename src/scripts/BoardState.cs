@@ -242,17 +242,51 @@ public partial class BoardState : Control
 
 	public List<int> GetSurroundingFences(int fenceIndex)
 	{
-		List<int> adjFences = Helper.InitialiseConnections(fenceIndex, BoardSize - 1).ToList();
+		if (PlacedFences[fenceIndex] == -1) return new List<int>();
 
-		adjFences.AddRange(new int[]
+		List<int> surroundingFences = new();
+		int direction = PlacedFences[fenceIndex];
+		int[] adjFences = Helper.InitialiseConnections(fenceIndex, BoardSize - 1);
+
+		// Add to the surrounding fences the fences which can be both horizontal and vertical
+		foreach (int fenceDirection in Helper.Bits)
 		{
-			Helper.GetWestAdjacent(adjFences[0], BoardSize),
-			Helper.GetEastAdjacent(adjFences[0], BoardSize),
-			Helper.GetWestAdjacent(adjFences[2], BoardSize),
-			Helper.GetEastAdjacent(adjFences[2], BoardSize)
-		});
+			foreach (int cardinalBit in Helper.Bits)
+			{
+				int cardinalDirection = (cardinalBit * 2) + fenceDirection;
 
-		return adjFences.Where(fence => fence > -1).ToList();
+				// Add parallel adjacent fences
+				surroundingFences.Add(Helper.GetMappedFenceIndex(adjFences[cardinalDirection], fenceDirection));
+
+				// Add perpendicular adjacent fences
+				if (fenceDirection == direction) surroundingFences.Add(Helper.GetMappedFenceIndex(adjFences[cardinalDirection], 1 - fenceDirection));
+			}
+		}
+
+		foreach (int cardinalBit in Helper.Bits)
+		{
+			int cardinalDirection = (cardinalBit * 2) + direction;
+			/** Enclosing Fence Check */
+
+			// Ignore if the adjacent fence is out of bounds
+			if (adjFences[cardinalDirection] == -1) continue;
+
+			// Get the adjacent fence's adjacent fence
+			int leapedFence = Helper.AdjacentFunctions[cardinalDirection](adjFences[cardinalDirection], BoardSize - 1);
+
+			// Check if the leaped fence is at a boundary or is a placed fence of the same direction
+			if (leapedFence == -1 || PlacedFences[leapedFence] == direction)
+			{
+				foreach (int cornerBit in Helper.Bits)
+				{
+					int cornerDirection = (cornerBit * 2) + (1 - direction);
+					int cornerFence = Helper.AdjacentFunctions[cornerDirection](adjFences[cardinalDirection], BoardSize - 1);
+					surroundingFences.Add(Helper.GetMappedFenceIndex(cornerFence, 1 - direction));
+				}
+			}
+		}
+
+		return surroundingFences.ToList();
 	}
 
 	public void RemoveTileConnection(int tile, int tileToRemove)
@@ -315,6 +349,8 @@ public partial class BoardState : Control
 			AddTileConnection(tileGrid[pair[0]], tileGrid[pair[1]]);
 			AddTileConnection(tileGrid[pair[1]], tileGrid[pair[0]]);
 		}
+
+		FenceCounts[1 - CurrentPlayer]++;
 	}
 
 	private void AddTileConnection(int tile, int tileToAdd)

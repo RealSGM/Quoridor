@@ -252,7 +252,7 @@ func _on_undo_button_pressed() -> void:
 
 	for player: int in Global.BITS:
 		user_interface.update_fence_counts(player, board.GetFenceCount(player))
-		
+
 	illegal_fence_check.GetIllegalFences(board)
 	current_player = 1 - current_player
 	move_code = ""

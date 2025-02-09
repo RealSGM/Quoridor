@@ -431,7 +431,6 @@ horizontal_alignment = 1
 custom_minimum_size = Vector2(320, 0)
 layout_mode = 2
 size_flags_horizontal = 3
-selected = 0
 script = ExtResource("3_58fea")
 
 [node name="MenuButtonsContainer" type="PanelContainer" parent="Background/Foreground/BoardOptionsMenu/VBC"]
