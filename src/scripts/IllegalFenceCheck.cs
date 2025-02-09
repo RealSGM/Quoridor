@@ -32,7 +32,7 @@ public partial class IllegalFenceCheck : Node
 
 				Parallel.ForEach(Helper.Bits, player =>
 				{
-					if (!IsFenceIllegal(board, fence, direction, 1 - player)) return;
+					if (!IsFenceIllegal(board, fence, direction, player)) return;
 
 					board.SetIllegalFence(fence, direction);
 				});

@@ -2,9 +2,6 @@ class_name BaseGame extends Control
 ## Handles the Interface for the BaseGame
 ## Sends signals to the board and user interface
 
-@export_category("Game Settings")
-@export var fence_amount: int = 10
-
 @export_category("Nodes")
 @export var board: BoardState
 @export var tile_container: GridContainer
@@ -65,8 +62,12 @@ func reset_board() -> void:
 
 
 ## Setup the board with the selected size
-func setup_board(board_size: int) -> void:
+func setup_board(board_size: int, fence_amount: int) -> void:
 	board.InitialiseBoard(board_size, fence_amount)
+
+	# Update both players fence counts in UI
+	for player: int in Global.BITS:
+		user_interface.update_fence_counts(player, board.GetFenceCount(player))
 
 	instance_tile_buttons(board_size)
 	instance_fence_buttons(board_size - 1)
@@ -115,7 +116,7 @@ func update_fence_buttons() -> void:
 
 func confirm_place_fence(fence: int) -> void:
 	user_interface.add_message("Add Fence: " + str(fence), current_player)
-	user_interface.fence_count_labels[current_player].text = str(board.GetFenceCount(current_player) - 1)
+	user_interface.update_fence_counts(current_player, board.GetFenceCount(current_player) - 1)
 
 
 func update_fence_direction() -> void:

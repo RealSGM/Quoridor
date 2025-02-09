@@ -242,7 +242,6 @@ public partial class BoardState : Control
 
 	public List<int> GetSurroundingFences(int fenceIndex)
 	{
-		// Get horizontal and vertically adjacent fences
 		List<int> adjFences = Helper.InitialiseConnections(fenceIndex, BoardSize - 1).ToList();
 
 		adjFences.AddRange(new int[]

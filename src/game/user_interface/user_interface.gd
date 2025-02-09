@@ -49,6 +49,10 @@ func update_win(player: int) -> void:
 	win_menu.show()
 
 
+func update_fence_counts(player: int, amount: int) -> void:
+	fence_count_labels[player].text = str(amount)
+
+
 func update_turn(player: int) -> void:
 	turn_label.text = str(Global.players[player]["name"]) + "'s Turn"
 

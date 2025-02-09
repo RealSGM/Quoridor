@@ -6,6 +6,7 @@ extends Control
 @export var multiplayer_menu: PanelContainer
 @export var board_options_menu: PanelContainer
 @export var foreground: ColorRect
+@export var start_game_button: Button
 
 @export_category("Main Menu Buttons")
 @export var play_button: Button
@@ -23,18 +24,17 @@ extends Control
 
 @export_category("Board Options")
 @export var board_vbc: VBoxContainer
-
-@export var start_game_button: Button
 @export var board_options_back_button: Button
 
-# Global Options
-@export var board_size_container: HBoxContainer
+@export_category("Global Options")
+@export var board_container: VBoxContainer
 @export var size_option_button: OptionButton
 @export var player_one_container: VBoxContainer
 @export var p_one_colours: OptionButton
 @export var player_one_name: LineEdit
+@export var fence_option_button: OptionButton
 
-# Local Options
+@export_category("Local Options")
 @export var p_two_colours: OptionButton
 @export var player_two_name: LineEdit
 @export var player_two_container: VBoxContainer
@@ -43,14 +43,16 @@ extends Control
 @export var bot_container: VBoxContainer
 @export var bot_colours: OptionButton
 
+@export_category("Game Settings")
 @export var size_options: Array[int] = [7, 9, 11]
+@export var fence_amounts: Array[int] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 @export var board_dimensions: float = 800
 
 var menu_stack: Array = []
 var game_type: String
 
 @onready var menus: Array[PanelContainer] = [main_menu, play_menu, multiplayer_menu, board_options_menu]
-@onready var global_options: Array[BoxContainer] = [player_one_container, board_size_container]
+@onready var global_options: Array[BoxContainer] = [player_one_container, board_container]
 @onready var game_type_dict: Dictionary = {"Singleplayer": [bot_container], "Local": [player_two_container]}
 
 
@@ -92,14 +94,22 @@ func setup_menus() -> void:
 	p_two_colours.select(1)
 
 	setup_board_sizes()
+	setup_fence_amounts()
 
 
 ## Setup the option button for the board sizes
 func setup_board_sizes() -> void:
-	for board_size_option: int in size_options:
-		size_option_button.add_item(str(board_size_option) + " * " + str(board_size_option))
+	for board_size_option in size_options:
+		size_option_button.add_item("%s * %s" % [board_size_option, board_size_option])
 	size_option_button.selected = 1
 	size_option_button.clear_radio_boxes()
+
+
+func setup_fence_amounts() -> void:
+	for fence_amount: int in fence_amounts:
+		fence_option_button.add_item("%s" % [fence_amount])
+	fence_option_button.selected = fence_amounts.size() - 1
+	fence_option_button.clear_radio_boxes()
 
 
 func show_main_menu() -> void:
@@ -159,7 +169,7 @@ func _on_start_game_pressed() -> void:
 	set_game_data()
 	var game: BaseGame = Resources.get_resource(game_type.to_lower() + "_game").instantiate()
 	Global.game = game
-	game.setup_board(size_options[size_option_button.selected])
+	game.setup_board(size_options[size_option_button.selected], fence_amounts[fence_option_button.selected])
 	foreground.add_child(game, true)
 	game.board.scale = Vector2.ONE * float(board_dimensions) / float(game.board_container.size.x)
 
