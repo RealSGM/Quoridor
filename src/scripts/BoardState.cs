@@ -261,18 +261,15 @@ public partial class BoardState : Control
 				// Add perpendicular adjacent fences
 				if (fenceDirection == direction) surroundingFences.Add(Helper.GetMappedFenceIndex(adjFences[cardinalDirection], 1 - fenceDirection));
 			}
-		}
 
-		foreach (int cardinalBit in Helper.Bits)
-		{
-			int cardinalDirection = (cardinalBit * 2) + direction;
 			/** Enclosing Fence Check */
+			int cardinalOpposites = (fenceDirection * 2) + direction;
 
 			// Ignore if the adjacent fence is out of bounds
-			if (adjFences[cardinalDirection] == -1) continue;
+			if (adjFences[cardinalOpposites] == -1) continue;
 
 			// Get the adjacent fence's adjacent fence
-			int leapedFence = Helper.AdjacentFunctions[cardinalDirection](adjFences[cardinalDirection], BoardSize - 1);
+			int leapedFence = Helper.AdjacentFunctions[cardinalOpposites](adjFences[cardinalOpposites], BoardSize - 1);
 
 			// Check if the leaped fence is at a boundary or is a placed fence of the same direction
 			if (leapedFence == -1 || PlacedFences[leapedFence] == direction)
@@ -280,13 +277,13 @@ public partial class BoardState : Control
 				foreach (int cornerBit in Helper.Bits)
 				{
 					int cornerDirection = (cornerBit * 2) + (1 - direction);
-					int cornerFence = Helper.AdjacentFunctions[cornerDirection](adjFences[cardinalDirection], BoardSize - 1);
+					int cornerFence = Helper.AdjacentFunctions[cornerDirection](adjFences[cardinalOpposites], BoardSize - 1);
 					surroundingFences.Add(Helper.GetMappedFenceIndex(cornerFence, 1 - direction));
 				}
 			}
 		}
 
-		return surroundingFences.ToList();
+		return surroundingFences;
 	}
 
 	public void RemoveTileConnection(int tile, int tileToRemove)
