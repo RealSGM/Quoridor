@@ -248,6 +248,7 @@ func _on_undo_button_pressed() -> void:
 			tile_buttons[moves[1].to_int()].pawns[abs(last_move[0].to_int())].show()
 			user_interface.add_message("Undo Move Pawn: " + moves[0], current_player)
 
+	board.InitialiseIllegalFences(board.GetBoardSize() - 1)
 	illegal_fence_check.GetIllegalFences(board)
 	current_player = 1 - current_player
 	move_code = ""

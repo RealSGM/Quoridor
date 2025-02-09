@@ -3,7 +3,6 @@ using System;
 using System.Linq;
 using System.Collections.Generic;
 using System.Text;
-using System.ComponentModel;
 
 [GlobalClass]
 public partial class BoardState : Control
@@ -44,13 +43,10 @@ public partial class BoardState : Control
 		InitialisePawnPositions(boardSize);
 		InitialiseTiles(boardSize);
 		InitialiseFences(boardSize - 1);
+		InitialiseIllegalFences(boardSize - 1);
 	}
 
-	private void InitialiseFences(int fenceSize)
-	{
-		PlacedFences = Enumerable.Repeat(-1, fenceSize * fenceSize).ToArray();
-		IllegalFences = Enumerable.Repeat(-1, fenceSize * fenceSize).ToArray();
-	}
+	private void InitialiseFences(int fenceSize) => PlacedFences = Enumerable.Repeat(-1, fenceSize * fenceSize).ToArray();
 
 	public void InitialisePawnPositions(int boardSize)
 	{
@@ -65,6 +61,8 @@ public partial class BoardState : Control
 			.Select(index => Helper.InitialiseConnections(index, boardSize))
 			.ToArray();
 	}
+
+	public void InitialiseIllegalFences(int fenceSize) => IllegalFences = Enumerable.Repeat(-1, fenceSize * fenceSize).ToArray();
 
 	#region Setters ---
 	#endregion
@@ -100,6 +98,8 @@ public partial class BoardState : Control
 	public bool GetWinner(int player) => GetGoalTiles(player).Contains(GetPawnPosition(player));
 
 	public int GetPawnPosition(int index) => PawnPositions[index];
+
+	public int GetBoardSize() => BoardSize;
 
 	#region Movement ---
 	#endregion
@@ -317,14 +317,14 @@ public partial class BoardState : Control
 		}
 	}
 
-    private void AddTileConnection(int tile, int tileToAdd)
-    {
-        int[] connections = Tiles[tile];
+	private void AddTileConnection(int tile, int tileToAdd)
+	{
+		int[] connections = Tiles[tile];
 		int index = Array.IndexOf(connections, -1);
 
 		if (index == -1) return;
 		connections[index] = tileToAdd;
-    }
+	}
 
 
 	#region Turn ---
@@ -350,7 +350,7 @@ public partial class BoardState : Control
 		MoveHistory.Append(code + ";");
 	}
 
-    public void BuildFromMoveHistory(string moveHistory)
+	public void BuildFromMoveHistory(string moveHistory)
 	{
 		string[] moves = moveHistory.Split(';');
 		foreach (string move in moves)
@@ -366,7 +366,7 @@ public partial class BoardState : Control
 
 		// Loop through both directions and add all possible fence placements
 		foreach (var direction in Helper.Bits)
-		{	
+		{
 			if (FenceCounts[CurrentPlayer] == 0) continue;
 
 			for (int i = 0; i < GetFenceAmount(); i++)
@@ -402,8 +402,6 @@ public partial class BoardState : Control
 		// Does the move win the game?
 		// Does the move block the opponent
 		// Does the move let the player go closer to the goal
-
-		GD.Print("Path: " + string.Join(", ", shortestPath));
 
 		return evaluation;
 	}

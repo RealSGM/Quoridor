@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 public partial class IllegalFenceCheck : Node
 {
 	public void GetIllegalFences(BoardState board)
-
 	{
 		// Ignore if player has no more fences
 		if (board.GetFenceCount(1 - board.CurrentPlayer) == 0) return;
