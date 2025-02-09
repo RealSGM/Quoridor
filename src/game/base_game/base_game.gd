@@ -249,8 +249,7 @@ func _on_undo_button_pressed() -> void:
 			user_interface.add_message("Undo Move Pawn: " + moves[0], current_player)
 
 	current_player = 1 - current_player
-
-
+	move_code = ""
 
 	if board.GetMoveHistory().is_empty():
 		user_interface.undo_button.disabled = true
