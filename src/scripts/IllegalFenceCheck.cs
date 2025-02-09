@@ -1,4 +1,5 @@
 using Godot;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -18,24 +19,26 @@ public partial class IllegalFenceCheck : Node
 			.Select((value, fenceIndex) => new { value, fenceIndex })
 			.Where(fence => fence.value != -1) // Skip fences that are not placed
 			.SelectMany(fence => board.GetSurroundingFences(fence.fenceIndex)
-				.Where(adjacentFence => adjacentFence >= 0 && adjacentFence < placedFences.Length && placedFences[adjacentFence] == -1))
+				.Where(adjacentFence => adjacentFence < placedFences.Length && placedFences[Math.Abs(adjacentFence)] == -1))
 			.Distinct()
 			.ToList();
 
-		possibleFences.ForEach(fence => board.SetIllegalFence(fence, -1));
+
+		possibleFences.ForEach(fence => board.SetIllegalFence(Math.Abs(fence), -1));
 
 		Parallel.ForEach(possibleFences, fence =>
 		{
-			Parallel.ForEach(Helper.Bits, direction =>
+			// Separate the fence index and direction
+			int direction = fence < 0 ? 1 : 0;
+			fence = Math.Abs(fence);
+			
+			if (!board.GetFenceEnabled(fence, direction)) return;
+
+			Parallel.ForEach(Helper.Bits, player =>
 			{
-				if (!board.GetFenceEnabled(fence, direction)) return;
+				if (!IsFenceIllegal(board, fence, direction, player)) return;
 
-				Parallel.ForEach(Helper.Bits, player =>
-				{
-					if (!IsFenceIllegal(board, fence, direction, player)) return;
-
-					board.SetIllegalFence(fence, direction);
-				});
+				board.SetIllegalFence(fence, direction);
 			});
 		});
 	}

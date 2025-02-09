@@ -240,19 +240,97 @@ public partial class BoardState : Control
 		FenceCounts[currentPlayer]--;
 	}
 
+	// Get the surrounding fences of a placed fence
 	public List<int> GetSurroundingFences(int fenceIndex)
 	{
-		List<int> adjFences = Helper.InitialiseConnections(fenceIndex, BoardSize - 1).ToList();
+		List<int> surroundingFences = new();
+		int direction = PlacedFences[fenceIndex];
+		int fenceBoardSize = BoardSize - 1;
 
-		adjFences.AddRange(new int[]
+		int[] adjFences = Helper.InitialiseConnections(fenceIndex, fenceBoardSize);
+
+		// Horizontal Fence
+		if (direction == 0)
 		{
-			Helper.GetWestAdjacent(adjFences[0], BoardSize),
-			Helper.GetEastAdjacent(adjFences[0], BoardSize),
-			Helper.GetWestAdjacent(adjFences[2], BoardSize),
-			Helper.GetEastAdjacent(adjFences[2], BoardSize)
-		});
+			// Add north and south adjacent fences for both directions
+			foreach (int bit in Helper.Bits)
+			{
+				surroundingFences.Add(Helper.GetMappedFenceIndex(adjFences[0], bit));
+				surroundingFences.Add(Helper.GetMappedFenceIndex(adjFences[2], bit));
+			}
 
-		return adjFences.Where(fence => fence > -1).ToList();
+			// Add east and west adjacent vertical fences if the direction is vertical
+			surroundingFences.Add(Helper.GetMappedFenceIndex(adjFences[1], 1));
+			surroundingFences.Add(Helper.GetMappedFenceIndex(adjFences[3], 1));
+
+			// North north check
+			if (adjFences[0] != -1)
+			{
+				// Get the north adjacent fence of northFence and check if that fence direction alligns with current direction
+				int northFenceNorth = Helper.GetNorthAdjacent(adjFences[0], fenceBoardSize);
+				if (northFenceNorth == -1 || PlacedFences[northFenceNorth] == 0)
+				{
+					// Add top left and top right vertical fneces
+					surroundingFences.Add(-Helper.GetEastAdjacent(northFenceNorth, fenceBoardSize));
+					surroundingFences.Add(-Helper.GetWestAdjacent(northFenceNorth, fenceBoardSize));
+				}
+			}
+
+			// South south check
+			if (adjFences[2] != -1)
+			{
+				// Get the south adjacent fence of southFence and check if that fence direction alligns with current direction
+				int southFenceSouth = Helper.GetSouthAdjacent(adjFences[2], fenceBoardSize);
+				if (southFenceSouth == -1 || PlacedFences[southFenceSouth] == 0)
+				{
+					// Add bottom left and bottom right vertical fences
+					surroundingFences.Add(-Helper.GetEastAdjacent(southFenceSouth, fenceBoardSize));
+					surroundingFences.Add(-Helper.GetWestAdjacent(southFenceSouth, fenceBoardSize));
+				}
+			}
+		}
+		// Vertical Fence
+		else
+		{
+			// Add east and west adjacent fences for both directions
+			foreach (int bit in Helper.Bits)
+			{
+				surroundingFences.Add(Helper.GetMappedFenceIndex(adjFences[1], bit));
+				surroundingFences.Add(Helper.GetMappedFenceIndex(adjFences[3], bit));
+			}
+
+			// Add north and south adjacent horizontal fences if the direction is horizontal
+			surroundingFences.Add(Helper.GetMappedFenceIndex(adjFences[0], 0));
+			surroundingFences.Add(Helper.GetMappedFenceIndex(adjFences[2], 0));
+
+			// West west check
+			if (adjFences[3] != -1)
+			{
+				// Get the west adjacent fence of westFence and check if that fence direction alligns with current direction
+				int westFenceWest = Helper.GetWestAdjacent(adjFences[3], fenceBoardSize);
+				if (westFenceWest == -1 || PlacedFences[westFenceWest] == 1)
+				{
+					// Add top left and bottom left horizontal fences
+					surroundingFences.Add(-Helper.GetNorthAdjacent(westFenceWest, fenceBoardSize));
+					surroundingFences.Add(-Helper.GetSouthAdjacent(westFenceWest, fenceBoardSize));
+				}
+			}
+
+			// East east check
+			if (adjFences[1] != -1)
+			{
+				// Get the east adjacent fence of eastFence and check if that fence direction alligns with current direction
+				int eastFenceEast = Helper.GetEastAdjacent(adjFences[1], fenceBoardSize);
+				if (eastFenceEast == -1 || PlacedFences[eastFenceEast] == 1)
+				{
+					// Add top right and bottom right horizontal fences
+					surroundingFences.Add(-Helper.GetNorthAdjacent(eastFenceEast, fenceBoardSize));
+					surroundingFences.Add(-Helper.GetSouthAdjacent(eastFenceEast, fenceBoardSize));
+				}
+			}
+		}
+
+		return surroundingFences.Where(fence => fence != -1).ToList();
 	}
 
 	public void RemoveTileConnection(int tile, int tileToRemove)
@@ -317,14 +395,14 @@ public partial class BoardState : Control
 		}
 	}
 
-    private void AddTileConnection(int tile, int tileToAdd)
-    {
-        int[] connections = Tiles[tile];
+	private void AddTileConnection(int tile, int tileToAdd)
+	{
+		int[] connections = Tiles[tile];
 		int index = Array.IndexOf(connections, -1);
 
 		if (index == -1) return;
 		connections[index] = tileToAdd;
-    }
+	}
 
 
 	#region Turn ---
@@ -350,7 +428,7 @@ public partial class BoardState : Control
 		MoveHistory.Append(code + ";");
 	}
 
-    public void BuildFromMoveHistory(string moveHistory)
+	public void BuildFromMoveHistory(string moveHistory)
 	{
 		string[] moves = moveHistory.Split(';');
 		foreach (string move in moves)
@@ -366,7 +444,7 @@ public partial class BoardState : Control
 
 		// Loop through both directions and add all possible fence placements
 		foreach (var direction in Helper.Bits)
-		{	
+		{
 			if (FenceCounts[CurrentPlayer] == 0) continue;
 
 			for (int i = 0; i < GetFenceAmount(); i++)
