@@ -396,8 +396,15 @@ public partial class BoardState : Control
 		int playerPosition = GetPawnPosition(currentPlayer);
 		var shortestPath = Algorithms.GetShortestPath(this, playerPosition, new HashSet<int>(goalTiles), currentPlayer);
 
-		// Evaluate the board based on the shortest path and other factors
-		evaluation += shortestPath.Count;
+		// Evaluate the length of the shortest path
+		int pathPoints = 100 - shortestPath.Count;; // Assign points based on the length of the path
+		evaluation += pathPoints;
+
+		// Does the move win the game?
+		// Does the move block the opponent
+		// Does the move let the player go closer to the goal
+
+		GD.Print("Path: " + string.Join(", ", shortestPath));
 
 		return evaluation;
 	}
