@@ -12,7 +12,8 @@ const COLORS: Array[Color] = [
 ## O is horizontal, 1 is vertical
 var fence_direction: int = 0
 var game: BaseGame
-var players: Array[Dictionary] = [{}, {}]
+# Third Element is for Testing
+var players: Array[Dictionary] = [{}, {}, {"color": Color.GHOST_WHITE}]
 
 
 func help() -> String:

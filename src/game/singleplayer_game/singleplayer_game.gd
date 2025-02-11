@@ -7,7 +7,6 @@ class_name SingleplayerGame extends BaseGame
 func _ready() -> void:
 	super._ready()
 	bot_cover.hide()
-	user_interface.undo_button.hide()
 
 
 func set_current_player(val: int) -> void:
@@ -30,3 +29,14 @@ func confirm_place_fence(fence: int) -> void:
 func confirm_move_pawn(tile: int) -> void:
 	_on_tile_pressed(tile)
 	super.confirm_move_pawn(tile)
+
+
+# Undo Twice so that Bot doesn't repeat
+func _on_undo_button_pressed() -> void:
+	undo_board_ui()
+	undo_board_ui()
+
+	finish_undo_board()
+
+	# Force reset turn
+	current_player = current_player

@@ -234,27 +234,35 @@ func _on_confirm_pressed() -> void:
 
 
 func _on_undo_button_pressed() -> void:
+	undo_board_ui()
+	finish_undo_board()
+
+	current_player = 1 - current_player
+
+
+func undo_board_ui() -> void:
 	var last_move: String = board.UndoMove()
 
 	match last_move[1]:
 		"f":
 			fence_buttons[abs(last_move.substr(2).to_int())].clear_fences()
 			user_interface.fence_count_labels[current_player].text = str(board.GetFenceCount(current_player))
-			user_interface.add_message("Undo Place Fence: " + last_move.substr(2), current_player)
+			user_interface.add_message("Undo Place Fence: " + last_move.substr(2), 2)
 		"m":
 			var moves_filtered: String = last_move.split("m")[1];
 			var moves: Array = moves_filtered.split("_")
 			tile_buttons[moves[0].to_int()].pawns[abs(last_move[0].to_int())].hide()
 			tile_buttons[moves[1].to_int()].pawns[abs(last_move[0].to_int())].show()
-			user_interface.add_message("Undo Move Pawn: " + moves[0], current_player)
+			user_interface.add_message("Undo Move Pawn: " + moves[0], 2)
 
+
+func finish_undo_board() -> void:
 	board.InitialiseIllegalFences(board.GetBoardSize() - 1)
 
 	for player: int in Global.BITS:
 		user_interface.update_fence_counts(player, board.GetFenceCount(player))
 
 	illegal_fence_check.GetIllegalFences(board)
-	current_player = 1 - current_player
 	move_code = ""
 
 	if board.GetMoveHistory().is_empty():
