@@ -4,18 +4,20 @@ using System;
 [GlobalClass]
 public partial class MiniMaxAlgorithm : Node
 {
-	const int MAX_DEPTH = 3;
+	const int MAX_DEPTH = 2;
 
 	[Export] int nodesVisited = 0;
 
+	Window Console;
+
 	public string GetBestMove(BoardState board, bool isMaximising)
 	{
-		var Console = GetNode<Window>("/root/Console");
+		Console = GetNode<Window>("/root/Console");
 		Console.Call("add_entry", "Creating Game Tree...", 0);
 		long startTime = DateTime.Now.Ticks;
 		nodesVisited = 1;
 
-		ValueTuple<int, string> bestMoveTuple = MiniMax(board, MAX_DEPTH, isMaximising, int.MinValue, int.MaxValue, 0, board.LastMove);
+		ValueTuple<int, string> bestMoveTuple = MiniMax(board, MAX_DEPTH, isMaximising, int.MinValue, int.MaxValue, 1 - board.CurrentPlayer, board.LastMove);
 		int bestValue = bestMoveTuple.Item1;
 		string bestMove = bestMoveTuple.Item2;
 
@@ -29,14 +31,15 @@ public partial class MiniMaxAlgorithm : Node
 	{
 		nodesVisited++;
 
-		// Base cases: game over or max depth reached
-		if (board.IsGameOver()) return (isMaximising ? int.MaxValue : int.MinValue, lastMove);
-		if (depth == 0) return (board.EvaluateBoard(currentPlayer, lastMove), lastMove);
+		if (board.IsGameOver()) return board.GetWinner(currentPlayer) ? (int.MaxValue, lastMove) : (int.MinValue, lastMove);
+
+		if (depth == 0) return (board.EvaluateBoard(isMaximising, currentPlayer, lastMove), lastMove);
 
 		string bestMove = "";
 		int bestValue = isMaximising ? int.MinValue : int.MaxValue;
+		string[] moves = board.GetAllMoves(1 - currentPlayer);
 
-		foreach (string move in board.GetAllMoves())
+		foreach (string move in moves)
 		{
 			BoardState newBoard = board.Clone();
 			newBoard.AddMove(move);
@@ -52,10 +55,10 @@ public partial class MiniMaxAlgorithm : Node
 			}
 
 			// Alpha-beta pruning
-			if (isMaximising) alpha = Math.Max(alpha, bestValue);
-			else beta = Math.Min(beta, bestValue);
+			if (isMaximising) alpha = Math.Max(alpha, value);
+			else beta = Math.Min(beta, value);
 
-			if (beta <= alpha) break; // Prune search
+			if (beta <= alpha) break;
 		}
 
 		return (bestValue, bestMove);

@@ -3,6 +3,7 @@ using System;
 using System.Linq;
 using System.Collections.Generic;
 using System.Text;
+using System.ComponentModel;
 
 [GlobalClass]
 public partial class BoardState : Control
@@ -91,8 +92,7 @@ public partial class BoardState : Control
 	public int[] GetGoalTiles(int player)
 	{
 		int startRow = player * (BoardSize - 1) * BoardSize;
-		int endRow = startRow + BoardSize;
-		return Enumerable.Range(startRow, endRow).ToArray();
+		return Enumerable.Range(startRow, BoardSize).ToArray();
 	}
 
 	public bool GetWinner(int player) => GetGoalTiles(player).Contains(GetPawnPosition(player));
@@ -393,49 +393,44 @@ public partial class BoardState : Control
 		}
 	}
 
-	public string[] GetAllMoves()
+	public string[] GetAllMoves(int currentPlayer)
 	{
 		StringBuilder allMoves = new();
 
 		// Loop through both directions and add all possible fence placements
 		foreach (var direction in Helper.Bits)
 		{
-			if (FenceCounts[CurrentPlayer] == 0) continue;
+			if (FenceCounts[currentPlayer] <= 0) continue;
 
 			for (int i = 0; i < GetFenceAmount(); i++)
 			{
 				if (!GetFenceEnabled(i, direction)) continue;
 				int mappedFence = Helper.GetMappedFenceIndex(i, direction);
-				allMoves.Append($"{CurrentPlayer}f{mappedFence};");
+				allMoves.Append($"{currentPlayer}f{mappedFence};");
 			}
 		}
 
 		// Add all possible pawn moves
-		GetReachableTiles(CurrentPlayer).ToList()
-			.ForEach(index => allMoves.Append($"{CurrentPlayer}m{index};"));
+		GetReachableTiles(currentPlayer).ToList()
+			.ForEach(index => allMoves.Append($"{currentPlayer}m{index};"));
 
-		return allMoves.ToString().Split(';', StringSplitOptions.RemoveEmptyEntries);
+		return allMoves.ToString().Split(';', StringSplitOptions.RemoveEmptyEntries).Distinct().ToArray();
 	}
 
 	public bool IsGameOver() => GetWinner(CurrentPlayer) || GetWinner(1 - CurrentPlayer);
 
-	public int EvaluateBoard(int currentPlayer, string lastMove)
+	// Evaluate the board state, assuming there is no winner
+	public int EvaluateBoard(bool isMaximising, int currentPlayer, string lastMove)
 	{
-		int evaluation = 0;
+		const int PATH_WEIGHT = 10;
+		const int WALL_WEIGHT = 3;
 
-		// Run BFS to get the shortest path to the goal
-		int[] goalTiles = GetGoalTiles(currentPlayer);
-		int playerPosition = GetPawnPosition(currentPlayer);
-		var shortestPath = Algorithms.GetShortestPath(this, playerPosition, new HashSet<int>(goalTiles), currentPlayer);
+		var playerShortestPath = Algorithms.GetShortestPath(this, GetPawnPosition(currentPlayer), new HashSet<int>(GetGoalTiles(currentPlayer)), currentPlayer);
+		var opponentShortestPath = Algorithms.GetShortestPath(this, GetPawnPosition(1 - currentPlayer), new HashSet<int>(GetGoalTiles(1 - currentPlayer)), 1 - currentPlayer);
 
-		// Evaluate the length of the shortest path
-		int pathPoints = 100 - shortestPath.Count;; // Assign points based on the length of the path
-		evaluation += pathPoints;
+		int pathScore = (playerShortestPath.Count - opponentShortestPath.Count) * PATH_WEIGHT;
+		int wallScore = (FenceCounts[currentPlayer] - FenceCounts[1 - currentPlayer]) * WALL_WEIGHT;
 
-		// Does the move win the game?
-		// Does the move block the opponent
-		// Does the move let the player go closer to the goal
-
-		return evaluation;
+		return pathScore; // + wallScore;
 	}
 }
