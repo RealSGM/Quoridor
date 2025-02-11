@@ -44,6 +44,7 @@ func _ready() -> void:
 	current_player = 0
 	board.show()
 
+
 func set_current_player(val: int) -> void:
 	reset_board()
 	set_tiles(board.GetPawnPosition(current_player))
@@ -249,7 +250,7 @@ func undo_board_ui() -> void:
 			user_interface.fence_count_labels[current_player].text = str(board.GetFenceCount(current_player))
 			user_interface.add_message("Undo Place Fence: " + last_move.substr(2), 2)
 		"m":
-			var moves_filtered: String = last_move.split("m")[1];
+			var moves_filtered: String = last_move.split("m")[1]
 			var moves: Array = moves_filtered.split("_")
 			tile_buttons[moves[0].to_int()].pawns[abs(last_move[0].to_int())].hide()
 			tile_buttons[moves[1].to_int()].pawns[abs(last_move[0].to_int())].show()
