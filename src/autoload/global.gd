@@ -64,3 +64,15 @@ func get_tiles() -> String:
 
 func get_move_history() -> String:
 	return game.board.GetMoveHistory()
+
+
+func get_goal_tiles() -> String:
+	if !game:
+		return "Game not started"
+
+	var text: String = ""
+
+	for player: int in Global.BITS:
+		text += "Player %s: %s\n" % [player, game.board.GetGoalTiles(player)]
+
+	return text
