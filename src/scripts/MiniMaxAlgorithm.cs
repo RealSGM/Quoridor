@@ -17,7 +17,7 @@ public partial class MiniMaxAlgorithm : Node
 		long startTime = DateTime.Now.Ticks;
 		nodesVisited = 1;
 
-		ValueTuple<int, string> bestMoveTuple = MiniMax(board, MAX_DEPTH, isMaximising, int.MinValue, int.MaxValue, 1 - board.CurrentPlayer, board.LastMove);
+		ValueTuple<int, string> bestMoveTuple = MiniMax(board, 0, isMaximising, int.MinValue, int.MaxValue, 1 - board.CurrentPlayer, board.LastMove);
 		int bestValue = bestMoveTuple.Item1;
 		string bestMove = bestMoveTuple.Item2;
 
@@ -33,7 +33,7 @@ public partial class MiniMaxAlgorithm : Node
 
 		if (board.IsGameOver()) return board.GetWinner(currentPlayer) ? (int.MaxValue, lastMove) : (int.MinValue, lastMove);
 
-		if (depth == 0) return (board.EvaluateBoard(isMaximising, currentPlayer, lastMove), lastMove);
+		if (depth == MAX_DEPTH) return (board.EvaluateBoard(isMaximising, currentPlayer, lastMove), lastMove);
 
 		string bestMove = "";
 		int bestValue = isMaximising ? int.MinValue : int.MaxValue;
@@ -43,7 +43,7 @@ public partial class MiniMaxAlgorithm : Node
 		{
 			BoardState newBoard = board.Clone();
 			newBoard.AddMove(move);
-			var (value, _) = MiniMax(newBoard, depth - 1, !isMaximising, alpha, beta, 1 - currentPlayer, move);
+			var (value, _) = MiniMax(newBoard, depth + 1, !isMaximising, alpha, beta, 1 - currentPlayer, move);
 
 			newBoard.Free();
 
