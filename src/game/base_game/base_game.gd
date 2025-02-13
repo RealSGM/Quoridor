@@ -243,11 +243,12 @@ func _on_undo_button_pressed() -> void:
 
 func undo_board_ui() -> void:
 	var last_move: String = board.UndoMove()
+	var player: int = abs(last_move[0].to_int())
 
 	match last_move[1]:
 		"f":
 			fence_buttons[abs(last_move.substr(2).to_int())].clear_fences()
-			user_interface.fence_count_labels[current_player].text = str(board.GetFenceCount(current_player))
+			user_interface.fence_count_labels[player].text = str(board.GetFenceCount(player))
 			user_interface.add_message("Undo Place Fence: " + last_move.substr(2), 2)
 		"m":
 			var moves_filtered: String = last_move.split("m")[1]

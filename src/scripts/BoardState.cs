@@ -330,6 +330,7 @@ public partial class BoardState : Control
 	private void UndoFenceMove()
 	{
 		int fence = int.Parse(LastMove[2..]);
+		int currentPlayer = int.Parse(LastMove[0].ToString());
 
 		// Separate the fence index and direction
 		int direction = fence < 0 ? 1 : 0;
@@ -347,7 +348,7 @@ public partial class BoardState : Control
 			AddTileConnection(tileGrid[pair[1]], tileGrid[pair[0]]);
 		}
 
-		FenceCounts[1 - CurrentPlayer]++;
+		FenceCounts[1 - currentPlayer]++;
 	}
 
 	private void AddTileConnection(int tile, int tileToAdd)

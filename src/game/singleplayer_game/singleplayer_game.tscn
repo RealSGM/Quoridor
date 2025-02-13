@@ -12,6 +12,12 @@ mini_max = NodePath("MiniMaxAlgorithm")
 [node name="MiniMaxAlgorithm" type="Node" parent="." index="1"]
 script = ExtResource("3_v54nn")
 
+[node name="TextContainer" parent="UserInterface/Chat/VBoxContainer" index="0"]
+visible = false
+
+[node name="Label" parent="UserInterface/Chat/VBoxContainer/TextContainer" index="0"]
+visible = false
+
 [node name="BotCover" type="Control" parent="UserInterface" index="3"]
 layout_mode = 1
 anchors_preset = 15

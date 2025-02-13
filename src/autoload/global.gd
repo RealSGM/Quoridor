@@ -77,3 +77,15 @@ func get_goal_tiles() -> String:
 		text += "Player %s: %s\n" % [player, game.board.GetGoalTiles(player)]
 
 	return text
+
+
+func get_fence_amounts() -> String:
+	if !game:
+		return "Game not started"
+
+	var text: String = ""
+
+	for player: int in Global.BITS:
+		text += "Player %s: %s\n" % [player, game.board.GetFenceCount(player)]
+
+	return text
