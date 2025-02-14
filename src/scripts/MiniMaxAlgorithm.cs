@@ -10,14 +10,14 @@ public partial class MiniMaxAlgorithm : Node
 
 	Window Console;
 
-	public string GetBestMove(BoardState board, bool isMaximising)
+	public string GetBestMove(BoardState board, int currentPlayer)
 	{
 		Console = GetNode<Window>("/root/Console");
 		Console.Call("add_entry", "Creating Game Tree...", 0);
 		long startTime = DateTime.Now.Ticks;
 		nodesVisited = 1;
 
-		ValueTuple<int, string> bestMoveTuple = MiniMax(board, 0, isMaximising, int.MinValue, int.MaxValue, 1 - board.CurrentPlayer, board.LastMove);
+		ValueTuple<int, string> bestMoveTuple = MiniMax(board, 0, true, int.MinValue, int.MaxValue, 1 - currentPlayer, board.LastMove);
 		int bestValue = bestMoveTuple.Item1;
 		string bestMove = bestMoveTuple.Item2;
 

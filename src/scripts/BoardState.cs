@@ -18,7 +18,6 @@ public partial class BoardState : Control
 	[Export]
 	public string LastMove { get; set; }
 	public int BoardSize { get; set; }
-	public int CurrentPlayer { get; set; } = 0;
 	public StringBuilder MoveHistory { get; set; } = new();
 
 	#region Initialisation ---
@@ -29,7 +28,6 @@ public partial class BoardState : Control
 		FenceCounts = FenceCounts.Clone() as int[],
 		PawnPositions = PawnPositions.Clone() as int[],
 		Tiles = Tiles.Select(tile => tile.Clone() as int[]).ToArray(),
-		CurrentPlayer = CurrentPlayer,
 		IllegalFences = IllegalFences.Clone() as int[],
 		MoveHistory = new StringBuilder(MoveHistory.ToString()),
 		PlacedFences = PlacedFences.Clone() as int[],
@@ -117,14 +115,14 @@ public partial class BoardState : Control
 			if (connectedTile == -1) continue;
 
 			// CheckFor Enemy and merge list
-			reachableTiles.AddRange(CheckForEnemy(connectedTile));
+			reachableTiles.AddRange(CheckForEnemy(connectedTile, player));
 		}
 		return reachableTiles.ToArray();
 	}
 
-	public List<int> CheckForEnemy(int connectedTile)
+	public List<int> CheckForEnemy(int connectedTile, int player)
 	{
-		int enemyPawnPosition = PawnPositions[1 - CurrentPlayer];
+		int enemyPawnPosition = PawnPositions[1 - player];
 		// Check if the enemy pawn is not on the tile
 		if (enemyPawnPosition != connectedTile)
 		{
@@ -132,7 +130,7 @@ public partial class BoardState : Control
 		}
 
 		// Get the direction of the enemy pawn
-		int directionIndex = Array.IndexOf(Tiles[PawnPositions[CurrentPlayer]], enemyPawnPosition);
+		int directionIndex = Array.IndexOf(Tiles[PawnPositions[player]], enemyPawnPosition);
 
 		// Check if the leaped tile is within boundaries
 		int[] AdjacentOffsets = new int[4] { -BoardSize, 1, BoardSize, -1 };
@@ -144,7 +142,7 @@ public partial class BoardState : Control
 			return new List<int>();
 		}
 
-		return GetLeapedTiles(PawnPositions[CurrentPlayer], leapedTileIndex, connectedTile, directionIndex).ToList();
+		return GetLeapedTiles(PawnPositions[player], leapedTileIndex, connectedTile, directionIndex).ToList();
 	}
 
 	public int[] GetLeapedTiles(int playerIndex, int leapedTileIndex, int tileIndex, int dirIndex)
@@ -422,7 +420,7 @@ public partial class BoardState : Control
 		return allMoves.ToString().Split(';', StringSplitOptions.RemoveEmptyEntries).Distinct().ToArray();
 	}
 
-	public bool IsGameOver() => GetWinner(CurrentPlayer) || GetWinner(1 - CurrentPlayer);
+	public bool IsGameOver() => GetWinner(0) || GetWinner(1);
 
 	// Evaluate the board state, assuming there is no winner
 	public int EvaluateBoard(bool isMaximising, int currentPlayer, string lastMove)

@@ -7,11 +7,11 @@ using System.Threading.Tasks;
 [GlobalClass]
 public partial class IllegalFenceCheck : Node
 {
-	public void GetIllegalFences(BoardState board)
+	public void GetIllegalFences(BoardState board, int currentPlayer)
 	{
 		// Ignore if player has no more fences
-		if (board.GetFenceCount(1 - board.CurrentPlayer) == 0) return;
-
+		if (board.GetFenceCount(1 - currentPlayer) == 0) return;
+	
 		int[] placedFences = board.GetPlacedFences();
 
 		List<int> possibleFences = placedFences.SelectMany((fence, fenceIndex) =>
