@@ -16,13 +16,13 @@ func set_current_player(val: int) -> void:
 	# Bot's Turn
 	if val == 1:
 		await RenderingServer.frame_post_draw
-		move_code = mini_max.GetBestMove(board, true)
+		move_code = mini_max.GetBestMove(board, current_player)
 		_on_confirm_pressed()
 
 
 func confirm_place_fence(fence: int) -> void:
 	var direction: int = 1 if move_code.substr(2).to_int() < 0 else 0
-	_on_fence_button_pressed(fence, direction)
+	_on_fence_button_pressed(abs(fence), direction)
 	super.confirm_place_fence(fence)
 
 

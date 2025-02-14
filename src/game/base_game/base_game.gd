@@ -211,7 +211,6 @@ func _on_confirm_pressed() -> void:
 	reset_board()
 	user_interface.undo_button.disabled = false
 
-	print(move_code)
 	var index: int = move_code.substr(2).to_int()
 
 	match move_code[1]:
