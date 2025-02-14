@@ -17,7 +17,6 @@ var fence_buttons: Array[FenceButton] = []
 @onready var current_player: int:
 	set(val):
 		current_player = val
-		board.CurrentPlayer = val
 		set_current_player(val)
 
 @onready var move_code: String = "":
@@ -194,7 +193,6 @@ func _on_directional_button_pressed() -> void:
 
 func _on_fence_button_pressed(fence: int, direction: int = Global.fence_direction) -> void:
 	move_code = "%sf%s" % [current_player, Helper.GetMappedFenceIndex(fence, direction)]
-
 	var fence_button: FenceButton = fence_buttons[fence]
 	fence_button.h_fence.visible = direction == 0
 	fence_button.v_fence.visible = direction != 0
@@ -213,7 +211,8 @@ func _on_confirm_pressed() -> void:
 	reset_board()
 	user_interface.undo_button.disabled = false
 
-	var index: int = abs(move_code.substr(2).to_int())
+	print(move_code)
+	var index: int = move_code.substr(2).to_int()
 
 	match move_code[1]:
 		"f":
@@ -230,7 +229,7 @@ func _on_confirm_pressed() -> void:
 	# Switch to next player
 	else:
 		# Complete IFS before switching player
-		illegal_fence_check.GetIllegalFences(board)
+		illegal_fence_check.GetIllegalFences(board, current_player)
 		current_player = 1 - current_player
 
 
@@ -264,7 +263,7 @@ func finish_undo_board() -> void:
 	for player: int in Global.BITS:
 		user_interface.update_fence_counts(player, board.GetFenceCount(player))
 
-	illegal_fence_check.GetIllegalFences(board)
+	illegal_fence_check.GetIllegalFences(board, current_player)
 	move_code = ""
 
 	if board.GetMoveHistory().is_empty():
