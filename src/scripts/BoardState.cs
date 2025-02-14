@@ -242,6 +242,7 @@ public partial class BoardState : Control
 
 	public List<int> GetSurroundingFences(int fenceIndex)
 	{
+		// Early exit if the fence is not placed
 		if (PlacedFences[fenceIndex] == -1) return new List<int>();
 
 		List<int> surroundingFences = new();
@@ -256,13 +257,15 @@ public partial class BoardState : Control
 				int cardinalDirection = (cardinalBit * 2) + fenceDirection;
 
 				// Add parallel adjacent fences
-				surroundingFences.Add(Helper.GetMappedFenceIndex(adjFences[cardinalDirection], fenceDirection));
+				if (adjFences[cardinalDirection] == -1) continue;
 
+				surroundingFences.Add(Helper.GetMappedFenceIndex(adjFences[cardinalDirection], fenceDirection));
 				// Add perpendicular adjacent fences
 				if (fenceDirection == direction) surroundingFences.Add(Helper.GetMappedFenceIndex(adjFences[cardinalDirection], 1 - fenceDirection));
 			}
 
-			/** Enclosing Fence Check */
+			/** Enclosing Fence Check (Corner Checks) */
+
 			int cardinalOpposites = (fenceDirection * 2) + direction;
 
 			// Ignore if the adjacent fence is out of bounds
@@ -272,14 +275,15 @@ public partial class BoardState : Control
 			int leapedFence = Helper.AdjacentFunctions[cardinalOpposites](adjFences[cardinalOpposites], BoardSize - 1);
 
 			// Check if the leaped fence is at a boundary or is a placed fence of the same direction
-			if (leapedFence == -1 || PlacedFences[leapedFence] == direction)
+			if (!(leapedFence == -1 || PlacedFences[leapedFence] == direction)) continue;
+
+			foreach (int cornerBit in Helper.Bits)
 			{
-				foreach (int cornerBit in Helper.Bits)
-				{
-					int cornerDirection = (cornerBit * 2) + (1 - direction);
-					int cornerFence = Helper.AdjacentFunctions[cornerDirection](adjFences[cardinalOpposites], BoardSize - 1);
-					surroundingFences.Add(Helper.GetMappedFenceIndex(cornerFence, 1 - direction));
-				}
+				int cornerDirection = (cornerBit * 2) + (1 - direction);
+				int cornerFence = Helper.AdjacentFunctions[cornerDirection](adjFences[cardinalOpposites], BoardSize - 1);
+
+				if (cornerFence == -1) continue;
+				surroundingFences.Add(Helper.GetMappedFenceIndex(cornerFence, 1 - direction));
 			}
 		}
 
