@@ -212,12 +212,8 @@ public partial class BoardState : Control
 		return new int[] { topLeft, topRight, bottomLeft, bottomRight };
 	}
 
-	public void PlaceFence(int fenceIndex, int currentPlayer, bool isIFS = false)
+	public void PlaceFence(int direction, int fenceIndex, int currentPlayer, bool isIFS = false)
 	{
-		// Separate the fence index and direction
-		int direction = fenceIndex < 0 ? 1 : 0;
-		fenceIndex = Math.Abs(fenceIndex);
-
 		// Set the fence as placed
 		PlacedFences[fenceIndex] = direction;
 
@@ -238,12 +234,12 @@ public partial class BoardState : Control
 		FenceCounts[currentPlayer]--;
 	}
 
-	public List<int> GetSurroundingFences(int fenceIndex)
+	public List<int[]> GetSurroundingFences(int fenceIndex)
 	{
 		// Early exit if the fence is not placed
-		if (PlacedFences[fenceIndex] == -1) return new List<int>();
+		if (PlacedFences[fenceIndex] == -1) return new ();
 
-		List<int> surroundingFences = new();
+		List<int[]> surroundingFences = new();
 		int direction = PlacedFences[fenceIndex];
 		int[] adjFences = Helper.InitialiseConnections(fenceIndex, BoardSize - 1);
 
@@ -257,9 +253,9 @@ public partial class BoardState : Control
 				// Add parallel adjacent fences
 				if (adjFences[cardinalDirection] == -1) continue;
 
-				surroundingFences.Add(Helper.GetMappedFenceIndex(adjFences[cardinalDirection], fenceDirection));
+				surroundingFences.Add(new int[] { adjFences[cardinalDirection], fenceDirection });
 				// Add perpendicular adjacent fences
-				if (fenceDirection == direction) surroundingFences.Add(Helper.GetMappedFenceIndex(adjFences[cardinalDirection], 1 - fenceDirection));
+				if (fenceDirection == direction) surroundingFences.Add(new int[] { adjFences[cardinalDirection], 1 - direction });
 			}
 
 			/** Enclosing Fence Check (Corner Checks) */
@@ -281,9 +277,11 @@ public partial class BoardState : Control
 				int cornerFence = Helper.AdjacentFunctions[cornerDirection](adjFences[cardinalOpposites], BoardSize - 1);
 
 				if (cornerFence == -1) continue;
-				surroundingFences.Add(Helper.GetMappedFenceIndex(cornerFence, 1 - direction));
+				surroundingFences.Add(new int[] { cornerFence, 1 - direction });
 			}
 		}
+
+		GD.Print("Surrounding Fences: " + string.Join(", ", surroundingFences.Select(fence => $"({fence[0]}, {fence[1]})")));
 
 		return surroundingFences;
 	}
@@ -305,6 +303,7 @@ public partial class BoardState : Control
 		if (LastMove == null) return "";
 
 		char moveType = LastMove[1];
+
 		switch (moveType)
 		{
 			case 'm':
@@ -331,12 +330,12 @@ public partial class BoardState : Control
 
 	private void UndoFenceMove()
 	{
-		int fence = int.Parse(LastMove[2..]);
-		int currentPlayer = int.Parse(LastMove[0].ToString());
-
 		// Separate the fence index and direction
-		int direction = fence < 0 ? 1 : 0;
-		fence = Math.Abs(fence);
+		int[] moveCode = Helper.GetMoveCode(LastMove[2..]);
+
+		int direction = moveCode[1];
+		int fence = moveCode[0];
+
 		PlacedFences[fence] = -1;
 
 		// Convert the index to a 2D grid index
@@ -350,6 +349,7 @@ public partial class BoardState : Control
 			AddTileConnection(tileGrid[pair[1]], tileGrid[pair[0]]);
 		}
 
+		int currentPlayer = int.Parse(LastMove[0].ToString());
 		FenceCounts[currentPlayer]++;
 	}
 
@@ -370,7 +370,8 @@ public partial class BoardState : Control
 	{
 		int currentPlayer = int.Parse(code[0].ToString());
 		char moveType = code[1];
-		int value = int.Parse(code[2..]);
+		int direction = code[2] == '-' ? 1 : 0;
+		int value = int.Parse(code[3..]);
 
 		switch (moveType)
 		{
@@ -379,7 +380,7 @@ public partial class BoardState : Control
 				MovePawn(value, currentPlayer);
 				break;
 			case 'f':
-				PlaceFence(value, currentPlayer);
+				PlaceFence(direction, value, currentPlayer);
 				break;
 		}
 		LastMove = code;
@@ -408,14 +409,14 @@ public partial class BoardState : Control
 			for (int i = 0; i < GetFenceAmount(); i++)
 			{
 				if (!GetFenceEnabled(i, direction)) continue;
-				int mappedFence = Helper.GetMappedFenceIndex(i, direction);
-				allMoves.Append($"{currentPlayer}f{mappedFence};");
+				
+				allMoves.Append($"{currentPlayer}f{Helper.GetMoveString(i, direction)};");
 			}
 		}
 
 		// Add all possible pawn moves
 		GetReachableTiles(currentPlayer).ToList()
-			.ForEach(index => allMoves.Append($"{currentPlayer}m{index};"));
+			.ForEach(index => allMoves.Append($"{currentPlayer}m{Helper.GetMoveString(index, 0)};"));
 
 		return allMoves.ToString().Split(';', StringSplitOptions.RemoveEmptyEntries).Distinct().ToArray();
 	}

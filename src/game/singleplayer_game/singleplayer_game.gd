@@ -20,10 +20,9 @@ func set_current_player(val: int) -> void:
 		_on_confirm_pressed()
 
 
-func confirm_place_fence(fence: int) -> void:
-	var direction: int = 1 if move_code.substr(2).to_int() < 0 else 0
+func confirm_place_fence(fence: int, direction: int) -> void:
 	_on_fence_button_pressed(abs(fence), direction)
-	super.confirm_place_fence(fence)
+	super.confirm_place_fence(fence, direction)
 
 
 func confirm_move_pawn(tile: int) -> void:

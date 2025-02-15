@@ -5,6 +5,7 @@ using Godot;
 [GlobalClass]
 public partial class Helper : Node
 {
+	public static readonly int LargeValue = 1000;
 	public static readonly int PlayerCount = 2;
 
 	public static readonly int[] Bits = new int[2] {0, 1};
@@ -23,9 +24,16 @@ public partial class Helper : Node
 		GetSouthAdjacent,
 		GetWestAdjacent
 	};
-	
-	// Converts fence direction which is [0, 1] to [-1, 1] for notation and ignores non-valid fences
-	public static int GetMappedFenceIndex(int fenceIndex, int direction) => direction == 0 || fenceIndex == -1 ? fenceIndex : -fenceIndex;
+
+	public static string GetMoveString(int index, int direction = 0) => $"{(direction == 1 ? "-" : "+")}{index}";
+
+	public static int[] GetMoveCode(string moveCode)
+	{
+		int direction = moveCode[0] == '-' ? 1 : 0;
+		int index = int.Parse(moveCode[1..]);
+
+		return new int[] { index, direction };
+	}
 
 	public static int GetNorthAdjacent(int index, int size) => index >= size ? index - size : -1;
 

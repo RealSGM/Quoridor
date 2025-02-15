@@ -14,27 +14,31 @@ public partial class IllegalFenceCheck : Node
 	
 		int[] placedFences = board.GetPlacedFences();
 
-		List<int> possibleFences = placedFences.SelectMany((fence, fenceIndex) =>
-			board.GetSurroundingFences(fenceIndex)
-				.Where(adjacentFence => Math.Abs(adjacentFence) < placedFences.Length && placedFences[Math.Abs(adjacentFence)] == -1)
-		).ToList();
+		List<int[]> possibleFences = new();
 
-		possibleFences.ForEach(fence => board.SetIllegalFence(Math.Abs(fence), -1));
+		for (int fenceIndex = 0; fenceIndex < placedFences.Length; fenceIndex++)
+		{
+			// Ignore if fence is not placed
+			if (placedFences[fenceIndex] == -1) continue;
+
+			possibleFences.AddRange(board.GetSurroundingFences(fenceIndex));
+		}
+
+		possibleFences = possibleFences
+			.Where(fence => Math.Abs(fence[0]) < placedFences.Length && placedFences[Math.Abs(fence[0])] == -1)
+			.ToList();
+
+		possibleFences.ForEach(fence => board.SetIllegalFence(fence[0], -1));
 
 		Parallel.ForEach(possibleFences, fence =>
 		{
-			fence = Math.Abs(fence);
+			if (!board.GetFenceEnabled(fence[0], fence[1])) return;
 
-			Parallel.ForEach(Helper.Bits, direction =>
+			Parallel.ForEach(Helper.Bits, player =>
 			{
-				if (!board.GetFenceEnabled(fence, direction)) return;
+				if (!IsFenceIllegal(board, fence[0], fence[1], player)) return;
 
-				Parallel.ForEach(Helper.Bits, player =>
-				{
-					if (!IsFenceIllegal(board, fence, direction, player)) return;
-
-					board.SetIllegalFence(Math.Abs(fence), direction);
-				});
+				board.SetIllegalFence(Math.Abs(fence[0]), fence[1]);
 			});
 		});
 	}
@@ -42,9 +46,8 @@ public partial class IllegalFenceCheck : Node
 	private static bool IsFenceIllegal(BoardState board, int fence, int direction, int player)
 	{
 		BoardState boardClone = board.Clone();
-		int mappedFence = Helper.GetMappedFenceIndex(fence, direction);
 
-		boardClone.PlaceFence(mappedFence, player, true);
+		boardClone.PlaceFence(direction, fence, player, true);
 
 		int start = boardClone.GetPawnPosition(player);
 		HashSet<int> goalTiles = boardClone.GetGoalTiles(player).ToHashSet();
