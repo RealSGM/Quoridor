@@ -8,7 +8,7 @@ using System.ComponentModel;
 [GlobalClass]
 public partial class BoardState : Control
 {
-	[Export] private int[] PlacedFences { get; set; } // Array of placed fences, index = fence, value = direction => [-1 = Empty, 0 = Horizontal Placed, 1 = Vertically Placed]
+	[Export] private int[] PlacedFences { get; set; } // Array of placed fences, index = fence, value = direction => [-1 = Empty, 0 = Horizontally Placed, 1 = Vertically Placed]
 	[Export] private int[] IllegalFences { get; set;} // Array of illegal fences, index = fence, value = direction => [-1 = Empty, 0 = Horizontally Illegal, 1 = Vertically Illegal]
 	[Export] private int[] PawnPositions { get; set; }
 	[Export] private int[] FenceCounts { get; set; }
@@ -350,7 +350,7 @@ public partial class BoardState : Control
 			AddTileConnection(tileGrid[pair[1]], tileGrid[pair[0]]);
 		}
 
-		FenceCounts[1 - currentPlayer]++;
+		FenceCounts[currentPlayer]++;
 	}
 
 	private void AddTileConnection(int tile, int tileToAdd)
