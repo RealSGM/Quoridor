@@ -1,7 +1,6 @@
 using Godot;
 using System;
 
-[GlobalClass]
 public partial class MiniMaxAlgorithm : Node
 {
 	const int MAX_DEPTH = 2;
@@ -63,4 +62,5 @@ public partial class MiniMaxAlgorithm : Node
 
 		return (bestValue, bestMove);
 	}
+
 }

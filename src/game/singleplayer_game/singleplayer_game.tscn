@@ -2,7 +2,7 @@
 
 [ext_resource type="PackedScene" uid="uid://g12um5raoqio" path="res://src/game/base_game/base_game.tscn" id="1_q7ens"]
 [ext_resource type="Script" path="res://src/game/singleplayer_game/singleplayer_game.gd" id="2_ysh73"]
-[ext_resource type="Script" path="res://src/scripts/MiniMaxAlgorithm.cs" id="3_v54nn"]
+[ext_resource type="Script" path="res://src/autoload/mini_max/MiniMaxAlgorithm.cs" id="3_v54nn"]
 
 [node name="SingleplayerGame" node_paths=PackedStringArray("bot_cover", "mini_max") instance=ExtResource("1_q7ens")]
 script = ExtResource("2_ysh73")

@@ -1,8 +1,6 @@
 class_name SingleplayerGame extends BaseGame
 
 @export var bot_cover: Control
-@export var mini_max: MiniMaxAlgorithm
-
 
 func _ready() -> void:
 	super._ready()
@@ -16,7 +14,7 @@ func set_current_player(val: int) -> void:
 	# Bot's Turn
 	if val == 1:
 		await RenderingServer.frame_post_draw
-		move_code = mini_max.GetBestMove(board, current_player)
+		move_code = MiniMaxAlgorithm.GetBestMove(board, current_player)
 		_on_confirm_pressed()
 
 

@@ -281,8 +281,6 @@ public partial class BoardState : Control
 			}
 		}
 
-		GD.Print("Surrounding Fences: " + string.Join(", ", surroundingFences.Select(fence => $"({fence[0]}, {fence[1]})")));
-
 		return surroundingFences;
 	}
 
