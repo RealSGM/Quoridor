@@ -36,7 +36,7 @@ public partial class MiniMaxAlgorithm : Node
 
 		string bestMove = "";
 		int bestValue = isMaximising ? int.MinValue : int.MaxValue;
-		string[] moves = board.GetAllMoves(1 - currentPlayer);
+		string[] moves = board.GetAllMoves(1 - currentPlayer); // Future me, do not change this to currentPlayer
 
 		foreach (string move in moves)
 		{
@@ -62,5 +62,4 @@ public partial class MiniMaxAlgorithm : Node
 
 		return (bestValue, bestMove);
 	}
-
 }

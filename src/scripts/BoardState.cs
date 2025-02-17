@@ -430,7 +430,10 @@ public partial class BoardState : Control
 		var playerShortestPath = Algorithms.GetShortestPath(this, GetPawnPosition(currentPlayer), new HashSet<int>(GetGoalTiles(currentPlayer)), currentPlayer);
 		var opponentShortestPath = Algorithms.GetShortestPath(this, GetPawnPosition(1 - currentPlayer), new HashSet<int>(GetGoalTiles(1 - currentPlayer)), 1 - currentPlayer);
 
-		int pathScore = (playerShortestPath.Count - opponentShortestPath.Count) * PATH_WEIGHT;
+		int pathScore = 0;
+		if (isMaximising) pathScore = (playerShortestPath.Count - opponentShortestPath.Count) * PATH_WEIGHT;
+		else pathScore = (opponentShortestPath.Count - playerShortestPath.Count) * PATH_WEIGHT;
+		
 		int wallScore = (FenceCounts[currentPlayer] - FenceCounts[1 - currentPlayer]) * WALL_WEIGHT;
 
 		return pathScore; // + wallScore;
