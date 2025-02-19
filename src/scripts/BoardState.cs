@@ -39,29 +39,29 @@ public partial class BoardState : Control
 		BoardSize = boardSize;
 		FenceCounts = Enumerable.Repeat(fencesPerPlayer, Helper.PlayerCount).ToArray();
 
-		InitialisePawnPositions(boardSize);
-		InitialiseTiles(boardSize);
-		InitialiseFences(boardSize - 1);
-		InitialiseIllegalFences(boardSize - 1);
+		InitialisePawnPositions();
+		InitialiseTiles();
+		InitialiseFences();
+		InitialiseIllegalFences();
 	}
 
-	private void InitialiseFences(int fenceSize) => PlacedFences = Enumerable.Repeat(-1, fenceSize * fenceSize).ToArray();
+	private void InitialiseFences() => PlacedFences = Enumerable.Repeat(-1, (BoardSize - 1) * (BoardSize - 1)).ToArray();
 
-	public void InitialisePawnPositions(int boardSize)
+	public void InitialisePawnPositions()
 	{
 		PawnPositions = new int[Helper.PlayerCount];
-		PawnPositions[0] = (int)(boardSize * (boardSize - 0.5));
-		PawnPositions[1] = boardSize / 2;
+		PawnPositions[0] = (int)(BoardSize * (BoardSize - 0.5));
+		PawnPositions[1] = BoardSize / 2;
 	}
 
-	public void InitialiseTiles(int boardSize)
+	public void InitialiseTiles()
 	{
-		Tiles = Enumerable.Range(0, boardSize * boardSize)
-			.Select(index => Helper.InitialiseConnections(index, boardSize))
+		Tiles = Enumerable.Range(0, BoardSize * BoardSize)
+			.Select(index => Helper.InitialiseConnections(index, BoardSize))
 			.ToArray();
 	}
 
-	public void InitialiseIllegalFences(int fenceSize) => IllegalFences = Enumerable.Repeat(-1, fenceSize * fenceSize).ToArray();
+	public void InitialiseIllegalFences() => IllegalFences = Enumerable.Repeat(-1, (BoardSize - 1) * (BoardSize - 1)).ToArray();
 
 	#region Setters ---
 	#endregion
