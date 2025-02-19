@@ -184,7 +184,7 @@ func _on_colour_selected(index: int, prev_index: int, other_button: OptionButton
 	# Loop through all options and enable them
 	for i in range(other_button.get_item_count()):
 		other_button.set_item_disabled(i, false)
-		
+
 	# Disable the selected colour in the other option button
 	other_button.set_item_disabled(index, true)
 	# Re-enable the previously selected colour in the other option button

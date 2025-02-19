@@ -14,8 +14,8 @@ public partial class BoardState : Control
 	[Export] private int[] FenceCounts { get; set; }
 
 	private int[][] Tiles { get; set; }
+	private List<int>[] VisitedTiles { get; set; } = new List<int>[2] { new(), new() };
 
-	[Export]
 	public string LastMove { get; set; }
 	public int BoardSize { get; set; }
 	public StringBuilder MoveHistory { get; set; } = new();
@@ -160,7 +160,13 @@ public partial class BoardState : Control
 		return leapedTiles;
 	}
 
-	public void MovePawn(int tileIndex, int currentPlayer) => PawnPositions[currentPlayer] = tileIndex;
+	public void MovePawn(int tileIndex, int currentPlayer, bool isUndo) 
+	{ 
+		PawnPositions[currentPlayer] = tileIndex;
+
+		if (isUndo) return;
+		VisitedTiles[currentPlayer].Add(tileIndex);
+	}
 
 	#region Fences ---
 	#endregion
@@ -234,6 +240,7 @@ public partial class BoardState : Control
 		FenceCounts[currentPlayer]--;
 	}
 
+	// TODO Refactor into smaller functions
 	public List<int[]> GetSurroundingFences(int fenceIndex)
 	{
 		// Early exit if the fence is not placed
@@ -279,6 +286,12 @@ public partial class BoardState : Control
 				if (cornerFence == -1) continue;
 				surroundingFences.Add(new int[] { cornerFence, 1 - direction });
 			}
+
+			/** Aligned Enclosing Check */
+
+			// TODO Check leaped fences cardinal Opposites, for wall or placed, if so, add the leaped fence
+
+
 		}
 
 		return surroundingFences;
@@ -323,7 +336,8 @@ public partial class BoardState : Control
 	{
 		int player = int.Parse(LastMove[0].ToString());
 		int position = int.Parse(LastMove.Split('_')[1]);
-		MovePawn(position, player);
+		VisitedTiles[player].RemoveAt(VisitedTiles[player].Count - 1);
+		MovePawn(position, player, true);
 	}
 
 	private void UndoFenceMove()
@@ -375,7 +389,7 @@ public partial class BoardState : Control
 		{
 			case 'm':
 				code += "_" + GetPawnPosition(currentPlayer);
-				MovePawn(value, currentPlayer);
+				MovePawn(value, currentPlayer, false);
 				break;
 			case 'f':
 				PlaceFence(direction, value, currentPlayer);
@@ -407,7 +421,7 @@ public partial class BoardState : Control
 			for (int i = 0; i < GetFenceAmount(); i++)
 			{
 				if (!GetFenceEnabled(i, direction)) continue;
-				
+
 				allMoves.Append($"{currentPlayer}f{Helper.GetMoveString(i, direction)};");
 			}
 		}
@@ -424,18 +438,34 @@ public partial class BoardState : Control
 	// Evaluate the board state, assuming there is no winner
 	public int EvaluateBoard(bool isMaximising, int currentPlayer, string lastMove)
 	{
-		const int PATH_WEIGHT = 10;
-		const int WALL_WEIGHT = 3;
-
-		var playerShortestPath = Algorithms.GetShortestPath(this, GetPawnPosition(currentPlayer), new HashSet<int>(GetGoalTiles(currentPlayer)), currentPlayer);
-		var opponentShortestPath = Algorithms.GetShortestPath(this, GetPawnPosition(1 - currentPlayer), new HashSet<int>(GetGoalTiles(1 - currentPlayer)), 1 - currentPlayer);
-
-		int pathScore = 0;
-		if (isMaximising) pathScore = (playerShortestPath.Count - opponentShortestPath.Count) * PATH_WEIGHT;
-		else pathScore = (opponentShortestPath.Count - playerShortestPath.Count) * PATH_WEIGHT;
+		int pathScore, wallScore, progressScore, repetitionPenalty;
 		
-		int wallScore = (FenceCounts[currentPlayer] - FenceCounts[1 - currentPlayer]) * WALL_WEIGHT;
+		int opponent = 1 - currentPlayer;
+		
+		int playerPos = GetPawnPosition(currentPlayer);
+		int opponentPos = GetPawnPosition(opponent);
 
-		return pathScore; // + wallScore;
+
+		var playerShortestPath = Algorithms.GetShortestPath(this, playerPos, new HashSet<int>(GetGoalTiles(currentPlayer)), currentPlayer);
+		var opponentShortestPath = Algorithms.GetShortestPath(this, opponentPos, new HashSet<int>(GetGoalTiles(1 - currentPlayer)), 1 - currentPlayer);
+
+		// TODO Only apply repetition penalty if the moveString is MovePawn
+		// TODO Only apply wallScore if the moveString is PlaceFence?
+
+		if (isMaximising)
+		{
+			pathScore = (playerShortestPath.Count - opponentShortestPath.Count) * Helper.PATH_WEIGHT;
+			wallScore = (FenceCounts[currentPlayer] - FenceCounts[opponent]) * Helper.WALL_WEIGHT;
+			repetitionPenalty = VisitedTiles[currentPlayer].ToHashSet().Contains(playerPos) ? Helper.REPETITION_WEIGHT : 0;
+		}
+		else
+		{
+			pathScore = (opponentShortestPath.Count - playerShortestPath.Count) * Helper.PATH_WEIGHT;
+			wallScore = (FenceCounts[opponent] - FenceCounts[currentPlayer]) * Helper.WALL_WEIGHT;
+			repetitionPenalty = VisitedTiles[opponent].ToHashSet().Contains(opponentPos) ? Helper.REPETITION_WEIGHT : 0;
+		}
+
+		return pathScore + wallScore - repetitionPenalty;
 	}
+
 }

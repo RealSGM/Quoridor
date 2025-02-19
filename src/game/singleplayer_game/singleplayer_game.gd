@@ -2,6 +2,7 @@ class_name SingleplayerGame extends BaseGame
 
 @export var bot_cover: Control
 
+
 func _ready() -> void:
 	super._ready()
 	bot_cover.hide()

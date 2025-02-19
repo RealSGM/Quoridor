@@ -17,7 +17,6 @@ func clear_pawns() -> void:
 		pawn_moved = false
 		return
 
-	pawns[0].hide()
-	pawns[0].modulate.a = 1
-	pawns[1].hide()
-	pawns[1].modulate.a = 1
+	for i: int in Global.BITS:
+		pawns[i].modulate.a = 1
+		pawns[i].hide()
