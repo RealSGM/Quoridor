@@ -1,5 +1,6 @@
 using Godot;
 using System;
+using System.Diagnostics;
 
 public partial class MiniMaxAlgorithm : Node
 {
@@ -13,14 +14,15 @@ public partial class MiniMaxAlgorithm : Node
 	{
 		Console = GetNode<Window>("/root/Console");
 		Console.Call("add_entry", "Creating Game Tree...", 0);
-		long startTime = DateTime.Now.Ticks;
+		ulong startTime = Time.GetTicksMsec();
 		nodesVisited = 1;
 
 		ValueTuple<int, string> bestMoveTuple = MiniMax(board, 0, true, int.MinValue, int.MaxValue, 1 - currentPlayer, board.LastMove);
 		int bestValue = bestMoveTuple.Item1;
 		string bestMove = bestMoveTuple.Item2;
 
-		Console.Call("add_entry", "Found Best Move in " + (DateTime.Now.Ticks - startTime) / TimeSpan.TicksPerMillisecond + " ms", 0);
+
+		Console.Call("add_entry", "Found Best Move in " + (Time.GetTicksMsec() - startTime) + " ms", 0);
 		Console.Call("add_entry", $"Best Value: {bestValue}\nBest Move: {bestMove}\nNodes visited: {nodesVisited}", 0);
 
 		return bestMove;
