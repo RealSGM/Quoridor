@@ -240,11 +240,49 @@ public partial class BoardState : Control
 		FenceCounts[currentPlayer]--;
 	}
 
-	// TODO Refactor into smaller functions
+	public List<int[]> GetParallelAdjacentFences(int fenceDirection, int[] adjFences, int direction)
+	{
+		List<int[]> fences = new();
+
+		foreach (int cardinalBit in Helper.Bits)
+		{
+			int cardinalDirection = (cardinalBit * 2) + fenceDirection;
+
+			// Ignore if the adjacent fence is out of bounds
+			if (adjFences[cardinalDirection] == -1) continue;
+
+			// Add adjacent fences of the same direction
+			fences.Add(new int[] { adjFences[cardinalDirection], fenceDirection });
+
+			if (fenceDirection != direction) continue;
+
+			// Add adjacent fences of the perpendicular direction
+			fences.Add(new int[] { adjFences[cardinalDirection], 1 - direction });
+		}
+
+		return fences;
+	}
+
+	public List<int[]> GetEnclosingCornerFences(int direction, int[] adjFences, int cardinalOpposites)
+	{
+		List<int[]> fences = new();
+
+		foreach (int cornerBit in Helper.Bits)
+		{
+			int cornerDirection = (cornerBit * 2) + (1 - direction);
+			int cornerFence = Helper.AdjacentFunctions[cornerDirection](adjFences[cardinalOpposites], BoardSize - 1);
+
+			if (cornerFence == -1) continue;
+			fences.Add(new int[] { cornerFence, 1 - direction });
+		}
+
+		return fences;
+	}
+
 	public List<int[]> GetSurroundingFences(int fenceIndex)
 	{
 		// Early exit if the fence is not placed
-		if (PlacedFences[fenceIndex] == -1) return new ();
+		if (PlacedFences[fenceIndex] == -1) return new();
 
 		List<int[]> surroundingFences = new();
 		int direction = PlacedFences[fenceIndex];
@@ -253,19 +291,7 @@ public partial class BoardState : Control
 		// Add to the surrounding fences the fences which can be both horizontal and vertical
 		foreach (int fenceDirection in Helper.Bits)
 		{
-			foreach (int cardinalBit in Helper.Bits)
-			{
-				int cardinalDirection = (cardinalBit * 2) + fenceDirection;
-
-				// Add parallel adjacent fences
-				if (adjFences[cardinalDirection] == -1) continue;
-
-				surroundingFences.Add(new int[] { adjFences[cardinalDirection], fenceDirection });
-				// Add perpendicular adjacent fences
-				if (fenceDirection == direction) surroundingFences.Add(new int[] { adjFences[cardinalDirection], 1 - direction });
-			}
-
-			/** Enclosing Fence Check (Corner Checks) */
+			surroundingFences.AddRange(GetParallelAdjacentFences(fenceDirection, adjFences, direction));
 
 			int cardinalOpposites = (fenceDirection * 2) + direction;
 
@@ -278,19 +304,9 @@ public partial class BoardState : Control
 			// Check if the leaped fence is at a boundary or is a placed fence of the same direction
 			if (!(leapedFence == -1 || PlacedFences[leapedFence] == direction)) continue;
 
-			foreach (int cornerBit in Helper.Bits)
-			{
-				int cornerDirection = (cornerBit * 2) + (1 - direction);
-				int cornerFence = Helper.AdjacentFunctions[cornerDirection](adjFences[cardinalOpposites], BoardSize - 1);
-
-				if (cornerFence == -1) continue;
-				surroundingFences.Add(new int[] { cornerFence, 1 - direction });
-			}
-
-			/** Aligned Enclosing Check */
+			surroundingFences.AddRange(GetEnclosingCornerFences(direction, adjFences, cardinalOpposites));
 
 			// TODO Check leaped fences cardinal Opposites, for wall or placed, if so, add the leaped fence
-
 
 		}
 
@@ -374,7 +390,6 @@ public partial class BoardState : Control
 		connections[index] = tileToAdd;
 	}
 
-
 	#region Turn ---
 	#endregion
 
@@ -455,17 +470,17 @@ public partial class BoardState : Control
 		if (isMaximising)
 		{
 			pathScore = (playerShortestPath.Count - opponentShortestPath.Count) * Helper.PATH_WEIGHT;
-			wallScore = (FenceCounts[currentPlayer] - FenceCounts[opponent]) * Helper.WALL_WEIGHT;
-			repetitionPenalty = VisitedTiles[currentPlayer].ToHashSet().Contains(playerPos) ? Helper.REPETITION_WEIGHT : 0;
+			// wallScore = (FenceCounts[currentPlayer] - FenceCounts[opponent]) * Helper.WALL_WEIGHT;
+			// repetitionPenalty = VisitedTiles[currentPlayer].ToHashSet().Contains(playerPos) ? Helper.REPETITION_WEIGHT : 0;
 		}
 		else
 		{
 			pathScore = (opponentShortestPath.Count - playerShortestPath.Count) * Helper.PATH_WEIGHT;
-			wallScore = (FenceCounts[opponent] - FenceCounts[currentPlayer]) * Helper.WALL_WEIGHT;
-			repetitionPenalty = VisitedTiles[opponent].ToHashSet().Contains(opponentPos) ? Helper.REPETITION_WEIGHT : 0;
+			// wallScore = (FenceCounts[opponent] - FenceCounts[currentPlayer]) * Helper.WALL_WEIGHT;
+			// repetitionPenalty = VisitedTiles[opponent].ToHashSet().Contains(opponentPos) ? Helper.REPETITION_WEIGHT : 0;
 		}
 
-		return pathScore + wallScore - repetitionPenalty;
+		return pathScore; // + wallScore - repetitionPenalty;
 	}
 
 }
