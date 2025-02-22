@@ -274,6 +274,31 @@ public partial class BoardState : Control
 		return fences;
 	}
 
+	public int GetLeapedFence(int fenceIndex, int cardinals)
+	{
+		int[] adjFences = Helper.InitialiseConnections(fenceIndex, BoardSize - 1);
+		int adjFence = adjFences[cardinals];
+
+		if (adjFence == -1) return -1;
+
+		return Helper.AdjacentFunctions[cardinals](adjFence, BoardSize - 1);
+	}
+
+	public int[] GetEnclosingAllignedFence(int fenceIndex, int direction, int fenceDirection)
+	{
+		int oppositeDirection = 1 - direction;
+		int cardinalAlligned = (fenceDirection * 2) + oppositeDirection;
+
+		// Check if the the double leaped fence is at a boundary or is a placed fence of the same direction
+		int leapedAllignedFence = GetLeapedFence(fenceIndex, cardinalAlligned);
+		if (leapedAllignedFence == -1) return null;
+			
+		int x2LeapedFence = GetLeapedFence(leapedAllignedFence, cardinalAlligned);
+		if (x2LeapedFence == -1 || PlacedFences[x2LeapedFence] == direction) return new int[] { leapedAllignedFence, direction };
+
+		return null;
+	}
+
 	public List<int[]> GetSurroundingFences(int fenceIndex)
 	{
 		// Early exit if the fence is not placed
@@ -296,37 +321,18 @@ public partial class BoardState : Control
 			if (adjFences[cardinalOpposites] != -1 && (leapedFence == -1 || PlacedFences[leapedFence] == direction))
 			{
 				surroundingFences.AddRange(GetEnclosingCornerFences(direction, adjFences, cardinalOpposites));
-
 			}
 
-			// Check if the the double leaped fence is at a boundary or is a placed fence of the same direction
-			int cardinalAlligned = (fenceDirection * 2) + oppositeDirection;
-			int leapedAllignedFence = GetLeapedFence(fenceIndex, cardinalAlligned);
+			int[] enclosingAllignedFence = GetEnclosingAllignedFence(fenceIndex, direction, fenceDirection);
 
-			if (leapedAllignedFence != -1)
+			if (enclosingAllignedFence != null) 
 			{
-				int x2LeapedFence = GetLeapedFence(leapedAllignedFence, cardinalAlligned);
-
-				if (x2LeapedFence == -1 || PlacedFences[x2LeapedFence] == direction)
-				{
-					surroundingFences.Add(new int[] { leapedAllignedFence, direction });
-				}
+				surroundingFences.Add(enclosingAllignedFence);
 			}
 		}
 
 		return surroundingFences;
 	}
-
-	public int GetLeapedFence(int fenceIndex, int cardinals)
-	{
-		int[] adjFences = Helper.InitialiseConnections(fenceIndex, BoardSize - 1);
-		int adjFence = adjFences[cardinals];
-
-		if (adjFence == -1) return -1;
-
-		return Helper.AdjacentFunctions[cardinals](adjFence, BoardSize - 1);
-	}
-
 
 	public void RemoveTileConnection(int tile, int tileToRemove)
 	{
