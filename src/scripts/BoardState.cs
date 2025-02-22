@@ -123,11 +123,9 @@ public partial class BoardState : Control
 	public List<int> CheckForEnemy(int connectedTile, int player)
 	{
 		int enemyPawnPosition = PawnPositions[1 - player];
+
 		// Check if the enemy pawn is not on the tile
-		if (enemyPawnPosition != connectedTile)
-		{
-			return new List<int> { connectedTile };
-		}
+		if (enemyPawnPosition != connectedTile) return new List<int> { connectedTile };
 
 		// Get the direction of the enemy pawn
 		int directionIndex = Array.IndexOf(Tiles[PawnPositions[player]], enemyPawnPosition);
@@ -136,11 +134,8 @@ public partial class BoardState : Control
 		int[] AdjacentOffsets = new int[4] { -BoardSize, 1, BoardSize, -1 };
 		int leapedTileIndex = connectedTile + AdjacentOffsets[directionIndex];
 
-		if (leapedTileIndex < 0 || leapedTileIndex >= Tiles.Length)
-		{
-			// Return an empty list, as the leaped tile is out of boundaries
-			return new List<int>();
-		}
+		// Return an empty list, as the leaped tile is out of boundaries
+		if (leapedTileIndex < 0 || leapedTileIndex >= Tiles.Length) return new List<int>();
 
 		return GetLeapedTiles(PawnPositions[player], leapedTileIndex, connectedTile, directionIndex).ToList();
 	}
@@ -160,8 +155,8 @@ public partial class BoardState : Control
 		return leapedTiles;
 	}
 
-	public void MovePawn(int tileIndex, int currentPlayer, bool isUndo) 
-	{ 
+	public void MovePawn(int tileIndex, int currentPlayer, bool isUndo)
+	{
 		PawnPositions[currentPlayer] = tileIndex;
 
 		if (isUndo) return;
@@ -286,6 +281,7 @@ public partial class BoardState : Control
 
 		List<int[]> surroundingFences = new();
 		int direction = PlacedFences[fenceIndex];
+		int oppositeDirection = 1 - direction;
 		int[] adjFences = Helper.InitialiseConnections(fenceIndex, BoardSize - 1);
 
 		// Add to the surrounding fences the fences which can be both horizontal and vertical
@@ -294,24 +290,43 @@ public partial class BoardState : Control
 			surroundingFences.AddRange(GetParallelAdjacentFences(fenceDirection, adjFences, direction));
 
 			int cardinalOpposites = (fenceDirection * 2) + direction;
-
-			// Ignore if the adjacent fence is out of bounds
-			if (adjFences[cardinalOpposites] == -1) continue;
-
-			// Get the adjacent fence's adjacent fence
-			int leapedFence = Helper.AdjacentFunctions[cardinalOpposites](adjFences[cardinalOpposites], BoardSize - 1);
+			int leapedFence = GetLeapedFence(fenceIndex, cardinalOpposites);
 
 			// Check if the leaped fence is at a boundary or is a placed fence of the same direction
-			if (!(leapedFence == -1 || PlacedFences[leapedFence] == direction)) continue;
+			if (adjFences[cardinalOpposites] != -1 && (leapedFence == -1 || PlacedFences[leapedFence] == direction))
+			{
+				surroundingFences.AddRange(GetEnclosingCornerFences(direction, adjFences, cardinalOpposites));
 
-			surroundingFences.AddRange(GetEnclosingCornerFences(direction, adjFences, cardinalOpposites));
+			}
 
-			// TODO Check leaped fences cardinal Opposites, for wall or placed, if so, add the leaped fence
+			// Check if the the double leaped fence is at a boundary or is a placed fence of the same direction
+			int cardinalAlligned = (fenceDirection * 2) + oppositeDirection;
+			int leapedAllignedFence = GetLeapedFence(fenceIndex, cardinalAlligned);
 
+			if (leapedAllignedFence != -1)
+			{
+				int x2LeapedFence = GetLeapedFence(leapedAllignedFence, cardinalAlligned);
+
+				if (x2LeapedFence == -1 || PlacedFences[x2LeapedFence] == direction)
+				{
+					surroundingFences.Add(new int[] { leapedAllignedFence, direction });
+				}
+			}
 		}
 
 		return surroundingFences;
 	}
+
+	public int GetLeapedFence(int fenceIndex, int cardinals)
+	{
+		int[] adjFences = Helper.InitialiseConnections(fenceIndex, BoardSize - 1);
+		int adjFence = adjFences[cardinals];
+
+		if (adjFence == -1) return -1;
+
+		return Helper.AdjacentFunctions[cardinals](adjFence, BoardSize - 1);
+	}
+
 
 	public void RemoveTileConnection(int tile, int tileToRemove)
 	{
@@ -454,9 +469,9 @@ public partial class BoardState : Control
 	public int EvaluateBoard(bool isMaximising, int currentPlayer, string lastMove)
 	{
 		int pathScore, wallScore, progressScore, repetitionPenalty;
-		
+
 		int opponent = 1 - currentPlayer;
-		
+
 		int playerPos = GetPawnPosition(currentPlayer);
 		int opponentPos = GetPawnPosition(opponent);
 

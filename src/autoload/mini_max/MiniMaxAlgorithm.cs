@@ -4,7 +4,7 @@ using System.Diagnostics;
 
 public partial class MiniMaxAlgorithm : Node
 {
-	const int MAX_DEPTH = 2;
+	const int MAX_DEPTH = 3;
 
 	[Export] int nodesVisited = 0;
 
