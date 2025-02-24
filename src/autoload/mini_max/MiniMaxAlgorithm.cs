@@ -4,7 +4,7 @@ using System.Diagnostics;
 
 public partial class MiniMaxAlgorithm : Node
 {
-	const int MAX_DEPTH = 3;
+	int MAX_DEPTH = 2;
 
 	[Export] int nodesVisited = 0;
 
@@ -16,6 +16,13 @@ public partial class MiniMaxAlgorithm : Node
 		Console.Call("add_entry", "Creating Game Tree...", 0);
 		ulong startTime = Time.GetTicksMsec();
 		nodesVisited = 1;
+
+		// Set first move depth to 1, as first move is super time consuming
+		string moveHistory = board.GetMoveHistory();
+		string[] moves = moveHistory.ToString().Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+		MAX_DEPTH = moves.Length <= 1 ? 1 : 2;
+
+		// Set MAX_DEPTH to higher value depending on the number of moves available / length into the game	
 
 		ValueTuple<int, string> bestMoveTuple = MiniMax(board, 0, true, int.MinValue, int.MaxValue, 1 - currentPlayer, board.LastMove);
 		int bestValue = bestMoveTuple.Item1;
