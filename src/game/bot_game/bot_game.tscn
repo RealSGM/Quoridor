@@ -33,9 +33,6 @@ layout_mode = 2
 text = "Pause Bots
 "
 
-[node name="UndoButton" parent="UserInterface/Chat/VBoxContainer" index="2"]
-visible = false
-
 [connection signal="pressed" from="UserInterface/ActionInterface/InterfaceVBC/ActionsVBC/PauseButton" to="." method="_on_pause_button_pressed"]
 
 [editable path="UserInterface"]

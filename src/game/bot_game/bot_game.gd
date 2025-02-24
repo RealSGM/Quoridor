@@ -40,3 +40,13 @@ func _on_pause_button_pressed() -> void:
 
 	if turn_ready:
 		set_current_player(current_player)
+
+
+func _on_undo_button_pressed() -> void:
+	undo_board_ui()
+	undo_board_ui()
+
+	finish_undo_board()
+
+	# Force reset turn
+	current_player = current_player
