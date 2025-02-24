@@ -3,8 +3,9 @@
 [ext_resource type="PackedScene" uid="uid://g12um5raoqio" path="res://src/game/base_game/base_game.tscn" id="1_7254e"]
 [ext_resource type="Script" path="res://src/game/bot_game/bot_game.gd" id="2_ax1fp"]
 
-[node name="BotGame" instance=ExtResource("1_7254e")]
+[node name="BotGame" node_paths=PackedStringArray("pause_button") instance=ExtResource("1_7254e")]
 script = ExtResource("2_ax1fp")
+pause_button = NodePath("UserInterface/ActionInterface/InterfaceVBC/ActionsVBC/PauseButton")
 
 [node name="FenceCountVBC" parent="UserInterface/ActionInterface/InterfaceVBC" index="0"]
 alignment = 1
@@ -21,16 +22,20 @@ alignment = 1
 [node name="ConstLabel" parent="UserInterface/ActionInterface/InterfaceVBC/FenceCountVBC/PlayerTwo/VBC" index="0"]
 text = "Bot 2 Fences"
 
-[node name="ActionsVBC" parent="UserInterface/ActionInterface/InterfaceVBC" index="1"]
-visible = false
-
 [node name="TogglePanel" parent="UserInterface/ActionInterface/InterfaceVBC/ActionsVBC" index="0"]
 visible = false
 
 [node name="ConfirmButton" parent="UserInterface/ActionInterface/InterfaceVBC/ActionsVBC" index="1"]
 visible = false
 
+[node name="PauseButton" type="Button" parent="UserInterface/ActionInterface/InterfaceVBC/ActionsVBC" index="2"]
+layout_mode = 2
+text = "Pause Bots
+"
+
 [node name="UndoButton" parent="UserInterface/Chat/VBoxContainer" index="2"]
 visible = false
+
+[connection signal="pressed" from="UserInterface/ActionInterface/InterfaceVBC/ActionsVBC/PauseButton" to="." method="_on_pause_button_pressed"]
 
 [editable path="UserInterface"]

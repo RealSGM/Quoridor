@@ -21,12 +21,15 @@ class_name UserInterface extends Control
 @export_category("Chat")
 @export var chat_container: VBoxContainer
 
+var is_bots: bool = false
 
 func _input(event: InputEvent) -> void:
-	if event.is_action_pressed("confirm") and !confirm_button.disabled:
-		SignalManager.confirm_pressed.emit()
 	if event.is_action_pressed("pause"):
 		pause_menu.visible = !pause_menu.visible
+	if is_bots:
+		return
+	if event.is_action_pressed("confirm") and !confirm_button.disabled:
+		SignalManager.confirm_pressed.emit()
 	if event.is_action_pressed("switch_direction"):
 		SignalManager.direction_toggled.emit()
 
