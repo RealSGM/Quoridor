@@ -16,6 +16,7 @@ extends Control
 @export var singleplayer_button: Button
 @export var multiplayer_button: Button
 @export var play_back_button: Button
+@export var bot_v_bot_button: Button
 
 @export_category("Multiplayer Buttons")
 @export var local_button: Button
@@ -39,9 +40,12 @@ extends Control
 @export var player_two_name: LineEdit
 @export var player_two_container: VBoxContainer
 
-# Singleplayer Options
-@export var bot_container: VBoxContainer
-@export var bot_colours: OptionButton
+@export_category("Bot Options")
+@export var bot_one_container: VBoxContainer
+@export var bot_one_colours: OptionButton
+
+@export var bot_two_container: VBoxContainer
+@export var bot_two_colours: OptionButton
 
 @export_category("Game Settings")
 @export var size_options: Array[int] = [7, 9, 11]
@@ -52,8 +56,15 @@ var menu_stack: Array = []
 var game_type: String
 
 @onready var menus: Array[PanelContainer] = [main_menu, play_menu, multiplayer_menu, board_options_menu]
-@onready var global_options: Array[BoxContainer] = [player_one_container, board_container]
-@onready var game_type_dict: Dictionary = {"Singleplayer": [bot_container], "Local": [player_two_container]}
+@onready var global_options: Array[BoxContainer] = [board_container]
+@onready var game_type_dict: Dictionary = {
+	"Singleplayer":
+		[player_one_container, bot_two_container],
+	"Local":
+		[player_one_container, player_two_container],
+	"BotVBot":
+		[bot_one_container, bot_two_container]
+	}
 
 
 func _input(event: InputEvent) -> void:
@@ -77,6 +88,7 @@ func setup_menus() -> void:
 
 	singleplayer_button.pressed.connect(_on_menu_button_pressed.bind(board_options_menu, singleplayer_button))
 	multiplayer_button.pressed.connect(_on_menu_button_pressed.bind(multiplayer_menu))
+	bot_v_bot_button.pressed.connect(_on_menu_button_pressed.bind(board_options_menu, bot_v_bot_button))
 	play_back_button.pressed.connect(_on_back_button_pressed)
 
 	#online_button.pressed
@@ -89,9 +101,13 @@ func setup_menus() -> void:
 	# Setup colour option buttons
 	p_one_colours.item_selected.connect(_on_colour_selected.bind(p_one_colours.selected, p_two_colours))
 	p_two_colours.item_selected.connect(_on_colour_selected.bind(p_two_colours.selected, p_one_colours))
-	bot_colours.item_selected.connect(_on_colour_selected.bind(bot_colours.selected, p_one_colours))
+	bot_two_colours.item_selected.connect(_on_colour_selected.bind(bot_two_colours.selected, p_one_colours))
+
 	p_one_colours.select(0)
 	p_two_colours.select(1)
+	bot_one_colours.select(2)
+	bot_two_colours.select(3)
+
 
 	setup_board_sizes()
 	setup_fence_amounts()
@@ -118,6 +134,7 @@ func show_main_menu() -> void:
 	menu_stack.append(main_menu)
 
 
+# TODO Probably can tidy this up
 func set_game_data() -> void:
 	Global.players[0]["name"] = player_one_name.text
 	Global.players[0]["color"] = Global.COLORS[p_one_colours.selected]
@@ -130,8 +147,14 @@ func set_game_data() -> void:
 			selected_colour = p_two_colours.selected
 			selected_name = player_two_name.text
 		"Singleplayer":
-			selected_colour = bot_colours.selected
+			selected_colour = bot_two_colours.selected
 			selected_name = "Bot"
+		"BotVBot":
+			Global.players[0]["name"] = "Bot 1"
+			Global.players[0]["color"] = Global.COLORS[bot_one_colours.selected]
+
+			selected_colour = bot_two_colours.selected
+			selected_name = "Bot One"
 
 	Global.players[1]["color"] = Global.COLORS[selected_colour]
 	Global.players[1]["name"] = selected_name
@@ -189,3 +212,7 @@ func _on_colour_selected(index: int, prev_index: int, other_button: OptionButton
 	other_button.set_item_disabled(index, true)
 	# Re-enable the previously selected colour in the other option button
 	other_button.set_item_disabled(prev_index, false)
+
+
+func _on_bot_button_pressed() -> void:
+	pass
