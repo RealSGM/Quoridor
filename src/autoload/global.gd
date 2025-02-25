@@ -90,3 +90,16 @@ func get_fence_amounts() -> String:
 		text += "Player %s: %s\n" % [player, game.board.GetFenceCount(player)]
 
 	return text
+
+
+func get_illegal_fences() -> String:
+	var illegal_fences: PackedInt32Array = game.board.GetIllegalFences()
+	var text: String = ""
+
+	for i: int in range(illegal_fences.size()):
+		var fence: int = illegal_fences[i]
+		var fence_string: String = "X" if fence == -1 else str(fence)
+		text += " [%s]" % [fence_string]
+		if (i + 1) % (game.board.BoardSize - 1) == 0:
+			text += "\n"
+	return text

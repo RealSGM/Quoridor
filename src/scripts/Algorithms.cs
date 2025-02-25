@@ -37,21 +37,16 @@ public partial class Algorithms : Node
 
 	public static bool RecursiveDFS(BoardState board, int current, HashSet<int> goalTiles, HashSet<int> visited, int player)
 	{
-		if (goalTiles.Contains(current))
-			return false;
+		if (goalTiles.Contains(current)) return false;
 
-		if (visited.Contains(current))
-			return true;
+		if (visited.Contains(current)) return true;
 
 		visited.Add(current);
 
 		foreach (int connectedTile in board.GetPathConnections(current, player))
 		{
-			if (visited.Contains(connectedTile) || connectedTile == -1)
-				continue;
-
-			if (!RecursiveDFS(board, connectedTile, goalTiles, visited, player))
-				return false;
+			if (visited.Contains(connectedTile) || connectedTile == -1) continue;
+			if (!RecursiveDFS(board, connectedTile, goalTiles, visited, player)) return false;
 		}
 
 		return true;
@@ -100,11 +95,9 @@ public partial class Algorithms : Node
 
 		foreach (int connectedTile in board.GetPathConnections(current, player))
 		{
-			if (visited.Contains(connectedTile) || connectedTile == -1)
-				continue;
+			if (visited.Contains(connectedTile) || connectedTile == -1) continue;
 
-			if (!RecursiveBFS(board, connectedTile, goalTiles, visited, player))
-				return false;
+			if (!RecursiveBFS(board, connectedTile, goalTiles, visited, player)) return false;
 		}
 
 		return true;

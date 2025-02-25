@@ -10,7 +10,7 @@ public partial class IllegalFenceCheck : Node
 	public void GetIllegalFences(BoardState board, int currentPlayer)
 	{
 		// Ignore if player has no more fences
-		if (board.GetFenceCount(1 - currentPlayer) == 0) return;
+		if (board.GetFenceCount(currentPlayer) == 0) return;
 	
 		int[] placedFences = board.GetPlacedFences();
 
@@ -27,29 +27,36 @@ public partial class IllegalFenceCheck : Node
 		possibleFences = possibleFences
 			.Where(fence => Math.Abs(fence[0]) < placedFences.Length && placedFences[Math.Abs(fence[0])] == -1)
 			.ToList();
+		
+		List<int[]> searchedFences = new();
 
 		possibleFences.ForEach(fence => board.SetIllegalFence(fence[0], -1));
 
-		Parallel.ForEach(possibleFences, fence =>
+		foreach (var fence in possibleFences)
 		{
-			if (!board.GetFenceEnabled(fence[0], fence[1])) return;
+			if (!board.GetFenceEnabled(fence[0], fence[1])) continue;
 
-			Parallel.ForEach(Helper.Bits, player =>
+			foreach (var player in Helper.Bits)
 			{
-				if (!IsFenceIllegal(board, fence[0], fence[1], player)) return;
+				if (searchedFences.Any(f => f.SequenceEqual(new[] {fence[0], fence[1], player}))) continue;
 
-				board.SetIllegalFence(Math.Abs(fence[0]), fence[1]);
-			});
-		});
+				searchedFences.Add(new[] {fence[0], fence[1], player});
+
+				if (!IsFenceIllegal(board, fence[0], fence[1], player)) continue;
+
+				board.SetIllegalFence(fence[0], fence[1]);
+			}
+		}
 	}
 
-	private static bool IsFenceIllegal(BoardState board, int fence, int direction, int player)
+	private bool IsFenceIllegal(BoardState board, int fence, int direction, int player)
 	{
 		BoardState boardClone = board.Clone();
 
-		boardClone.PlaceFence(direction, fence, player, true);
+		boardClone.PlaceFence(direction, fence, player);
 
 		int start = boardClone.GetPawnPosition(player);
+
 		HashSet<int> goalTiles = boardClone.GetGoalTiles(player).ToHashSet();
 
 		return Algorithms.RecursiveDFS(boardClone, start, goalTiles, new(), player);

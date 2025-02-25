@@ -153,11 +153,11 @@ func set_game_data() -> void:
 			selected_colour = bot_two_colours.selected
 			selected_name = "Bot"
 		"BotVBot":
-			Global.players[0]["name"] = "Bot 1"
+			Global.players[0]["name"] = "Bot One"
 			Global.players[0]["color"] = Global.COLORS[bot_one_colours.selected]
 
 			selected_colour = bot_two_colours.selected
-			selected_name = "Bot One"
+			selected_name = "Bot Two	"
 
 	Global.players[1]["color"] = Global.COLORS[selected_colour]
 	Global.players[1]["name"] = selected_name

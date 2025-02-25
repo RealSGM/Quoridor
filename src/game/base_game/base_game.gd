@@ -234,7 +234,7 @@ func _on_confirm_pressed() -> void:
 	# Switch to next player
 	else:
 		# Complete IFS before switching player
-		illegal_fence_check.GetIllegalFences(board, current_player)
+		illegal_fence_check.GetIllegalFences(board, 1- current_player)
 		current_player = 1 - current_player
 
 
