@@ -34,6 +34,7 @@ extends Control
 @export var p_one_colours: OptionButton
 @export var player_one_name: LineEdit
 @export var fence_option_button: OptionButton
+@export var fence_coloured_button: Button
 
 @export_category("Local Options")
 @export var p_two_colours: OptionButton
@@ -108,9 +109,11 @@ func setup_menus() -> void:
 	bot_one_colours.select(2)
 	bot_two_colours.select(3)
 
-
 	setup_board_sizes()
 	setup_fence_amounts()
+
+	fence_coloured_button.pressed.emit()
+	_on_colour_toggle_toggled(false)
 
 
 ## Setup the option button for the board sizes
@@ -192,6 +195,7 @@ func _on_start_game_pressed() -> void:
 	set_game_data()
 	var game: BaseGame = Resources.get_resource(game_type.to_lower() + "_game").instantiate()
 	Global.game = game
+	Global.coloured_fences = fence_coloured_button.is_pressed()
 	game.setup_board(size_options[size_option_button.selected], fence_amounts[fence_option_button.selected])
 	foreground.add_child(game, true)
 	game.board.scale = Vector2.ONE * float(board_dimensions) / float(game.board_container.size.x)
@@ -216,3 +220,7 @@ func _on_colour_selected(index: int, prev_index: int, other_button: OptionButton
 
 func _on_bot_button_pressed() -> void:
 	pass
+
+
+func _on_colour_toggle_toggled(toggled_on: bool) -> void:
+	fence_coloured_button.text = "Coloured" if toggled_on else "Gray"

@@ -197,6 +197,12 @@ func _on_fence_button_pressed(fence: int, direction: int = Global.fence_directio
 	fence_button.h_fence.visible = direction == 0
 	fence_button.v_fence.visible = direction != 0
 
+	if not Global.coloured_fences:
+		return
+
+	fence_button.h_fence.modulate = Global.players[current_player]["color"]
+	fence_button.v_fence.modulate = Global.players[current_player]["color"]
+
 
 func _on_tile_pressed(tile: int) -> void:
 	move_code = "%sm%s" % [current_player, Helper.GetMoveString(tile, 0)]

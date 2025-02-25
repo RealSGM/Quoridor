@@ -15,6 +15,7 @@ func set_current_player(val: int) -> void:
 
 	await RenderingServer.frame_post_draw
 
+
 	if not bots_enabled:
 		return
 
@@ -36,7 +37,7 @@ func confirm_move_pawn(tile: int) -> void:
 
 func _on_pause_button_pressed() -> void:
 	bots_enabled = not bots_enabled
-	pause_button.text =  "%s Bots" % ["Pause" if bots_enabled else "Unpause"]
+	pause_button.text = "%s Bots" % ["Pause" if bots_enabled else "Unpause"]
 
 	if turn_ready:
 		set_current_player(current_player)
