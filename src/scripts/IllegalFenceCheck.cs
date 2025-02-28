@@ -32,21 +32,21 @@ public partial class IllegalFenceCheck : Node
 
 		possibleFences.ForEach(fence => board.SetIllegalFence(fence[0], -1));
 
-		foreach (var fence in possibleFences)
+		Parallel.ForEach(possibleFences, fence =>
 		{
-			if (!board.GetFenceEnabled(fence[0], fence[1])) continue;
+			if (!board.GetFenceEnabled(fence[0], fence[1])) return;
 
-			foreach (var player in Helper.Bits)
+			Parallel.ForEach(Helper.Bits, player =>
 			{
-				if (searchedFences.Any(f => f.SequenceEqual(new[] {fence[0], fence[1], player}))) continue;
+				if (searchedFences.Any(f => f.SequenceEqual(new[] {fence[0], fence[1], player}))) return;
 
 				searchedFences.Add(new[] {fence[0], fence[1], player});
 
-				if (!IsFenceIllegal(board, fence[0], fence[1], player)) continue;
+				if (!IsFenceIllegal(board, fence[0], fence[1], player)) return;
 
 				board.SetIllegalFence(fence[0], fence[1]);
-			}
-		}
+			});
+		});
 	}
 
 	private bool IsFenceIllegal(BoardState board, int fence, int direction, int player)
