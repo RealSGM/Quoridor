@@ -56,4 +56,17 @@ public partial class Helper : Node
 		GetWestAdjacent(index, size)
 	};
 
+	public class FenceEqualityComparer : IEqualityComparer<int[]>
+	{
+		public bool Equals(int[] x, int[] y)
+		{
+			return x[0] == y[1] && x[1] == y[0];
+		}
+
+		public int GetHashCode(int[] obj)
+		{
+			return obj[0].GetHashCode() ^ obj[1].GetHashCode();
+		}
+	}
+
 }

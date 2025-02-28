@@ -28,9 +28,11 @@ public partial class IllegalFenceCheck : Node
 			.Where(fence => Math.Abs(fence[0]) < placedFences.Length && placedFences[Math.Abs(fence[0])] == -1)
 			.ToList();
 		
-		List<int[]> searchedFences = new();
-
 		possibleFences.ForEach(fence => board.SetIllegalFence(fence[0], -1));
+
+		possibleFences = possibleFences
+			.Distinct(new Helper.FenceEqualityComparer())
+			.ToList();
 
 		Parallel.ForEach(possibleFences, fence =>
 		{
@@ -38,10 +40,6 @@ public partial class IllegalFenceCheck : Node
 
 			Parallel.ForEach(Helper.Bits, player =>
 			{
-				if (searchedFences.Any(f => f.SequenceEqual(new[] {fence[0], fence[1], player}))) return;
-
-				searchedFences.Add(new[] {fence[0], fence[1], player});
-
 				if (!IsFenceIllegal(board, fence[0], fence[1], player)) return;
 
 				board.SetIllegalFence(fence[0], fence[1]);
