@@ -4,17 +4,17 @@ using System.Linq;
 using System.Collections.Generic;
 using System.Text;
 using System.ComponentModel;
+using System.Numerics;
 
 [GlobalClass]
 public partial class BoardState : Control
 {
 	[Export] private int[] PlacedFences { get; set; } // Array of placed fences, index = fence, value = direction => [-1 = Empty, 0 = Horizontally Placed, 1 = Vertically Placed]
-	[Export] private int[] IllegalFences { get; set;} // Array of illegal fences, index = fence, value = direction => [-1 = Empty, 0 = Horizontally Illegal, 1 = Vertically Illegal]
 	[Export] private int[] PawnPositions { get; set; }
 	[Export] private int[] FenceCounts { get; set; }
 
 	private int[][] Tiles { get; set; }
-	private List<int>[] VisitedTiles { get; set; } = new List<int>[2] { new(), new() };
+	private bool[][] IllegalFences { get; set; }
 
 	public string LastMove { get; set; }
 	public int BoardSize { get; set; }
@@ -28,7 +28,7 @@ public partial class BoardState : Control
 		FenceCounts = FenceCounts.Clone() as int[],
 		PawnPositions = PawnPositions.Clone() as int[],
 		Tiles = Tiles.Select(tile => tile.Clone() as int[]).ToArray(),
-		IllegalFences = IllegalFences.Clone() as int[],
+		IllegalFences = IllegalFences.Clone() as bool[][],
 		MoveHistory = new StringBuilder(MoveHistory.ToString()),
 		PlacedFences = PlacedFences.Clone() as int[],
 		BoardSize = BoardSize
@@ -61,12 +61,17 @@ public partial class BoardState : Control
 			.ToArray();
 	}
 
-	public void InitialiseIllegalFences() => IllegalFences = Enumerable.Repeat(-1, (BoardSize - 1) * (BoardSize - 1)).ToArray();
+	public void InitialiseIllegalFences()
+	{
+		IllegalFences = Enumerable.Range(0, (BoardSize - 1) * (BoardSize - 1))
+			.Select(_ => new bool[2] { false, false })
+			.ToArray();
+	}
 
 	#region Setters ---
 	#endregion
 
-	public void SetIllegalFence(int fence, int direction) => IllegalFences[fence] = direction;
+	public void SetIllegalFence(int fence, int direction, bool value) => IllegalFences[fence][direction] = value;
 
 	#region Getters ---
 	#endregion
@@ -98,6 +103,8 @@ public partial class BoardState : Control
 	public int GetPawnPosition(int index) => PawnPositions[index];
 
 	public int GetBoardSize() => BoardSize;
+
+	public bool[][] GetIllegalFences() => IllegalFences;
 
 	#region Movement ---
 	#endregion
@@ -155,13 +162,7 @@ public partial class BoardState : Control
 		return leapedTiles;
 	}
 
-	public void MovePawn(int tileIndex, int currentPlayer, bool isUndo)
-	{
-		PawnPositions[currentPlayer] = tileIndex;
-
-		if (isUndo) return;
-		VisitedTiles[currentPlayer].Add(tileIndex);
-	}
+	public void MovePawn(int tileIndex, int currentPlayer) => PawnPositions[currentPlayer] = tileIndex;
 
 	#region Fences ---
 	#endregion
@@ -179,7 +180,7 @@ public partial class BoardState : Control
 		if (IsFencePlaced(fence)) return false;
 
 		// Return false if the fence is illegal
-		if (IllegalFences[fence] == direction) return false;
+		if (IllegalFences[fence][direction]) return false;
 
 		// Horizontal Fence -> Check if the WEST or EAST adjacent fences are placed
 		if (direction == 0)
@@ -213,7 +214,7 @@ public partial class BoardState : Control
 		return new int[] { topLeft, topRight, bottomLeft, bottomRight };
 	}
 
-	public void PlaceFence(int direction, int fenceIndex, int currentPlayer, bool isIFS = false)
+	public void PlaceFence(int direction, int fenceIndex, int currentPlayer)
 	{
 		// Set the fence as placed
 		PlacedFences[fenceIndex] = direction;
@@ -229,9 +230,6 @@ public partial class BoardState : Control
 			RemoveTileConnection(tileGrid[pair[1]], tileGrid[pair[0]]);
 		}
 
-		// Continue if User or AI is placing the fence
-		if (isIFS) return;
-
 		FenceCounts[currentPlayer]--;
 	}
 
@@ -242,6 +240,7 @@ public partial class BoardState : Control
 		foreach (int cardinalBit in Helper.Bits)
 		{
 			int cardinalDirection = (cardinalBit * 2) + fenceDirection;
+
 
 			// Ignore if the adjacent fence is out of bounds
 			if (adjFences[cardinalDirection] == -1) continue;
@@ -292,7 +291,7 @@ public partial class BoardState : Control
 		// Check if the the double leaped fence is at a boundary or is a placed fence of the same direction
 		int leapedAllignedFence = GetLeapedFence(fenceIndex, cardinalAlligned);
 		if (leapedAllignedFence == -1) return null;
-			
+
 		int x2LeapedFence = GetLeapedFence(leapedAllignedFence, cardinalAlligned);
 		if (x2LeapedFence == -1 || PlacedFences[x2LeapedFence] == direction) return new int[] { leapedAllignedFence, direction };
 
@@ -306,7 +305,6 @@ public partial class BoardState : Control
 
 		List<int[]> surroundingFences = new();
 		int direction = PlacedFences[fenceIndex];
-		int oppositeDirection = 1 - direction;
 		int[] adjFences = Helper.InitialiseConnections(fenceIndex, BoardSize - 1);
 
 		// Add to the surrounding fences the fences which can be both horizontal and vertical
@@ -325,7 +323,7 @@ public partial class BoardState : Control
 
 			int[] enclosingAllignedFence = GetEnclosingAllignedFence(fenceIndex, direction, fenceDirection);
 
-			if (enclosingAllignedFence != null) 
+			if (enclosingAllignedFence != null)
 			{
 				surroundingFences.Add(enclosingAllignedFence);
 			}
@@ -373,8 +371,7 @@ public partial class BoardState : Control
 	{
 		int player = int.Parse(LastMove[0].ToString());
 		int position = int.Parse(LastMove.Split('_')[1]);
-		VisitedTiles[player].RemoveAt(VisitedTiles[player].Count - 1);
-		MovePawn(position, player, true);
+		MovePawn(position, player);
 	}
 
 	private void UndoFenceMove()
@@ -425,7 +422,7 @@ public partial class BoardState : Control
 		{
 			case 'm':
 				code += "_" + GetPawnPosition(currentPlayer);
-				MovePawn(value, currentPlayer, false);
+				MovePawn(value, currentPlayer);
 				break;
 			case 'f':
 				PlaceFence(direction, value, currentPlayer);
@@ -449,6 +446,10 @@ public partial class BoardState : Control
 	{
 		StringBuilder allMoves = new();
 
+		// Add all possible pawn moves
+		GetReachableTiles(currentPlayer).ToList()
+			.ForEach(index => allMoves.Append($"{currentPlayer}m{Helper.GetMoveString(index, 0)};"));
+
 		// Loop through both directions and add all possible fence placements
 		foreach (var direction in Helper.Bits)
 		{
@@ -462,46 +463,23 @@ public partial class BoardState : Control
 			}
 		}
 
-		// Add all possible pawn moves
-		GetReachableTiles(currentPlayer).ToList()
-			.ForEach(index => allMoves.Append($"{currentPlayer}m{Helper.GetMoveString(index, 0)};"));
-
 		return allMoves.ToString().Split(';', StringSplitOptions.RemoveEmptyEntries).Distinct().ToArray();
 	}
 
 	public bool IsGameOver() => GetWinner(0) || GetWinner(1);
 
 	// Evaluate the board state, assuming there is no winner
-	public int EvaluateBoard(bool isMaximising, int currentPlayer, string lastMove)
+	public int EvaluateBoard(int currentPlayer)
 	{
-		int pathScore, wallScore, progressScore, repetitionPenalty;
-
+		// TODO Value pawn move over fence place
 		int opponent = 1 - currentPlayer;
 
 		int playerPos = GetPawnPosition(currentPlayer);
 		int opponentPos = GetPawnPosition(opponent);
 
-
 		var playerShortestPath = Algorithms.GetShortestPath(this, playerPos, new HashSet<int>(GetGoalTiles(currentPlayer)), currentPlayer);
-		var opponentShortestPath = Algorithms.GetShortestPath(this, opponentPos, new HashSet<int>(GetGoalTiles(1 - currentPlayer)), 1 - currentPlayer);
+		var opponentShortestPath = Algorithms.GetShortestPath(this, opponentPos, new HashSet<int>(GetGoalTiles(opponent)), opponent);
 
-		// TODO Only apply repetition penalty if the moveString is MovePawn
-		// TODO Only apply wallScore if the moveString is PlaceFence?
-
-		if (isMaximising)
-		{
-			pathScore = (playerShortestPath.Count - opponentShortestPath.Count) * Helper.PATH_WEIGHT;
-			// wallScore = (FenceCounts[currentPlayer] - FenceCounts[opponent]) * Helper.WALL_WEIGHT;
-			// repetitionPenalty = VisitedTiles[currentPlayer].ToHashSet().Contains(playerPos) ? Helper.REPETITION_WEIGHT : 0;
-		}
-		else
-		{
-			pathScore = (opponentShortestPath.Count - playerShortestPath.Count) * Helper.PATH_WEIGHT;
-			// wallScore = (FenceCounts[opponent] - FenceCounts[currentPlayer]) * Helper.WALL_WEIGHT;
-			// repetitionPenalty = VisitedTiles[opponent].ToHashSet().Contains(opponentPos) ? Helper.REPETITION_WEIGHT : 0;
-		}
-
-		return pathScore; // + wallScore - repetitionPenalty;
+		return (playerShortestPath.Count - opponentShortestPath.Count) * Helper.PATH_WEIGHT;
 	}
-
 }

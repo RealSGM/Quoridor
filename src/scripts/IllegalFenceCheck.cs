@@ -26,23 +26,19 @@ public partial class IllegalFenceCheck : Node
 
 		possibleFences = possibleFences
 			.Where(fence => Math.Abs(fence[0]) < placedFences.Length && placedFences[Math.Abs(fence[0])] == -1)
-			.ToList();
-		
-		possibleFences.ForEach(fence => board.SetIllegalFence(fence[0], -1));
-
-		possibleFences = possibleFences
 			.Distinct(new Helper.FenceEqualityComparer())
 			.ToList();
 
 		Parallel.ForEach(possibleFences, fence =>
 		{
+			board.SetIllegalFence(fence[0], fence[1], false);
 			if (!board.GetFenceEnabled(fence[0], fence[1])) return;
 
 			Parallel.ForEach(Helper.Bits, player =>
 			{
 				if (!IsFenceIllegal(board, fence[0], fence[1], player)) return;
 
-				board.SetIllegalFence(fence[0], fence[1]);
+				board.SetIllegalFence(fence[0], fence[1], true);
 			});
 		});
 	}
