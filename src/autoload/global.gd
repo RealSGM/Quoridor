@@ -103,3 +103,25 @@ func get_illegal_fences() -> String:
 		if (i + 1) % (game.board.BoardSize - 1) == 0:
 			text += "\n"
 	return text
+
+
+func get_shortest_path(player: int) -> String:
+	if !game:
+		return "Game not started"
+
+	var text: String = ""
+	var path: PackedInt32Array = game.board.GetShortestPath(player)
+
+	for i: int in range(path.size()):
+		text += " %s " % path[i]
+
+	return text
+
+
+func get_best_move() -> String:
+	if !game:
+		return "Game not started"
+
+	var move: String = MiniMaxAlgorithm.GetBestMove(game.board, game.current_player, false)
+
+	return "Best Move: %s" % [move]

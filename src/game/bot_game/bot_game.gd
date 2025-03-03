@@ -1,13 +1,16 @@
 class_name BotGame extends BaseGame
 
-@export var pause_button: Button
+@export var next_move_button: Button
+@export var debug_minimax_button: Button
+@export var autoplay_button: Button
 
-var bots_enabled: bool = true
-var turn_ready: bool = true
+var turn_ready: bool = false
 
 func _ready() -> void:
 	super._ready()
 	user_interface.is_bots = true
+	turn_ready = true
+	_on_print_minimax_toggled(false)
 
 
 func set_current_player(val: int) -> void:
@@ -15,14 +18,14 @@ func set_current_player(val: int) -> void:
 
 	await RenderingServer.frame_post_draw
 
-
-	if not bots_enabled:
+	if not autoplay_button.is_pressed():
 		return
 
 	turn_ready = false
-	move_code = MiniMaxAlgorithm.GetBestMove(board, current_player)
+	move_code = MiniMaxAlgorithm.GetBestMove(board, current_player, debug_minimax_button.is_pressed())
 	_on_confirm_pressed()
 	turn_ready = true
+
 
 
 func confirm_place_fence(fence: int, direction: int) -> void:
@@ -35,19 +38,26 @@ func confirm_move_pawn(tile: int) -> void:
 	super.confirm_move_pawn(tile)
 
 
-func _on_pause_button_pressed() -> void:
-	bots_enabled = not bots_enabled
-	pause_button.text = "%s Bots" % ["Pause" if bots_enabled else "Unpause"]
-
-	if turn_ready:
-		set_current_player(current_player)
-
-
 func _on_undo_button_pressed() -> void:
 	undo_board_ui()
-	undo_board_ui()
-
 	finish_undo_board()
+	current_player = 1 - current_player
 
-	# Force reset turn
-	current_player = current_player
+
+func _on_next_move_pressed() -> void:
+	if not turn_ready:
+		return
+	move_code = MiniMaxAlgorithm.GetBestMove(board, current_player, debug_minimax_button.is_pressed())
+	_on_confirm_pressed()
+
+
+func _on_print_minimax_toggled(toggled_on: bool) -> void:
+	debug_minimax_button.text = "Debug: %s" % ["On" if toggled_on else "Off"]
+
+
+func _on_autoplay_button_toggled(toggled_on: bool) -> void:
+	autoplay_button.text = "Auto: %s" % ["On" if toggled_on else "Off"]
+	next_move_button.disabled = toggled_on
+
+	if toggled_on:
+		_on_next_move_pressed()
