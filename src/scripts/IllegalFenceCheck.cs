@@ -43,7 +43,7 @@ public partial class IllegalFenceCheck : Node
 		});
 	}
 
-	private bool IsFenceIllegal(BoardState board, int fence, int direction, int player)
+	private static bool IsFenceIllegal(BoardState board, int fence, int direction, int player)
 	{
 		BoardState boardClone = board.Clone();
 

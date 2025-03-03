@@ -3,8 +3,6 @@ using System;
 using System.Linq;
 using System.Collections.Generic;
 using System.Text;
-using System.ComponentModel;
-using System.Numerics;
 
 [GlobalClass]
 public partial class BoardState : Control
@@ -25,12 +23,13 @@ public partial class BoardState : Control
 
 	public BoardState Clone() => new()
 	{
-		FenceCounts = FenceCounts.Clone() as int[],
-		PawnPositions = PawnPositions.Clone() as int[],
-		Tiles = Tiles.Select(tile => tile.Clone() as int[]).ToArray(),
-		IllegalFences = IllegalFences.Clone() as bool[][],
-		MoveHistory = new StringBuilder(MoveHistory.ToString()),
 		PlacedFences = PlacedFences.Clone() as int[],
+		PawnPositions = PawnPositions.Clone() as int[],
+		FenceCounts = FenceCounts.Clone() as int[],
+		Tiles = Tiles.Select(tile => tile.Clone() as int[]).ToArray(),
+		IllegalFences = IllegalFences.Select(fence => fence.Clone() as bool[]).ToArray(),
+		MoveHistory = new StringBuilder(MoveHistory.ToString()),
+		LastMove = LastMove,		
 		BoardSize = BoardSize
 	};
 
@@ -38,7 +37,6 @@ public partial class BoardState : Control
 	{
 		BoardSize = boardSize;
 		FenceCounts = Enumerable.Repeat(fencesPerPlayer, Helper.PlayerCount).ToArray();
-
 		InitialisePawnPositions();
 		InitialiseTiles();
 		InitialiseFences();
@@ -205,15 +203,6 @@ public partial class BoardState : Control
 		return true;
 	}
 
-	public int[] GetTileGrid(int index)
-	{
-		int topLeft = index;
-		int topRight = Helper.GetEastAdjacent(index, BoardSize);
-		int bottomLeft = Helper.GetSouthAdjacent(index, BoardSize);
-		int bottomRight = Helper.GetSouthAdjacent(topRight, BoardSize);
-		return new int[] { topLeft, topRight, bottomLeft, bottomRight };
-	}
-
 	public void PlaceFence(int direction, int fenceIndex, int currentPlayer)
 	{
 		// Set the fence as placed
@@ -222,7 +211,7 @@ public partial class BoardState : Control
 		// Convert the index to a 2D grid index
 		int convertedIndex = fenceIndex + (fenceIndex / (BoardSize - 1));
 		// Get possible tile indexes in 2x2 grid
-		int[] tileGrid = GetTileGrid(convertedIndex);
+		int[] tileGrid = Helper.GetTileGrid(convertedIndex, BoardSize);
 
 		foreach (int[] pair in Helper.DefaultTileGridConnections[direction])
 		{
@@ -233,7 +222,7 @@ public partial class BoardState : Control
 		FenceCounts[currentPlayer]--;
 	}
 
-	public List<int[]> GetParallelAdjacentFences(int fenceDirection, int[] adjFences, int direction)
+	public static List<int[]> GetParallelAdjacentFences(int fenceDirection, int[] adjFences, int direction)
 	{
 		List<int[]> fences = new();
 
@@ -387,7 +376,7 @@ public partial class BoardState : Control
 		// Convert the index to a 2D grid index
 		int convertedIndex = fence + (fence / (BoardSize - 1));
 		// Get possible tile indexes in 2x2 grid
-		int[] tileGrid = GetTileGrid(convertedIndex);
+		int[] tileGrid = Helper.GetTileGrid(convertedIndex, BoardSize);
 
 		foreach (int[] pair in Helper.DefaultTileGridConnections[direction])
 		{
@@ -432,23 +421,9 @@ public partial class BoardState : Control
 		MoveHistory.Append(code + ";");
 	}
 
-	public void BuildFromMoveHistory(string moveHistory)
-	{
-		string[] moves = moveHistory.Split(';');
-		foreach (string move in moves)
-		{
-			if (move == "") continue;
-			AddMove(move);
-		}
-	}
-
 	public string[] GetAllMoves(int currentPlayer)
 	{
 		StringBuilder allMoves = new();
-
-		// Add all possible pawn moves
-		GetReachableTiles(currentPlayer).ToList()
-			.ForEach(index => allMoves.Append($"{currentPlayer}m{Helper.GetMoveString(index, 0)};"));
 
 		// Loop through both directions and add all possible fence placements
 		foreach (var direction in Helper.Bits)
@@ -463,23 +438,79 @@ public partial class BoardState : Control
 			}
 		}
 
+		// Add all possible pawn moves
+		GetReachableTiles(currentPlayer).ToList()
+			.ForEach(index => allMoves.Append($"{currentPlayer}m{Helper.GetMoveString(index, 0)};"));
+
 		return allMoves.ToString().Split(';', StringSplitOptions.RemoveEmptyEntries).Distinct().ToArray();
 	}
 
+	#region  Evaluation ---
+	#endregion
+	
 	public bool IsGameOver() => GetWinner(0) || GetWinner(1);
+
+	public int[] GetShortestPath(int player)
+	{
+		Queue<int> queue = new();
+		Dictionary<int, int> previous = new();
+		HashSet<int> visited = new();
+		HashSet<int> goalTiles = new(GetGoalTiles(player));
+
+		queue.Enqueue(GetPawnPosition(player));
+
+		while (queue.Count > 0)
+		{
+			int current = queue.Dequeue();
+
+			if (goalTiles.Contains(current))
+			{
+				List<int> path = new() { current };
+
+				while (previous.ContainsKey(current))
+				{
+					current = previous[current];
+					path.Add(current);
+				}
+
+				path.Reverse();
+				return path.ToArray();
+			}
+
+			if (visited.Contains(current))
+				continue;
+
+			visited.Add(current);
+
+			foreach (int connectedTile in GetPathConnections(current, player))
+			{
+				if (visited.Contains(connectedTile) || connectedTile == -1)
+					continue;
+
+				queue.Enqueue(connectedTile);
+				previous[connectedTile] = current;
+			}
+		}
+
+		return Array.Empty<int>();
+	}
 
 	// Evaluate the board state, assuming there is no winner
 	public int EvaluateBoard(int currentPlayer)
 	{
-		// TODO Value pawn move over fence place
+		// Check for winner
+		if (GetWinner(currentPlayer)) return int.MinValue;
+		if (GetWinner(1 - currentPlayer)) return int.MaxValue;
+
 		int opponent = 1 - currentPlayer;
 
-		int playerPos = GetPawnPosition(currentPlayer);
-		int opponentPos = GetPawnPosition(opponent);
+		int[] playerShortestPath = GetShortestPath(currentPlayer);
+		int[]  opponentShortestPath = GetShortestPath(opponent);
 
-		var playerShortestPath = Algorithms.GetShortestPath(this, playerPos, new HashSet<int>(GetGoalTiles(currentPlayer)), currentPlayer);
-		var opponentShortestPath = Algorithms.GetShortestPath(this, opponentPos, new HashSet<int>(GetGoalTiles(opponent)), opponent);
+		int pathScore = (playerShortestPath.Length - opponentShortestPath.Length) * Helper.PATH_WEIGHT;
+		int wallScore = FenceCounts[currentPlayer] * Helper.WALL_WEIGHT;
+		int moveScore = LastMove[1] == 'm' ? 1 : 0;
 
-		return (playerShortestPath.Count - opponentShortestPath.Count) * Helper.PATH_WEIGHT;
+		return pathScore + wallScore + moveScore;
 	}
 }

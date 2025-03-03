@@ -1,57 +1,51 @@
 using Godot;
 using System;
-using System.Diagnostics;
+using System.Collections.Generic;
+using System.Linq;
 
 public partial class MiniMaxAlgorithm : Node
 {
-	int MAX_DEPTH = 2;
+	int MAX_DEPTH = 1;
+	int START_DEPTH = 0;
+	ulong startTime;
 
 	[Export] int nodesVisited = 0;
 
 	Window Console;
 
-	public string GetBestMove(BoardState board, int currentPlayer)
+	public string GetBestMove(BoardState board, int currentPlayer, bool isDebugging = false)
 	{
+		// Setup console
 		Console = GetNode<Window>("/root/Console");
-		Console.Call("add_entry", "Creating Game Tree...", 0);
-		ulong startTime = Time.GetTicksMsec();
-		nodesVisited = 1;
 
 		// Set first move depth to 1, as first move is super time consuming
 		string moveHistory = board.GetMoveHistory();
 		string[] moves = moveHistory.ToString().Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
 		MAX_DEPTH = moves.Length <= 1 ? 1 : 2;
 
-		// Set MAX_DEPTH to higher value depending on the number of moves available / length into the game	
-
-		ValueTuple<int, string> bestMoveTuple = MiniMax(board, 0, true, int.MinValue, int.MaxValue, 1 - currentPlayer, board.LastMove);
-		int bestValue = bestMoveTuple.Item1;
+		ValueTuple<int, string> bestMoveTuple = MiniMax(board, START_DEPTH, true, currentPlayer, int.MinValue, int.MaxValue);
 		string bestMove = bestMoveTuple.Item2;
-
-
-		Console.Call("add_entry", "Found Best Move in " + (Time.GetTicksMsec() - startTime) + " ms", 0);
-		Console.Call("add_entry", $"Best Value: {bestValue}\nBest Move: {bestMove}\nNodes visited: {nodesVisited}", 0);
 
 		return bestMove;
 	}
 
-	private (int value, string move) MiniMax(BoardState board, int depth, bool isMaximising, int alpha, int beta, int currentPlayer, string lastMove)
+	private (int v, string m) MiniMax(BoardState board, int depth, bool isMaximising, int currentPlayer, int alpha, int beta)
 	{
 		nodesVisited++;
 
-		if (board.IsGameOver()) return board.GetWinner(currentPlayer) ? (int.MaxValue, lastMove) : (int.MinValue, lastMove);
+		// Do 1 - currentPlayer to get the evaluation of the previous move
+		if (depth == MAX_DEPTH || board.IsGameOver()) return (board.EvaluateBoard(currentPlayer), board.LastMove);
 
-		if (depth == MAX_DEPTH) return (board.EvaluateBoard(isMaximising, currentPlayer, lastMove), lastMove);
-
-		string bestMove = "";
 		int bestValue = isMaximising ? int.MinValue : int.MaxValue;
-		string[] moves = board.GetAllMoves(1 - currentPlayer); // Future me, do not change this to currentPlayer
+		string[] moves = board.GetAllMoves(currentPlayer);
+		string bestMove = moves[0];
 
+		// Recursively call MiniMax for each move for the current player
 		foreach (string move in moves)
 		{
 			BoardState newBoard = board.Clone();
 			newBoard.AddMove(move);
-			var (value, _) = MiniMax(newBoard, depth + 1, !isMaximising, alpha, beta, 1 - currentPlayer, move);
+			int value = MiniMax(newBoard, depth + 1, !isMaximising, 1 - currentPlayer, alpha, beta).v;
 
 			newBoard.Free();
 

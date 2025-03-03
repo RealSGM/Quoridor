@@ -69,4 +69,14 @@ public partial class Helper : Node
 		}
 	}
 
+	public static int[] GetTileGrid(int index, int boardSize)
+	{
+		int topLeft = index;
+		int topRight = GetEastAdjacent(index, boardSize);
+		int bottomLeft = GetSouthAdjacent(index, boardSize);
+		int bottomRight = GetSouthAdjacent(topRight, boardSize);
+		return new int[] { topLeft, topRight, bottomLeft, bottomRight };
+	}
+
+
 }
