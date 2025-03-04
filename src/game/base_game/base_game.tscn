@@ -1,9 +1,9 @@
 [gd_scene load_steps=7 format=3 uid="uid://g12um5raoqio"]
 
 [ext_resource type="Theme" uid="uid://gl4viqpfcsgn" path="res://src/resources/themes/main_theme.tres" id="1_khihi"]
-[ext_resource type="Script" path="res://src/game/base_game/base_game.gd" id="2_8s0tt"]
-[ext_resource type="Script" path="res://src/scripts/IllegalFenceCheck.cs" id="3_hx0ce"]
-[ext_resource type="Script" path="res://src/scripts/BoardState.cs" id="3_kvsy8"]
+[ext_resource type="Script" uid="uid://3xwpg5g8eght" path="res://src/game/base_game/base_game.gd" id="2_8s0tt"]
+[ext_resource type="Script" uid="uid://bese72xjy1rkh" path="res://src/scripts/IllegalFenceCheck.cs" id="3_hx0ce"]
+[ext_resource type="Script" uid="uid://cvvpsn2l7tf14" path="res://src/scripts/BoardState.cs" id="3_kvsy8"]
 [ext_resource type="PackedScene" uid="uid://c6fyma6opa8b1" path="res://src/game/user_interface/user_interface.tscn" id="4_d4stq"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_pufkf"]

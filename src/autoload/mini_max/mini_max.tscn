@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://bn3gs8hff0o4r"]
 
-[ext_resource type="Script" path="res://src/autoload/mini_max/MiniMaxAlgorithm.cs" id="1_fq0ip"]
+[ext_resource type="Script" uid="uid://b3yvokh86wgv7" path="res://src/autoload/mini_max/MiniMaxAlgorithm.cs" id="1_fq0ip"]
 
 [node name="MiniMaxAlgorithm" type="Node"]
 process_thread_group = 2

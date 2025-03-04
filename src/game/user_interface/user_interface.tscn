@@ -1,6 +1,6 @@
 [gd_scene load_steps=10 format=3 uid="uid://c6fyma6opa8b1"]
 
-[ext_resource type="Script" path="res://src/game/user_interface/user_interface.gd" id="1_j6xwu"]
+[ext_resource type="Script" uid="uid://btfpaj2g2rw83" path="res://src/game/user_interface/user_interface.gd" id="1_j6xwu"]
 [ext_resource type="Theme" uid="uid://gl4viqpfcsgn" path="res://src/resources/themes/main_theme.tres" id="1_vpc43"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_d1llx"]
@@ -40,7 +40,7 @@ theme = ExtResource("1_vpc43")
 script = ExtResource("1_j6xwu")
 toggle_direction_button = NodePath("ActionInterface/InterfaceVBC/ActionsVBC/TogglePanel/DirectionContainer/ToggleDirection")
 confirm_button = NodePath("ActionInterface/InterfaceVBC/ActionsVBC/ConfirmButton")
-undo_button = NodePath("Chat/VBoxContainer/UndoButton")
+undo_button = NodePath("ActionInterface/InterfaceVBC/ActionsVBC/UndoButton")
 turn_label = NodePath("TurnLabel")
 pause_menu = NodePath("PauseMenu")
 pause_exit = NodePath("PauseMenu/PanelContainer/VBoxContainer/ExitButton")
@@ -140,6 +140,10 @@ layout_mode = 2
 text = "Confirm
 "
 
+[node name="UndoButton" type="Button" parent="ActionInterface/InterfaceVBC/ActionsVBC"]
+layout_mode = 2
+text = "Undo"
+
 [node name="Chat" type="Panel" parent="."]
 custom_minimum_size = Vector2(398, 0)
 layout_mode = 1
@@ -201,10 +205,6 @@ layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 4
 alignment = 1
-
-[node name="UndoButton" type="Button" parent="Chat/VBoxContainer"]
-layout_mode = 2
-text = "Undo"
 
 [node name="WinMenu" type="Control" parent="."]
 visible = false

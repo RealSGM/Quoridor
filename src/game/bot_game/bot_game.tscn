@@ -1,7 +1,7 @@
 [gd_scene load_steps=3 format=3 uid="uid://hom0e34digvf"]
 
 [ext_resource type="PackedScene" uid="uid://g12um5raoqio" path="res://src/game/base_game/base_game.tscn" id="1_7254e"]
-[ext_resource type="Script" path="res://src/game/bot_game/bot_game.gd" id="2_ax1fp"]
+[ext_resource type="Script" uid="uid://bpan4hpvkt65g" path="res://src/game/bot_game/bot_game.gd" id="2_ax1fp"]
 
 [node name="BotGame" node_paths=PackedStringArray("next_move_button", "debug_minimax_button", "autoplay_button") instance=ExtResource("1_7254e")]
 script = ExtResource("2_ax1fp")
@@ -30,22 +30,22 @@ visible = false
 [node name="ConfirmButton" parent="UserInterface/ActionInterface/InterfaceVBC/ActionsVBC" index="1"]
 visible = false
 
-[node name="AutoplayButton" type="Button" parent="UserInterface/ActionInterface/InterfaceVBC/ActionsVBC" index="2"]
+[node name="NextMoveButton" type="Button" parent="UserInterface/ActionInterface/InterfaceVBC/ActionsVBC" index="2"]
+layout_mode = 2
+text = "Next Move"
+
+[node name="AutoplayButton" type="Button" parent="UserInterface/ActionInterface/InterfaceVBC/ActionsVBC" index="4"]
 layout_mode = 2
 toggle_mode = true
 text = "Auto: Off"
 
-[node name="NextMoveButton" type="Button" parent="UserInterface/ActionInterface/InterfaceVBC/ActionsVBC" index="3"]
-layout_mode = 2
-text = "Next Move"
-
-[node name="DebuggingButton" type="Button" parent="UserInterface/ActionInterface/InterfaceVBC/ActionsVBC" index="4"]
+[node name="DebuggingButton" type="Button" parent="UserInterface/ActionInterface/InterfaceVBC/ActionsVBC" index="5"]
 layout_mode = 2
 toggle_mode = true
-text = "Debug Disabled"
+text = "Debug: Off"
 
-[connection signal="toggled" from="UserInterface/ActionInterface/InterfaceVBC/ActionsVBC/AutoplayButton" to="." method="_on_autoplay_button_toggled"]
 [connection signal="pressed" from="UserInterface/ActionInterface/InterfaceVBC/ActionsVBC/NextMoveButton" to="." method="_on_next_move_pressed"]
+[connection signal="toggled" from="UserInterface/ActionInterface/InterfaceVBC/ActionsVBC/AutoplayButton" to="." method="_on_autoplay_button_toggled"]
 [connection signal="toggled" from="UserInterface/ActionInterface/InterfaceVBC/ActionsVBC/DebuggingButton" to="." method="_on_print_minimax_toggled"]
 
 [editable path="UserInterface"]
