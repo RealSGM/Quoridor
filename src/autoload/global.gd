@@ -118,10 +118,10 @@ func get_shortest_path(player: int) -> String:
 	return text
 
 
-func get_best_move() -> String:
+func get_next_move(is_maximising: bool) -> String:
 	if !game:
 		return "Game not started"
 
-	var move: String = MiniMaxAlgorithm.GetBestMove(game.board, game.current_player, false)
+	var move: String = MiniMaxAlgorithm.GetMove(game.board, game.current_player, is_maximising, false)
 
 	return "Best Move: %s" % [move]

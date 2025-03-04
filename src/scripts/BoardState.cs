@@ -13,6 +13,7 @@ public partial class BoardState : Control
 
 	private int[][] Tiles { get; set; }
 	private bool[][] IllegalFences { get; set; }
+	private int[] EvaluationScores { get; set; }
 
 	public string LastMove { get; set; }
 	public int BoardSize { get; set; }
@@ -30,13 +31,16 @@ public partial class BoardState : Control
 		IllegalFences = IllegalFences.Select(fence => fence.Clone() as bool[]).ToArray(),
 		MoveHistory = new StringBuilder(MoveHistory.ToString()),
 		LastMove = LastMove,		
-		BoardSize = BoardSize
+		BoardSize = BoardSize,
+		EvaluationScores = EvaluationScores.Clone() as int[]
 	};
 
 	public void InitialiseBoard(int boardSize, int fencesPerPlayer)
 	{
 		BoardSize = boardSize;
 		FenceCounts = Enumerable.Repeat(fencesPerPlayer, Helper.PlayerCount).ToArray();
+		EvaluationScores = new int[Helper.PlayerCount];
+		Array.Fill(EvaluationScores, 0);
 		InitialisePawnPositions();
 		InitialiseTiles();
 		InitialiseFences();
@@ -503,7 +507,6 @@ public partial class BoardState : Control
 		if (GetWinner(1 - currentPlayer)) return int.MaxValue;
 
 		int opponent = 1 - currentPlayer;
-
 		int[] playerShortestPath = GetShortestPath(currentPlayer);
 		int[]  opponentShortestPath = GetShortestPath(opponent);
 
@@ -511,6 +514,20 @@ public partial class BoardState : Control
 		int wallScore = FenceCounts[currentPlayer] * Helper.WALL_WEIGHT;
 		int moveScore = LastMove[1] == 'm' ? 1 : 0;
 
-		return pathScore + wallScore + moveScore;
+		int score = pathScore; // + wallScore + moveScore;
+
+		// // Check if the last move is better than the previous evaluation
+		// if (EvaluationScores[currentPlayer] > score)
+		// {
+		// 	score += 5;
+		// }
+		// else if (EvaluationScores[currentPlayer] < score)
+		// {
+		// 	score -= 5;
+		// }
+
+		// Compare score with previous evaluation
+		EvaluationScores[currentPlayer] = score;
+		return score;
 	}
 }

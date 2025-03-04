@@ -1,30 +1,37 @@
 using Godot;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 
 public partial class MiniMaxAlgorithm : Node
 {
 	int MAX_DEPTH = 1;
 	int START_DEPTH = 0;
-	ulong startTime;
 
-	[Export] int nodesVisited = 0;
+	ulong startTime;
+	bool debugging = false;
+	int nodesVisited = 0;
 
 	Window Console;
 
-	public string GetBestMove(BoardState board, int currentPlayer, bool isDebugging = false)
+	public string GetMove(BoardState board, int currentPlayer, bool isMaximising = true, bool isDebugging = false)
 	{
 		// Setup console
 		Console = GetNode<Window>("/root/Console");
+		Console.Call("add_entry", "Creating Game Tree...", 0);
+		ulong startTime = Time.GetTicksMsec();
+		debugging = isDebugging;
+		nodesVisited = 1;
 
 		// Set first move depth to 1, as first move is super time consuming
 		string moveHistory = board.GetMoveHistory();
 		string[] moves = moveHistory.ToString().Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
-		MAX_DEPTH = moves.Length <= 1 ? 1 : 2;
+		MAX_DEPTH = moves.Length <= 1 ? 1 : 3;
 
-		ValueTuple<int, string> bestMoveTuple = MiniMax(board, START_DEPTH, true, currentPlayer, int.MinValue, int.MaxValue);
+		ValueTuple<int, string> bestMoveTuple = MiniMax(board, START_DEPTH, isMaximising, currentPlayer, int.MinValue, int.MaxValue);
 		string bestMove = bestMoveTuple.Item2;
+		int bestValue = bestMoveTuple.Item1;
+
+		Console.Call("add_entry", "Found Best Move in " + (Time.GetTicksMsec() - startTime) + " ms", 0);
+		Console.Call("add_entry", $"Best Value: {bestValue}, Best Move: {bestMove}, Nodes visited: {nodesVisited}", 0);
 
 		return bestMove;
 	}
@@ -46,6 +53,8 @@ public partial class MiniMaxAlgorithm : Node
 			BoardState newBoard = board.Clone();
 			newBoard.AddMove(move);
 			int value = MiniMax(newBoard, depth + 1, !isMaximising, 1 - currentPlayer, alpha, beta).v;
+
+			if (debugging) Console.Call("add_entry", $"Move: {move}, Value: {value}, Depth: {depth}, Player: {currentPlayer}", 0);
 
 			newBoard.Free();
 
