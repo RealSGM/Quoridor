@@ -14,7 +14,7 @@ public partial class IllegalFenceCheck : Node
 	
 		int[] placedFences = board.GetPlacedFences();
 
-		List<int[]> possibleFences = new();
+		List<int[]> possibleFences = [];
 
 		for (int fenceIndex = 0; fenceIndex < placedFences.Length; fenceIndex++)
 		{
@@ -51,8 +51,8 @@ public partial class IllegalFenceCheck : Node
 
 		int start = boardClone.GetPawnPosition(player);
 
-		HashSet<int> goalTiles = boardClone.GetGoalTiles(player).ToHashSet();
+		HashSet<int> goalTiles = [.. boardClone.GetGoalTiles(player)];
 
-		return Algorithms.RecursiveDFS(boardClone, start, goalTiles, new(), player);
+		return Algorithms.RecursiveDFS(boardClone, start, goalTiles, [], player);
 	}
 }

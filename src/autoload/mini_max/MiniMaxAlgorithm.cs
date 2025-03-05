@@ -3,7 +3,7 @@ using System;
 
 public partial class MiniMaxAlgorithm : Node
 {
-	int MAX_DEPTH = 1;
+	int MAX_DEPTH = 2;
 	int START_DEPTH = 0;
 
 	ulong startTime;
@@ -23,7 +23,7 @@ public partial class MiniMaxAlgorithm : Node
 
 		// Set first move depth to 1, as first move is super time consuming
 		string moveHistory = board.GetMoveHistory();
-		string[] moves = moveHistory.ToString().Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+		string[] moves = moveHistory.ToString().Split([';'], StringSplitOptions.RemoveEmptyEntries);
 		MAX_DEPTH = moves.Length <= 1 ? 1 : 3;
 
 		ValueTuple<int, string> bestMoveTuple = MiniMax(board, START_DEPTH, isMaximising, currentPlayer, int.MinValue, int.MaxValue);
@@ -41,11 +41,11 @@ public partial class MiniMaxAlgorithm : Node
 		nodesVisited++;
 
 		// Do 1 - currentPlayer to get the evaluation of the previous move
-		if (depth == MAX_DEPTH || board.IsGameOver()) return (board.EvaluateBoard(currentPlayer), board.LastMove);
+		if (depth == MAX_DEPTH || board.IsGameOver()) return (board.EvaluateBoard(currentPlayer), board.GetLastMove());
 
-		int bestValue = isMaximising ? int.MinValue : int.MaxValue;
 		string[] moves = board.GetAllMoves(currentPlayer);
-		string bestMove = moves[0];
+		string bestMove = "";
+		int bestValue = isMaximising ? int.MinValue : int.MaxValue;
 
 		// Recursively call MiniMax for each move for the current player
 		foreach (string move in moves)

@@ -7,7 +7,7 @@ public partial class Algorithms : Node
 	public static bool IterativeDFS(BoardState board, int start, HashSet<int> goalTiles, int player)
 	{
 		Stack<int> stack = new();
-		HashSet<int> visited = new();
+		HashSet<int> visited = [];
 
 		stack.Push(start);
 
@@ -55,7 +55,7 @@ public partial class Algorithms : Node
 	public static bool IterativeBFS(BoardState board, int start, HashSet<int> goalTiles, int player)
 	{
 		Queue<int> queue = new();
-		HashSet<int> visited = new();
+		HashSet<int> visited = [];
 
 		queue.Enqueue(start);
 

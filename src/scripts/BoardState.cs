@@ -15,7 +15,6 @@ public partial class BoardState : Control
 	private bool[][] IllegalFences { get; set; }
 	private int[] EvaluationScores { get; set; }
 
-	public string LastMove { get; set; }
 	public int BoardSize { get; set; }
 	public StringBuilder MoveHistory { get; set; } = new();
 
@@ -29,10 +28,9 @@ public partial class BoardState : Control
 		FenceCounts = FenceCounts.Clone() as int[],
 		Tiles = Tiles.Select(tile => tile.Clone() as int[]).ToArray(),
 		IllegalFences = IllegalFences.Select(fence => fence.Clone() as bool[]).ToArray(),
-		MoveHistory = new StringBuilder(MoveHistory.ToString()),
-		LastMove = LastMove,		
+		EvaluationScores = EvaluationScores.Clone() as int[],
 		BoardSize = BoardSize,
-		EvaluationScores = EvaluationScores.Clone() as int[]
+		MoveHistory = new StringBuilder(MoveHistory.ToString()),
 	};
 
 	public void InitialiseBoard(int boardSize, int fencesPerPlayer)
@@ -87,9 +85,9 @@ public partial class BoardState : Control
 	public int[] GetPathConnections(int tile, int player)
 	{
 		// Return NEWS connections for the bottom player
-		if (player == 0) return new int[] { Tiles[tile][0], Tiles[tile][1], Tiles[tile][3], Tiles[tile][2] };
+		if (player == 0) return [Tiles[tile][0], Tiles[tile][1], Tiles[tile][3], Tiles[tile][2]];
 		// Return SNEW connections for the top player
-		else return new int[] { Tiles[tile][2], Tiles[tile][3], Tiles[tile][1], Tiles[tile][0] };
+		else return [Tiles[tile][2], Tiles[tile][3], Tiles[tile][1], Tiles[tile][0]];
 	}
 
 	public string GetMoveHistory() => MoveHistory.ToString();
@@ -108,6 +106,12 @@ public partial class BoardState : Control
 
 	public bool[][] GetIllegalFences() => IllegalFences;
 
+	public string GetLastMove()
+	{
+		if (MoveHistory.Length == 0) return "";
+		return MoveHistory.ToString().Split([';'], StringSplitOptions.RemoveEmptyEntries).Last();
+	}
+
 	#region Movement ---
 	#endregion
 
@@ -115,7 +119,7 @@ public partial class BoardState : Control
 	{
 		int playerPawnPosition = PawnPositions[player];
 		int[] playerPawnTile = Tiles[playerPawnPosition];
-		List<int> reachableTiles = new();
+		List<int> reachableTiles = [];
 
 		// Loop through all tiles
 		foreach (int connectedTile in playerPawnTile)
@@ -126,7 +130,7 @@ public partial class BoardState : Control
 			// CheckFor Enemy and merge list
 			reachableTiles.AddRange(CheckForEnemy(connectedTile, player));
 		}
-		return reachableTiles.ToArray();
+		return [.. reachableTiles];
 	}
 
 	public List<int> CheckForEnemy(int connectedTile, int player)
@@ -134,19 +138,19 @@ public partial class BoardState : Control
 		int enemyPawnPosition = PawnPositions[1 - player];
 
 		// Check if the enemy pawn is not on the tile
-		if (enemyPawnPosition != connectedTile) return new List<int> { connectedTile };
+		if (enemyPawnPosition != connectedTile) return [connectedTile];
 
 		// Get the direction of the enemy pawn
 		int directionIndex = Array.IndexOf(Tiles[PawnPositions[player]], enemyPawnPosition);
 
 		// Check if the leaped tile is within boundaries
-		int[] AdjacentOffsets = new int[4] { -BoardSize, 1, BoardSize, -1 };
+		int[] AdjacentOffsets = [-BoardSize, 1, BoardSize, -1];
 		int leapedTileIndex = connectedTile + AdjacentOffsets[directionIndex];
 
 		// Return an empty list, as the leaped tile is out of boundaries
-		if (leapedTileIndex < 0 || leapedTileIndex >= Tiles.Length) return new List<int>();
+		if (leapedTileIndex < 0 || leapedTileIndex >= Tiles.Length) return [];
 
-		return GetLeapedTiles(PawnPositions[player], leapedTileIndex, connectedTile, directionIndex).ToList();
+		return [.. GetLeapedTiles(PawnPositions[player], leapedTileIndex, connectedTile, directionIndex)];
 	}
 
 	public int[] GetLeapedTiles(int playerIndex, int leapedTileIndex, int tileIndex, int dirIndex)
@@ -154,7 +158,7 @@ public partial class BoardState : Control
 		int[] leapedTile = Tiles[leapedTileIndex];
 
 		// Check no fence blocking it
-		if (Tiles[tileIndex][dirIndex] == leapedTileIndex) return new int[] { leapedTileIndex };
+		if (Tiles[tileIndex][dirIndex] == leapedTileIndex) return [leapedTileIndex];
 
 		// Fence blocking it, check adjacent tiles over the enemy pawn
 		var leapedTiles = Tiles[tileIndex]
@@ -228,7 +232,7 @@ public partial class BoardState : Control
 
 	public static List<int[]> GetParallelAdjacentFences(int fenceDirection, int[] adjFences, int direction)
 	{
-		List<int[]> fences = new();
+		List<int[]> fences = [];
 
 		foreach (int cardinalBit in Helper.Bits)
 		{
@@ -239,12 +243,12 @@ public partial class BoardState : Control
 			if (adjFences[cardinalDirection] == -1) continue;
 
 			// Add adjacent fences of the same direction
-			fences.Add(new int[] { adjFences[cardinalDirection], fenceDirection });
+			fences.Add([adjFences[cardinalDirection], fenceDirection]);
 
 			if (fenceDirection != direction) continue;
 
 			// Add adjacent fences of the perpendicular direction
-			fences.Add(new int[] { adjFences[cardinalDirection], 1 - direction });
+			fences.Add([adjFences[cardinalDirection], 1 - direction]);
 		}
 
 		return fences;
@@ -252,7 +256,7 @@ public partial class BoardState : Control
 
 	public List<int[]> GetEnclosingCornerFences(int direction, int[] adjFences, int cardinalOpposites)
 	{
-		List<int[]> fences = new();
+		List<int[]> fences = [];
 
 		foreach (int cornerBit in Helper.Bits)
 		{
@@ -260,7 +264,7 @@ public partial class BoardState : Control
 			int cornerFence = Helper.AdjacentFunctions[cornerDirection](adjFences[cardinalOpposites], BoardSize - 1);
 
 			if (cornerFence == -1) continue;
-			fences.Add(new int[] { cornerFence, 1 - direction });
+			fences.Add([cornerFence, 1 - direction]);
 		}
 
 		return fences;
@@ -286,7 +290,7 @@ public partial class BoardState : Control
 		if (leapedAllignedFence == -1) return null;
 
 		int x2LeapedFence = GetLeapedFence(leapedAllignedFence, cardinalAlligned);
-		if (x2LeapedFence == -1 || PlacedFences[x2LeapedFence] == direction) return new int[] { leapedAllignedFence, direction };
+		if (x2LeapedFence == -1 || PlacedFences[x2LeapedFence] == direction) return [leapedAllignedFence, direction];
 
 		return null;
 	}
@@ -294,9 +298,9 @@ public partial class BoardState : Control
 	public List<int[]> GetSurroundingFences(int fenceIndex)
 	{
 		// Early exit if the fence is not placed
-		if (PlacedFences[fenceIndex] == -1) return new();
+		if (PlacedFences[fenceIndex] == -1) return [];
 
-		List<int[]> surroundingFences = new();
+		List<int[]> surroundingFences = [];
 		int direction = PlacedFences[fenceIndex];
 		int[] adjFences = Helper.InitialiseConnections(fenceIndex, BoardSize - 1);
 
@@ -339,7 +343,8 @@ public partial class BoardState : Control
 
 	public string UndoMove()
 	{
-		if (LastMove == null) return "";
+		string LastMove = GetLastMove();
+		if (LastMove == "") return "";
 
 		char moveType = LastMove[1];
 
@@ -356,12 +361,12 @@ public partial class BoardState : Control
 		string returnLastMove = LastMove;
 
 		MoveHistory.Remove(MoveHistory.Length - LastMove.Length - 1, LastMove.Length + 1);
-		LastMove = MoveHistory.Length == 0 ? "" : MoveHistory.ToString().Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries).Last();
 		return returnLastMove;
 	}
 
 	private void UndoPawnMove()
 	{
+		string LastMove = GetLastMove();
 		int player = int.Parse(LastMove[0].ToString());
 		int position = int.Parse(LastMove.Split('_')[1]);
 		MovePawn(position, player);
@@ -369,6 +374,7 @@ public partial class BoardState : Control
 
 	private void UndoFenceMove()
 	{
+		string LastMove = GetLastMove();
 		// Separate the fence index and direction
 		int[] moveCode = Helper.GetMoveCode(LastMove[2..]);
 
@@ -421,7 +427,6 @@ public partial class BoardState : Control
 				PlaceFence(direction, value, currentPlayer);
 				break;
 		}
-		LastMove = code;
 		MoveHistory.Append(code + ";");
 	}
 
@@ -451,14 +456,14 @@ public partial class BoardState : Control
 
 	#region  Evaluation ---
 	#endregion
-	
+
 	public bool IsGameOver() => GetWinner(0) || GetWinner(1);
 
 	public int[] GetShortestPath(int player)
 	{
 		Queue<int> queue = new();
-		Dictionary<int, int> previous = new();
-		HashSet<int> visited = new();
+		Dictionary<int, int> previous = [];
+		HashSet<int> visited = [];
 		HashSet<int> goalTiles = new(GetGoalTiles(player));
 
 		queue.Enqueue(GetPawnPosition(player));
@@ -469,7 +474,7 @@ public partial class BoardState : Control
 
 			if (goalTiles.Contains(current))
 			{
-				List<int> path = new() { current };
+				List<int> path = [current];
 
 				while (previous.ContainsKey(current))
 				{
@@ -478,25 +483,22 @@ public partial class BoardState : Control
 				}
 
 				path.Reverse();
-				return path.ToArray();
+				return [.. path];
 			}
 
-			if (visited.Contains(current))
-				continue;
+			if (visited.Contains(current)) continue;
 
 			visited.Add(current);
 
 			foreach (int connectedTile in GetPathConnections(current, player))
 			{
-				if (visited.Contains(connectedTile) || connectedTile == -1)
-					continue;
-
+				if (visited.Contains(connectedTile) || connectedTile == -1) continue;
 				queue.Enqueue(connectedTile);
 				previous[connectedTile] = current;
 			}
 		}
 
-		return Array.Empty<int>();
+		return [];
 	}
 
 	// Evaluate the board state, assuming there is no winner
@@ -512,7 +514,7 @@ public partial class BoardState : Control
 
 		int pathScore = (playerShortestPath.Length - opponentShortestPath.Length) * Helper.PATH_WEIGHT;
 		int wallScore = FenceCounts[currentPlayer] * Helper.WALL_WEIGHT;
-		int moveScore = LastMove[1] == 'm' ? 1 : 0;
+		int moveScore = GetLastMove()[1] == 'm' ? 1 : 0;
 
 		int score = pathScore; // + wallScore + moveScore;
 
@@ -525,9 +527,8 @@ public partial class BoardState : Control
 		// {
 		// 	score -= 5;
 		// }
-
-		// Compare score with previous evaluation
-		EvaluationScores[currentPlayer] = score;
+		// // Compare score with previous evaluation
+		// EvaluationScores[currentPlayer] = score;
 		return score;
 	}
 }
