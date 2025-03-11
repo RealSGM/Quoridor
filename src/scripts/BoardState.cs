@@ -427,7 +427,9 @@ public partial class BoardState : Control
 				PlaceFence(direction, value, currentPlayer);
 				break;
 		}
+
 		MoveHistory.Append(code + ";");
+		EvaluateBoard();
 	}
 
 	public string[] GetAllMoves(int currentPlayer)
@@ -501,34 +503,41 @@ public partial class BoardState : Control
 		return [];
 	}
 
-	// Evaluate the board state, assuming there is no winner
-	public int EvaluateBoard(int currentPlayer)
+	public int EvaluateBoard()
 	{
-		// Check for winner
-		if (GetWinner(currentPlayer)) return int.MinValue;
-		if (GetWinner(1 - currentPlayer)) return int.MaxValue;
+		string lastMove = GetLastMove();
+		int currentPlayer = int.Parse(lastMove[0].ToString());
 
-		int opponent = 1 - currentPlayer;
-		int[] playerShortestPath = GetShortestPath(currentPlayer);
-		int[]  opponentShortestPath = GetShortestPath(opponent);
+		// Calculate the score, relative to the current player, where negative is not in favour of the player
+		int playerPath = GetShortestPath(currentPlayer).Length;
+		int opponentPath = GetShortestPath(1 - currentPlayer).Length;
+		int evaluation = (opponentPath - playerPath) * Helper.PATH_WEIGHT;
 
-		int pathScore = (playerShortestPath.Length - opponentShortestPath.Length) * Helper.PATH_WEIGHT;
-		int wallScore = FenceCounts[currentPlayer] * Helper.WALL_WEIGHT;
-		int moveScore = GetLastMove()[1] == 'm' ? 1 : 0;
+		// Add the different in number of fences remaining
+		evaluation += (FenceCounts[currentPlayer] - FenceCounts[1 - currentPlayer]) * Helper.FENCE_WEIGHT;
 
-		int score = pathScore; // + wallScore + moveScore;
+		// If this move decreases the player's path length, decrease the evaluation score
+		if (playerPath > EvaluationScores[currentPlayer])
+		{
+			evaluation -= 100;
+		}
 
-		// // Check if the last move is better than the previous evaluation
-		// if (EvaluationScores[currentPlayer] > score)
+		// If this move increases the opponent's path length, increase the evaluation score
+		if (opponentPath > EvaluationScores[1 - currentPlayer])
+		{
+			evaluation += 100;
+		}
+
+		// if (GetLastMove() == "") return evaluation;
+
+		// if (GetLastMove()[1] == 'm')
 		// {
-		// 	score += 5;
+		// 	evaluation += 100;
 		// }
-		// else if (EvaluationScores[currentPlayer] < score)
-		// {
-		// 	score -= 5;
-		// }
-		// // Compare score with previous evaluation
-		// EvaluationScores[currentPlayer] = score;
-		return score;
+
+		EvaluationScores[currentPlayer] = playerPath;
+		EvaluationScores[1 - currentPlayer] = opponentPath;
+
+		return evaluation;
 	}
 }

@@ -3,12 +3,11 @@ using System;
 
 public partial class MiniMaxAlgorithm : Node
 {
-	int MAX_DEPTH = 2;
-	int START_DEPTH = 0;
+	public int START_DEPTH = 1;
+	private int nodesVisited = 0;
+	private ulong startTime;
+	private bool debugging = false;
 
-	ulong startTime;
-	bool debugging = false;
-	int nodesVisited = 0;
 
 	Window Console;
 
@@ -21,11 +20,6 @@ public partial class MiniMaxAlgorithm : Node
 		debugging = isDebugging;
 		nodesVisited = 1;
 
-		// Set first move depth to 1, as first move is super time consuming
-		string moveHistory = board.GetMoveHistory();
-		string[] moves = moveHistory.ToString().Split([';'], StringSplitOptions.RemoveEmptyEntries);
-		MAX_DEPTH = moves.Length <= 1 ? 1 : 3;
-
 		ValueTuple<int, string> bestMoveTuple = MiniMax(board, START_DEPTH, isMaximising, currentPlayer, int.MinValue, int.MaxValue);
 		string bestMove = bestMoveTuple.Item2;
 		int bestValue = bestMoveTuple.Item1;
@@ -36,15 +30,26 @@ public partial class MiniMaxAlgorithm : Node
 		return bestMove;
 	}
 
+	public void SetMaxDepth(BoardState board)
+	{
+		// Set first move depth to 1, as first move is super time consuming
+		string moveHistory = board.GetMoveHistory();
+		string[] moves = moveHistory.ToString().Split([';'], StringSplitOptions.RemoveEmptyEntries);
+		START_DEPTH = moves.Length <= 1 ? 1 : 3;
+	}
+
+
 	private (int v, string m) MiniMax(BoardState board, int depth, bool isMaximising, int currentPlayer, int alpha, int beta)
 	{
 		nodesVisited++;
 
-		// Do 1 - currentPlayer to get the evaluation of the previous move
-		if (depth == MAX_DEPTH || board.IsGameOver()) return (board.EvaluateBoard(currentPlayer), board.GetLastMove());
+		// Check for winner
+		if (board.GetWinner(1 - currentPlayer)) return (int.MaxValue, board.GetLastMove());
+		if (board.GetWinner(currentPlayer)) return (int.MinValue, board.GetLastMove());
+		if (depth == 0) return (board.EvaluateBoard(), board.GetLastMove());
 
 		string[] moves = board.GetAllMoves(currentPlayer);
-		string bestMove = "";
+		string bestMove = moves[0];
 		int bestValue = isMaximising ? int.MinValue : int.MaxValue;
 
 		// Recursively call MiniMax for each move for the current player
@@ -52,9 +57,11 @@ public partial class MiniMaxAlgorithm : Node
 		{
 			BoardState newBoard = board.Clone();
 			newBoard.AddMove(move);
-			int value = MiniMax(newBoard, depth + 1, !isMaximising, 1 - currentPlayer, alpha, beta).v;
 
-			if (debugging) Console.Call("add_entry", $"Move: {move}, Value: {value}, Depth: {depth}, Player: {currentPlayer}", 0);
+			// Value return: Negative number better for player 1, positive number better for player 0, 0 is a neutral standing
+			int value = MiniMax(newBoard, depth - 1, !isMaximising, 1 - currentPlayer, alpha, beta).v;
+
+			if (debugging && depth == 0) Console.Call("add_entry", $"Move: {move}, Value: {value}, Depth: {depth}, Player: {currentPlayer}, Last Move: {board.GetLastMove()}", 0);
 
 			newBoard.Free();
 
@@ -74,4 +81,5 @@ public partial class MiniMaxAlgorithm : Node
 
 		return (bestValue, bestMove);
 	}
+
 }
