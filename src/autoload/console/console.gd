@@ -167,6 +167,7 @@ func _on_input_text_submitted(text: String) -> void:
 
 	input_index = history.size() - 1
 	input.clear()
+	input.grab_focus()
 
 
 func _on_timer_timeout() -> void:

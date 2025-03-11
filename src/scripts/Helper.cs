@@ -5,11 +5,10 @@ using Godot;
 [GlobalClass]
 public partial class Helper : Node
 {
+	public static readonly Random Random = new();
 	public static readonly int PATH_WEIGHT = 25;
-	public static readonly int WALL_WEIGHT = 1;
-	public static readonly int REPETITION_WEIGHT = 10;
+	public static readonly int FENCE_WEIGHT = 2;
 
-	public static readonly int LargeValue = 1000;
 	public static readonly int PlayerCount = 2;
 
 	public static readonly int[] Bits = [0, 1];

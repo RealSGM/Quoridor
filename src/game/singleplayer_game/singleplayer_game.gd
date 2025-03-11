@@ -15,6 +15,7 @@ func set_current_player(val: int) -> void:
 	# Bot's Turn
 	if val == 1:
 		await RenderingServer.frame_post_draw
+		MiniMaxAlgorithm.SetMaxDepth(board)
 		move_code = MiniMaxAlgorithm.GetMove(board, current_player, true, false)
 		_on_confirm_pressed()
 

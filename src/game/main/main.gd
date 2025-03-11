@@ -112,8 +112,7 @@ func setup_menus() -> void:
 	setup_board_sizes()
 	setup_fence_amounts()
 
-	fence_coloured_button.pressed.emit()
-	_on_colour_toggle_toggled(false)
+	fence_coloured_button.set_pressed(true)
 
 
 ## Setup the option button for the board sizes
@@ -157,7 +156,7 @@ func set_game_data() -> void:
 			Global.players[0]["color"] = Global.COLORS[bot_one_colours.selected]
 
 			selected_colour = bot_two_colours.selected
-			selected_name = "Bot Two	"
+			selected_name = "Bot Two"
 
 	Global.players[1]["color"] = Global.COLORS[selected_colour]
 	Global.players[1]["name"] = selected_name

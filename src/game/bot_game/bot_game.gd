@@ -22,8 +22,11 @@ func set_current_player(val: int) -> void:
 		return
 
 	turn_ready = false
+
+	MiniMaxAlgorithm.SetMaxDepth(board)
 	move_code = MiniMaxAlgorithm.GetMove(board, current_player, true, debug_minimax_button.is_pressed())
 	_on_confirm_pressed()
+
 	turn_ready = true
 
 
@@ -47,6 +50,8 @@ func _on_undo_button_pressed() -> void:
 func _on_next_move_pressed() -> void:
 	if not turn_ready:
 		return
+
+	MiniMaxAlgorithm.SetMaxDepth(board)
 	move_code = MiniMaxAlgorithm.GetMove(board, current_player, true, debug_minimax_button.is_pressed())
 	_on_confirm_pressed()
 

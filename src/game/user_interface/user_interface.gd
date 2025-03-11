@@ -17,6 +17,7 @@ class_name UserInterface extends Control
 @export var win_menu: Control
 @export var win_label: Label
 @export var win_exit_button: Button
+@export var hide_button: Button
 
 @export_category("Chat")
 @export var chat_container: VBoxContainer
@@ -41,6 +42,7 @@ func _ready() -> void:
 	toggle_direction_button.pressed.connect(SignalManager.direction_toggled.emit)
 	confirm_button.pressed.connect(SignalManager.confirm_pressed.emit)
 	undo_button.pressed.connect(SignalManager.undo_pressed.emit)
+	hide_button.pressed.connect(func(): win_menu.hide())
 
 	undo_button.disabled = true
 	pause_menu.hide()

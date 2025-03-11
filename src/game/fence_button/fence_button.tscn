@@ -1,16 +1,22 @@
-[gd_scene load_steps=8 format=3 uid="uid://rfqpiq385m6l"]
+[gd_scene load_steps=10 format=3 uid="uid://rfqpiq385m6l"]
 
 [ext_resource type="StyleBox" uid="uid://8bjcyjmqqxs7" path="res://src/resources/fence/fence_disabled.tres" id="2_2flaf"]
 [ext_resource type="StyleBox" uid="uid://ftbivfna5m8m" path="res://src/resources/fence/fence_hover.tres" id="3_12f5i"]
 [ext_resource type="StyleBox" uid="uid://cue3j7ivreusm" path="res://src/resources/fence/fence_pressed.tres" id="3_lwelp"]
 [ext_resource type="StyleBox" uid="uid://c6r5krky1pues" path="res://src/resources/fence/fence_normal.tres" id="4_dqfgy"]
 [ext_resource type="Script" uid="uid://30lklrlfm4qa" path="res://src/game/fence_button/fence_button.gd" id="5_3cfjt"]
+[ext_resource type="FontFile" uid="uid://bqs1impjgngsx" path="res://assets/fonts/OpenSans-Regular.ttf" id="6_aq46p"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_wjmnx"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ym2v4"]
 
-[node name="FenceButton" type="Button" node_paths=PackedStringArray("h_fence", "v_fence")]
+[sub_resource type="LabelSettings" id="LabelSettings_2rl8v"]
+font = ExtResource("6_aq46p")
+font_size = 10
+font_color = Color(0, 0, 0, 1)
+
+[node name="FenceButton" type="Button" node_paths=PackedStringArray("h_fence", "v_fence", "id_label")]
 custom_minimum_size = Vector2(15, 15)
 anchors_preset = 8
 anchor_left = 0.5
@@ -30,8 +36,10 @@ theme_override_styles/normal = ExtResource("4_dqfgy")
 script = ExtResource("5_3cfjt")
 h_fence = NodePath("HorizontalFence")
 v_fence = NodePath("VerticalFence")
+id_label = NodePath("ID")
 
 [node name="HorizontalFence" type="Panel" parent="."]
+visible = false
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -47,6 +55,7 @@ grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_wjmnx")
 
 [node name="VerticalFence" type="Panel" parent="."]
+visible = false
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -60,3 +69,21 @@ offset_bottom = 80.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_ym2v4")
+
+[node name="ID" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -7.0
+offset_top = -8.0
+offset_right = 7.0
+offset_bottom = 8.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "99"
+label_settings = SubResource("LabelSettings_2rl8v")
+horizontal_alignment = 1
+vertical_alignment = 1
