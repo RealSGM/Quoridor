@@ -463,6 +463,9 @@ public partial class BoardState : Control
 		EvaluationScores[currentPlayer] = playerPath;
 		EvaluationScores[1 - currentPlayer] = opponentPath;
 
+		// Add +- 1 random value to the evaluation score to avoid ties
+		evaluation += Helper.Random.Next(-1, 2);
+
 		return isMaximising ? evaluation : -evaluation;
 	}
 }

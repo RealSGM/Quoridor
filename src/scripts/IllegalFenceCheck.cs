@@ -38,7 +38,6 @@ public partial class IllegalFenceCheck : Node
 			{
 				if (!IsFenceIllegal(board, index, direction, player)) return;
 				board.SetIllegalFence(index, direction, true);
-				GD.Print($"Fence {index} {direction} is illegal for player {player}");
 			});
 		});
 	}
