@@ -35,7 +35,7 @@ public partial class MiniMaxAlgorithm : Node
 		// Set first move depth to 1, as first move is super time consuming
 		string moveHistory = board.GetMoveHistory();
 		string[] moves = moveHistory.ToString().Split([';'], StringSplitOptions.RemoveEmptyEntries);
-		START_DEPTH = moves.Length <= 1 ? 1 : 3;
+		START_DEPTH = moves.Length <= 1 ? 1 : 2;
 	}
 
 
@@ -46,7 +46,7 @@ public partial class MiniMaxAlgorithm : Node
 		// Check for winner
 		if (board.GetWinner(1 - currentPlayer)) return (int.MaxValue, board.GetLastMove());
 		if (board.GetWinner(currentPlayer)) return (int.MinValue, board.GetLastMove());
-		if (depth == 0) return (board.EvaluateBoard(), board.GetLastMove());
+		if (depth == 0) return (board.EvaluateBoard(START_DEPTH % 2 == 1), board.GetLastMove());
 
 		string[] moves = board.GetAllMoves(currentPlayer);
 		string bestMove = moves[0];
@@ -61,7 +61,7 @@ public partial class MiniMaxAlgorithm : Node
 			// Value return: Negative number better for player 1, positive number better for player 0, 0 is a neutral standing
 			int value = MiniMax(newBoard, depth - 1, !isMaximising, 1 - currentPlayer, alpha, beta).v;
 
-			if (debugging && depth == 0) Console.Call("add_entry", $"Move: {move}, Value: {value}, Depth: {depth}, Player: {currentPlayer}, Last Move: {board.GetLastMove()}", 0);
+			if (debugging && depth == START_DEPTH) Console.Call("add_entry", $"Move: {move}, Value: {value}, Depth: {depth}, Player: {currentPlayer}, Last Move: {board.GetLastMove()}", 0);
 
 			newBoard.Free();
 

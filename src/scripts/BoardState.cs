@@ -503,7 +503,7 @@ public partial class BoardState : Control
 		return [];
 	}
 
-	public int EvaluateBoard()
+	public int EvaluateBoard(bool isMaximising = true)
 	{
 		string lastMove = GetLastMove();
 		int currentPlayer = int.Parse(lastMove[0].ToString());
@@ -528,16 +528,9 @@ public partial class BoardState : Control
 			evaluation += 100;
 		}
 
-		// if (GetLastMove() == "") return evaluation;
-
-		// if (GetLastMove()[1] == 'm')
-		// {
-		// 	evaluation += 100;
-		// }
-
 		EvaluationScores[currentPlayer] = playerPath;
 		EvaluationScores[1 - currentPlayer] = opponentPath;
 
-		return evaluation;
+		return isMaximising ? evaluation : -evaluation;
 	}
 }
