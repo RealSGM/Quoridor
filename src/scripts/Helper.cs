@@ -14,6 +14,8 @@ public partial class Helper : Node
 	public static readonly int[] Bits = [0, 1];
 	public static readonly int[] CardinalDirections = [0, 1, 2, 3];
 
+    public static readonly bool[] emptyFences = [false, false];
+
 	public static readonly int[][][] DefaultTileGridConnections =
     [
         [[0, 2], [1, 3]],
@@ -46,6 +48,22 @@ public partial class Helper : Node
 
 	public static int GetWestAdjacent(int index, int size) => index % size != 0 ? index - 1 : -1;
 
+	public static int GetNorthEastAdjacent(int index, int size) => GetNorthAdjacent(GetEastAdjacent(index, size), size);
+
+	public static int GetSouthEastAdjacent(int index, int size) => GetSouthAdjacent(GetEastAdjacent(index, size), size);
+
+	public static int GetSouthWestAdjacent(int index, int size) => GetSouthAdjacent(GetWestAdjacent(index, size), size);
+
+	public static int GetNorthWestAdjacent(int index, int size) => GetNorthAdjacent(GetWestAdjacent(index, size), size);
+
+	public static int[] InitialiseCornerConnections(int index, int size) =>
+	[
+		GetNorthEastAdjacent(index, size),
+		GetSouthEastAdjacent(index, size),
+		GetSouthWestAdjacent(index, size),
+		GetNorthWestAdjacent(index, size)
+	];
+
 	// Initalise the NESW connections for given index
 	public static int[] InitialiseConnections(int index, int size) =>
     [
@@ -54,19 +72,6 @@ public partial class Helper : Node
 		GetSouthAdjacent(index, size),
 		GetWestAdjacent(index, size)
 	];
-
-	public class FenceEqualityComparer : IEqualityComparer<int[]>
-	{
-		public bool Equals(int[] x, int[] y)
-		{
-			return x[0] == y[1] && x[1] == y[0];
-		}
-
-		public int GetHashCode(int[] obj)
-		{
-			return obj[0].GetHashCode() ^ obj[1].GetHashCode();
-		}
-	}
 
 	public static int[] GetTileGrid(int index, int boardSize)
 	{

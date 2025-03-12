@@ -14,31 +14,32 @@ public partial class IllegalFenceCheck : Node
 	
 		int[] placedFences = board.GetPlacedFences();
 
-		List<int[]> possibleFences = [];
+		List<int> possibleFences = [];
 
-		for (int fenceIndex = 0; fenceIndex < placedFences.Length; fenceIndex++)
+		for (int fenceIndex = 0; fenceIndex < placedFences.Length; fenceIndex++)		
 		{
 			// Ignore if fence is not placed
 			if (placedFences[fenceIndex] == -1) continue;
 
-			possibleFences.AddRange(board.GetSurroundingFences(fenceIndex));
+			possibleFences.AddRange(board.GetAllSurroundingFences(fenceIndex));
 		}
 
-		possibleFences = possibleFences
-			.Where(fence => Math.Abs(fence[0]) < placedFences.Length && placedFences[Math.Abs(fence[0])] == -1)
-			.Distinct(new Helper.FenceEqualityComparer())
-			.ToList();
+		possibleFences = possibleFences.Distinct().ToList();
+
+		GD.Print(string.Join(", ", possibleFences));
 
 		Parallel.ForEach(possibleFences, fence =>
 		{
-			board.SetIllegalFence(fence[0], fence[1], false);
-			if (!board.GetFenceEnabled(fence[0], fence[1])) return;
+			int index = Math.Abs(fence);
+			int direction = fence < 0 ? 1 : 0;
+
+			board.SetIllegalFence(index, direction, false);
+			if (!board.GetFenceEnabled(index, direction)) return;
 
 			Parallel.ForEach(Helper.Bits, player =>
 			{
-				if (!IsFenceIllegal(board, fence[0], fence[1], player)) return;
-
-				board.SetIllegalFence(fence[0], fence[1], true);
+				if (!IsFenceIllegal(board, index, direction, player)) return;
+				board.SetIllegalFence(index, direction, true);
 			});
 		});
 	}

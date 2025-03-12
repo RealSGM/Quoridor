@@ -27,11 +27,15 @@ func clear() -> String:
 	return ""
 
 
+func check_illegal_fence(fence: int, direction: int, player: int = 0) -> String:
+	var is_illegal: bool = IllegalFenceCheck.IsFenceIllegal(game.board, fence, direction, player)
+	return "Is Illegal: %s" % [is_illegal]
 
-func evaluate_board() -> String:
+
+func evaluate_board(is_maximising: bool = true) -> String:
 	if !game:
 		return "Game not started"
-	return "Evaluation: %s, Last Move: %s" % [game.board.EvaluateBoard(), game.board.GetLastMove()]
+	return "Evaluation: %s, Last Move: %s" % [game.board.EvaluateBoard(is_maximising), game.board.GetLastMove()]
 
 
 func get_move_history() -> String:
@@ -62,19 +66,6 @@ func get_fence_amounts() -> String:
 	return text
 
 
-func get_illegal_fences() -> String:
-	var illegal_fences: PackedInt32Array = game.board.GetIllegalFences()
-	var text: String = ""
-
-	for i: int in range(illegal_fences.size()):
-		var fence: int = illegal_fences[i]
-		var fence_string: String = "X" if fence == -1 else str(fence)
-		text += " [%s]" % [fence_string]
-		if (i + 1) % (game.board.BoardSize - 1) == 0:
-			text += "\n"
-	return text
-
-
 func get_shortest_path(player: int) -> String:
 	if !game:
 		return "Game not started"
@@ -97,6 +88,12 @@ func get_next_move(is_maximising: bool = true, depth: int = 1) -> String:
 
 	return "Best Move: %s" % [move]
 
+
+func get_illegal_fences() -> String:
+	if !game:
+		return "Game not started"
+
+	return str(game.board.GetIllegalFencesString())
 
 func print_fences() -> String:
 	if !game:

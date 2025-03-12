@@ -18,10 +18,11 @@ public partial class BoardState : Control
 	public int BoardSize { get; set; }
 	public StringBuilder MoveHistory { get; set; } = new();
 
-	#region Initialisation ---
-	#endregion
 
-	public BoardState Clone() => new()
+    #region Initialisation ---
+    #endregion
+
+    public BoardState Clone() => new()
 	{
 		PlacedFences = PlacedFences.Clone() as int[],
 		PawnPositions = PawnPositions.Clone() as int[],
@@ -64,7 +65,7 @@ public partial class BoardState : Control
 	public void InitialiseIllegalFences()
 	{
 		IllegalFences = Enumerable.Range(0, (BoardSize - 1) * (BoardSize - 1))
-			.Select(_ => new bool[2] { false, false })
+			.Select(_ => Helper.emptyFences)
 			.ToArray();
 	}
 
@@ -104,7 +105,20 @@ public partial class BoardState : Control
 
 	public int GetBoardSize() => BoardSize;
 
-	public bool[][] GetIllegalFences() => IllegalFences;
+	public string GetIllegalFencesString()
+	{
+		StringBuilder illegalFences = new();
+
+		for (int i = 0; i < IllegalFences.Length; i++)
+		{
+			for (int j = 0; j < IllegalFences[i].Length; j++)
+			{
+				illegalFences.Append($"Index: {i}, Direction: {j} = {IllegalFences[i][j]}\n");
+			}
+		}
+
+		return illegalFences.ToString();
+	}
 
 	public string GetLastMove()
 	{
@@ -230,103 +244,35 @@ public partial class BoardState : Control
 		FenceCounts[currentPlayer]--;
 	}
 
-	public static List<int[]> GetParallelAdjacentFences(int fenceDirection, int[] adjFences, int direction)
+	public List<int> GetAllSurroundingFences(int fenceIndex)
 	{
-		List<int[]> fences = [];
+		List<int> surroundingFences = [];
 
-		foreach (int cardinalBit in Helper.Bits)
-		{
-			int cardinalDirection = (cardinalBit * 2) + fenceDirection;
+		int[] adjFences = Helper.InitialiseConnections(fenceIndex, BoardSize - 1)
+			.Where(fence => fence >= 0)
+			.ToArray();
 
+		int[] cornerFences = Helper.InitialiseCornerConnections(fenceIndex, BoardSize - 1)
+			.Where(fence => fence >= 0)
+			.ToArray();
 
-			// Ignore if the adjacent fence is out of bounds
-			if (adjFences[cardinalDirection] == -1) continue;
-
-			// Add adjacent fences of the same direction
-			fences.Add([adjFences[cardinalDirection], fenceDirection]);
-
-			if (fenceDirection != direction) continue;
-
-			// Add adjacent fences of the perpendicular direction
-			fences.Add([adjFences[cardinalDirection], 1 - direction]);
-		}
-
-		return fences;
-	}
-
-	public List<int[]> GetEnclosingCornerFences(int direction, int[] adjFences, int cardinalOpposites)
-	{
-		List<int[]> fences = [];
-
-		foreach (int cornerBit in Helper.Bits)
-		{
-			int cornerDirection = (cornerBit * 2) + (1 - direction);
-			int cornerFence = Helper.AdjacentFunctions[cornerDirection](adjFences[cardinalOpposites], BoardSize - 1);
-
-			if (cornerFence == -1) continue;
-			fences.Add([cornerFence, 1 - direction]);
-		}
-
-		return fences;
-	}
-
-	public int GetLeapedFence(int fenceIndex, int cardinals)
-	{
-		int[] adjFences = Helper.InitialiseConnections(fenceIndex, BoardSize - 1);
-		int adjFence = adjFences[cardinals];
-
-		if (adjFence == -1) return -1;
-
-		return Helper.AdjacentFunctions[cardinals](adjFence, BoardSize - 1);
-	}
-
-	public int[] GetEnclosingAllignedFence(int fenceIndex, int direction, int fenceDirection)
-	{
-		int oppositeDirection = 1 - direction;
-		int cardinalAlligned = (fenceDirection * 2) + oppositeDirection;
-
-		// Check if the the double leaped fence is at a boundary or is a placed fence of the same direction
-		int leapedAllignedFence = GetLeapedFence(fenceIndex, cardinalAlligned);
-		if (leapedAllignedFence == -1) return null;
-
-		int x2LeapedFence = GetLeapedFence(leapedAllignedFence, cardinalAlligned);
-		if (x2LeapedFence == -1 || PlacedFences[x2LeapedFence] == direction) return [leapedAllignedFence, direction];
-
-		return null;
-	}
-
-	public List<int[]> GetSurroundingFences(int fenceIndex)
-	{
-		// Early exit if the fence is not placed
-		if (PlacedFences[fenceIndex] == -1) return [];
-
-		List<int[]> surroundingFences = [];
-		int direction = PlacedFences[fenceIndex];
-		int[] adjFences = Helper.InitialiseConnections(fenceIndex, BoardSize - 1);
-
-		// Add to the surrounding fences the fences which can be both horizontal and vertical
+		// Add every adjacent fence and corner fence in both directions
 		foreach (int fenceDirection in Helper.Bits)
 		{
-			surroundingFences.AddRange(GetParallelAdjacentFences(fenceDirection, adjFences, direction));
+			int mappedFenceDirection = fenceDirection == 0 ? 1 : -1;
 
-			int cardinalOpposites = (fenceDirection * 2) + direction;
-			int leapedFence = GetLeapedFence(fenceIndex, cardinalOpposites);
-
-			// Check if the leaped fence is at a boundary or is a placed fence of the same direction
-			if (adjFences[cardinalOpposites] != -1 && (leapedFence == -1 || PlacedFences[leapedFence] == direction))
+			foreach (int fence in adjFences)
 			{
-				surroundingFences.AddRange(GetEnclosingCornerFences(direction, adjFences, cardinalOpposites));
+				surroundingFences.Add(mappedFenceDirection * fence);
 			}
 
-			int[] enclosingAllignedFence = GetEnclosingAllignedFence(fenceIndex, direction, fenceDirection);
-
-			if (enclosingAllignedFence != null)
+			foreach (int fence in cornerFences)
 			{
-				surroundingFences.Add(enclosingAllignedFence);
+				surroundingFences.Add(mappedFenceDirection * fence);
 			}
 		}
 
-		return surroundingFences;
+		return surroundingFences.Distinct().ToList();
 	}
 
 	public void RemoveTileConnection(int tile, int tileToRemove)
@@ -453,6 +399,8 @@ public partial class BoardState : Control
 		GetReachableTiles(currentPlayer).ToList()
 			.ForEach(index => allMoves.Append($"{currentPlayer}m{Helper.GetMoveString(index, 0)};"));
 
+		GD.Print(allMoves.ToString());
+
 		return allMoves.ToString().Split(';', StringSplitOptions.RemoveEmptyEntries).Distinct().ToArray();
 	}
 
@@ -503,12 +451,11 @@ public partial class BoardState : Control
 		return [];
 	}
 
-	public int EvaluateBoard()
+	public int EvaluateBoard(bool isMaximising = false)
 	{
 		string lastMove = GetLastMove();
 		int currentPlayer = int.Parse(lastMove[0].ToString());
 
-		// Calculate the score, relative to the current player, where negative is not in favour of the player
 		int playerPath = GetShortestPath(currentPlayer).Length;
 		int opponentPath = GetShortestPath(1 - currentPlayer).Length;
 		int evaluation = (opponentPath - playerPath) * Helper.PATH_WEIGHT;
@@ -528,16 +475,9 @@ public partial class BoardState : Control
 			evaluation += 100;
 		}
 
-		// if (GetLastMove() == "") return evaluation;
-
-		// if (GetLastMove()[1] == 'm')
-		// {
-		// 	evaluation += 100;
-		// }
-
 		EvaluationScores[currentPlayer] = playerPath;
 		EvaluationScores[1 - currentPlayer] = opponentPath;
 
-		return evaluation;
+		return isMaximising ? evaluation : -evaluation;
 	}
 }
