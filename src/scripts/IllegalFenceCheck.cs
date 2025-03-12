@@ -21,7 +21,7 @@ public partial class IllegalFenceCheck : Node
 			// Ignore if fence is not placed
 			if (placedFences[fenceIndex] == -1) continue;
 
-			possibleFences.AddRange(board.GetSurroundingFences(fenceIndex));
+			possibleFences.AddRange(board.GetAllSurroundingFences(fenceIndex));
 		}
 
 		possibleFences = possibleFences

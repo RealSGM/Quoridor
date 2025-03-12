@@ -46,6 +46,22 @@ public partial class Helper : Node
 
 	public static int GetWestAdjacent(int index, int size) => index % size != 0 ? index - 1 : -1;
 
+	public static int GetNorthEastAdjacent(int index, int size) => GetNorthAdjacent(GetEastAdjacent(index, size), size);
+
+	public static int GetSouthEastAdjacent(int index, int size) => GetSouthAdjacent(GetEastAdjacent(index, size), size);
+
+	public static int GetSouthWestAdjacent(int index, int size) => GetSouthAdjacent(GetWestAdjacent(index, size), size);
+
+	public static int GetNorthWestAdjacent(int index, int size) => GetNorthAdjacent(GetWestAdjacent(index, size), size);
+
+	public static int[] InitialiseCornerConnections(int index, int size) =>
+	[
+		GetNorthEastAdjacent(index, size),
+		GetSouthEastAdjacent(index, size),
+		GetSouthWestAdjacent(index, size),
+		GetNorthWestAdjacent(index, size)
+	];
+
 	// Initalise the NESW connections for given index
 	public static int[] InitialiseConnections(int index, int size) =>
     [

@@ -230,103 +230,35 @@ public partial class BoardState : Control
 		FenceCounts[currentPlayer]--;
 	}
 
-	public static List<int[]> GetParallelAdjacentFences(int fenceDirection, int[] adjFences, int direction)
+	public List<int> GetAllSurroundingFences(int fenceIndex)
 	{
-		List<int[]> fences = [];
+		List<int> surroundingFences = [];
 
-		foreach (int cardinalBit in Helper.Bits)
-		{
-			int cardinalDirection = (cardinalBit * 2) + fenceDirection;
+		int[] adjFences = Helper.InitialiseConnections(fenceIndex, BoardSize - 1)
+			.Where(fence => fence >= 0)
+			.ToArray();
 
+		int[] cornerFences = Helper.InitialiseCornerConnections(fenceIndex, BoardSize - 1)
+			.Where(fence => fence >= 0)
+			.ToArray();
 
-			// Ignore if the adjacent fence is out of bounds
-			if (adjFences[cardinalDirection] == -1) continue;
-
-			// Add adjacent fences of the same direction
-			fences.Add([adjFences[cardinalDirection], fenceDirection]);
-
-			if (fenceDirection != direction) continue;
-
-			// Add adjacent fences of the perpendicular direction
-			fences.Add([adjFences[cardinalDirection], 1 - direction]);
-		}
-
-		return fences;
-	}
-
-	public List<int[]> GetEnclosingCornerFences(int direction, int[] adjFences, int cardinalOpposites)
-	{
-		List<int[]> fences = [];
-
-		foreach (int cornerBit in Helper.Bits)
-		{
-			int cornerDirection = (cornerBit * 2) + (1 - direction);
-			int cornerFence = Helper.AdjacentFunctions[cornerDirection](adjFences[cardinalOpposites], BoardSize - 1);
-
-			if (cornerFence == -1) continue;
-			fences.Add([cornerFence, 1 - direction]);
-		}
-
-		return fences;
-	}
-
-	public int GetLeapedFence(int fenceIndex, int cardinals)
-	{
-		int[] adjFences = Helper.InitialiseConnections(fenceIndex, BoardSize - 1);
-		int adjFence = adjFences[cardinals];
-
-		if (adjFence == -1) return -1;
-
-		return Helper.AdjacentFunctions[cardinals](adjFence, BoardSize - 1);
-	}
-
-	public int[] GetEnclosingAllignedFence(int fenceIndex, int direction, int fenceDirection)
-	{
-		int oppositeDirection = 1 - direction;
-		int cardinalAlligned = (fenceDirection * 2) + oppositeDirection;
-
-		// Check if the the double leaped fence is at a boundary or is a placed fence of the same direction
-		int leapedAllignedFence = GetLeapedFence(fenceIndex, cardinalAlligned);
-		if (leapedAllignedFence == -1) return null;
-
-		int x2LeapedFence = GetLeapedFence(leapedAllignedFence, cardinalAlligned);
-		if (x2LeapedFence == -1 || PlacedFences[x2LeapedFence] == direction) return [leapedAllignedFence, direction];
-
-		return null;
-	}
-
-	public List<int[]> GetSurroundingFences(int fenceIndex)
-	{
-		// Early exit if the fence is not placed
-		if (PlacedFences[fenceIndex] == -1) return [];
-
-		List<int[]> surroundingFences = [];
-		int direction = PlacedFences[fenceIndex];
-		int[] adjFences = Helper.InitialiseConnections(fenceIndex, BoardSize - 1);
-
-		// Add to the surrounding fences the fences which can be both horizontal and vertical
+		// Add every adjacent fence and corner fence in both directions
 		foreach (int fenceDirection in Helper.Bits)
 		{
-			surroundingFences.AddRange(GetParallelAdjacentFences(fenceDirection, adjFences, direction));
+			int mappedFenceDirection = fenceDirection == 0 ? 1 : -1;
 
-			int cardinalOpposites = (fenceDirection * 2) + direction;
-			int leapedFence = GetLeapedFence(fenceIndex, cardinalOpposites);
-
-			// Check if the leaped fence is at a boundary or is a placed fence of the same direction
-			if (adjFences[cardinalOpposites] != -1 && (leapedFence == -1 || PlacedFences[leapedFence] == direction))
+			foreach (int fence in adjFences)
 			{
-				surroundingFences.AddRange(GetEnclosingCornerFences(direction, adjFences, cardinalOpposites));
+				surroundingFences.Add(mappedFenceDirection * fence);
 			}
 
-			int[] enclosingAllignedFence = GetEnclosingAllignedFence(fenceIndex, direction, fenceDirection);
-
-			if (enclosingAllignedFence != null)
+			foreach (int fence in cornerFences)
 			{
-				surroundingFences.Add(enclosingAllignedFence);
+				surroundingFences.Add(mappedFenceDirection * fence);
 			}
 		}
 
-		return surroundingFences;
+		return surroundingFences.Distinct().ToList();
 	}
 
 	public void RemoveTileConnection(int tile, int tileToRemove)
