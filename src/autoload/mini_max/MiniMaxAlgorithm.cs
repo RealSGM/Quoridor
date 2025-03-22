@@ -8,7 +8,6 @@ public partial class MiniMaxAlgorithm : Node
 	private ulong startTime;
 	private bool debugging = false;
 
-
 	Window Console;
 
 	public string GetMove(BoardState board, int currentPlayer, bool isMaximising = true, bool isDebugging = false)
