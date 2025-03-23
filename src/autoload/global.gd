@@ -12,9 +12,10 @@ const COLORS: Array[Color] = [
 ## O is horizontal, 1 is vertical
 var fence_direction: int = 0
 var coloured_fences: bool = false
-var game: BaseGame
 # Third Element is for Testing
 var players: Array[Dictionary] = [{}, {}, {"color": Color.GHOST_WHITE}]
+var game: BaseGame
+var chosen_algorithms: Array = [null, null]
 
 
 func help() -> String:
@@ -25,7 +26,6 @@ func help() -> String:
 func clear() -> String:
 	Console.clear()
 	return ""
-
 
 
 func evaluate_board(is_maximising: bool) -> String:

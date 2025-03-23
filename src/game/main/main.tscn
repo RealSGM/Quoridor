@@ -16,7 +16,7 @@ expand_margin_bottom = 8.0
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ayg4q"]
 bg_color = Color(0.105882, 0.105882, 0.109804, 1)
 
-[node name="Main" type="Control" node_paths=PackedStringArray("main_menu", "play_menu", "multiplayer_menu", "board_options_menu", "foreground", "start_game_button", "play_button", "exit_button", "singleplayer_button", "multiplayer_button", "play_back_button", "bot_v_bot_button", "local_button", "online_button", "multiplayer_back_button", "board_vbc", "board_options_back_button", "board_container", "size_option_button", "player_one_container", "p_one_colours", "player_one_name", "fence_option_button", "fence_coloured_button", "p_two_colours", "player_two_name", "player_two_container", "bot_one_container", "bot_one_colours", "bot_two_container", "bot_two_colours")]
+[node name="Main" type="Control" node_paths=PackedStringArray("main_menu", "play_menu", "multiplayer_menu", "board_options_menu", "foreground", "start_game_button", "play_button", "exit_button", "singleplayer_button", "multiplayer_button", "play_back_button", "bot_v_bot_button", "local_button", "online_button", "multiplayer_back_button", "board_vbc", "board_options_back_button", "board_container", "size_option_button", "player_one_container", "p_one_colours", "player_one_name", "fence_option_button", "fence_coloured_button", "p_two_colours", "player_two_name", "player_two_container", "bot_one_container", "bot_one_algorithms", "bot_one_colours", "bot_two_container", "bot_two_algorithms", "bot_two_colours")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -53,8 +53,10 @@ p_two_colours = NodePath("Background/Foreground/BoardOptionsMenu/VBC/BoardOption
 player_two_name = NodePath("Background/Foreground/BoardOptionsMenu/VBC/BoardOptions/BoardVBC/PlayerTwoContainer/PlayerTwoName/LineEdit")
 player_two_container = NodePath("Background/Foreground/BoardOptionsMenu/VBC/BoardOptions/BoardVBC/PlayerTwoContainer")
 bot_one_container = NodePath("Background/Foreground/BoardOptionsMenu/VBC/BoardOptions/BoardVBC/BotOneContainer")
+bot_one_algorithms = NodePath("Background/Foreground/BoardOptionsMenu/VBC/BoardOptions/BoardVBC/BotOneContainer/BotType/BotOneAlgorithmsOptionButton")
 bot_one_colours = NodePath("Background/Foreground/BoardOptionsMenu/VBC/BoardOptions/BoardVBC/BotOneContainer/BotColours/BotColourOption")
 bot_two_container = NodePath("Background/Foreground/BoardOptionsMenu/VBC/BoardOptions/BoardVBC/BotTwoContainer")
+bot_two_algorithms = NodePath("Background/Foreground/BoardOptionsMenu/VBC/BoardOptions/BoardVBC/BotTwoContainer/BotType/BotTwoAlgorithmsOptionButton")
 bot_two_colours = NodePath("Background/Foreground/BoardOptionsMenu/VBC/BoardOptions/BoardVBC/BotTwoContainer/BotColours/BotColourOption")
 
 [node name="Background" type="ColorRect" parent="."]
@@ -356,16 +358,11 @@ layout_mode = 2
 text = "Bot One Type"
 horizontal_alignment = 1
 
-[node name="SizeOptionButton" type="OptionButton" parent="Background/Foreground/BoardOptionsMenu/VBC/BoardOptions/BoardVBC/BotOneContainer/BotType"]
+[node name="BotOneAlgorithmsOptionButton" type="OptionButton" parent="Background/Foreground/BoardOptionsMenu/VBC/BoardOptions/BoardVBC/BotOneContainer/BotType"]
 custom_minimum_size = Vector2(320, 0)
 layout_mode = 2
 size_flags_horizontal = 3
 selected = 0
-item_count = 2
-popup/item_0/text = "Minimax"
-popup/item_0/id = 0
-popup/item_1/text = "MCTS"
-popup/item_1/id = 1
 script = ExtResource("3_58fea")
 
 [node name="BotColours" type="HBoxContainer" parent="Background/Foreground/BoardOptionsMenu/VBC/BoardOptions/BoardVBC/BotOneContainer"]
@@ -419,16 +416,11 @@ layout_mode = 2
 text = "Bot Two Type"
 horizontal_alignment = 1
 
-[node name="SizeOptionButton" type="OptionButton" parent="Background/Foreground/BoardOptionsMenu/VBC/BoardOptions/BoardVBC/BotTwoContainer/BotType"]
+[node name="BotTwoAlgorithmsOptionButton" type="OptionButton" parent="Background/Foreground/BoardOptionsMenu/VBC/BoardOptions/BoardVBC/BotTwoContainer/BotType"]
 custom_minimum_size = Vector2(320, 0)
 layout_mode = 2
 size_flags_horizontal = 3
 selected = 0
-item_count = 2
-popup/item_0/text = "Minimax"
-popup/item_0/id = 0
-popup/item_1/text = "MCTS"
-popup/item_1/id = 1
 script = ExtResource("3_58fea")
 
 [node name="BotColours" type="HBoxContainer" parent="Background/Foreground/BoardOptionsMenu/VBC/BoardOptions/BoardVBC/BotTwoContainer"]

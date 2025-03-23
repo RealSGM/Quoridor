@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://bvs3u7tmdmwgx"]
+
+[ext_resource type="Script" uid="uid://do2jpi73j8qv8" path="res://src/autoload/mcts/MCTS.cs" id="1_162mw"]
+
+[node name="MCTS" type="Node2D"]
+script = ExtResource("1_162mw")

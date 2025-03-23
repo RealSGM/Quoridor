@@ -43,14 +43,18 @@ extends Control
 
 @export_category("Bot Options")
 @export var bot_one_container: VBoxContainer
+@export var bot_one_algorithms: OptionButton
 @export var bot_one_colours: OptionButton
 
 @export var bot_two_container: VBoxContainer
+@export var bot_two_algorithms: OptionButton
 @export var bot_two_colours: OptionButton
 
 @export_category("Game Settings")
 @export var size_options: Array[int] = [7, 9, 11]
 @export var fence_amounts: Array[int] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+@export var algorithm_names: Array[String] = ["Minimax", "MCTS"]
+@export var algorithms: Array = [MiniMaxAlgorithm, MCTS]
 @export var board_dimensions: float = 800
 
 var menu_stack: Array = []
@@ -111,6 +115,7 @@ func setup_menus() -> void:
 
 	setup_board_sizes()
 	setup_fence_amounts()
+	setup_algorithm_names()
 
 	fence_coloured_button.set_pressed(true)
 
@@ -130,13 +135,22 @@ func setup_fence_amounts() -> void:
 	fence_option_button.clear_radio_boxes()
 
 
+func setup_algorithm_names() -> void:
+	for algo: String in algorithm_names:
+		bot_one_algorithms.add_item(algo)
+		bot_two_algorithms.add_item(algo)
+	bot_one_algorithms.selected = algorithm_names.size() - 1
+	bot_two_algorithms.selected = algorithm_names.size() - 1
+	bot_one_algorithms.clear_radio_boxes()
+	bot_two_algorithms.clear_radio_boxes()
+
+
 func show_main_menu() -> void:
 	menu_stack.clear()
 	main_menu.show()
 	menu_stack.append(main_menu)
 
 
-# TODO Probably can tidy this up
 func set_game_data() -> void:
 	Global.players[0]["name"] = player_one_name.text
 	Global.players[0]["color"] = Global.COLORS[p_one_colours.selected]
@@ -151,13 +165,15 @@ func set_game_data() -> void:
 		"Singleplayer":
 			selected_colour = bot_two_colours.selected
 			selected_name = "Bot"
+			Global.chosen_algorithms[1] = algorithms[bot_two_algorithms.selected]
 		"BotVBot":
 			Global.players[0]["name"] = "Bot One"
 			Global.players[0]["color"] = Global.COLORS[bot_one_colours.selected]
+			Global.chosen_algorithms[0] = algorithms[bot_one_algorithms.selected]
+			Global.chosen_algorithms[1] = algorithms[bot_two_algorithms.selected]
 
 			selected_colour = bot_two_colours.selected
 			selected_name = "Bot Two"
-
 	Global.players[1]["color"] = Global.COLORS[selected_colour]
 	Global.players[1]["name"] = selected_name
 
