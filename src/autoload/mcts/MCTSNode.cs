@@ -13,6 +13,7 @@ public class MCTSNode(MCTSNode parent, BoardState state, int player)
 
     public bool IsLeaf() => Children.Count == 0;
 
+	// Returns a child node with the highest UCT value
 	public MCTSNode SelectChild(double explorationConstant = 1.41)
     {
 		if (IsLeaf() || State.IsGameOver()) return this;
@@ -23,8 +24,10 @@ public class MCTSNode(MCTSNode parent, BoardState state, int player)
 		).First();
     }
 
+	// Expands the node by adding all moves that have not been explored yet
 	public MCTSNode Expand()
 	{
+		// TODO Run Illegal Fence Check
 		string[] possibleMoves = State.GetAllMoves(CurrentPlayer);
 		HashSet<BoardState> exploredStates = new(Children.Select(c => c.State));
 
@@ -33,24 +36,24 @@ public class MCTSNode(MCTSNode parent, BoardState state, int player)
 			BoardState newState = State.Clone();
 			newState.AddMove(move);
 
-			if (!exploredStates.Contains(newState)) // Ensure we only expand unexplored moves
+			if (!exploredStates.Contains(newState))
 			{
 				MCTSNode childNode = new(this, newState, 1 - CurrentPlayer);
 				Children.Add(childNode);
-				return childNode; // Return the new child node
+				return childNode;
 			}
 		}
 
-		return this; // Shouldn't happen unless all moves are expanded
+		return this; 
 	}
 
+	// Simulates a game from the current state until it reaches a terminal state
 	public int Simulate(int simulatingPlayer, int maxPlayoutDepth = 200)
 	{
-		BoardState tempState = State.Clone();  // Clone the current game state to simulate without modifying the original
-		bool isGameOver = false;
+		BoardState tempState = State.Clone();
 		int depth = 0;
 
-		while (!isGameOver && depth < maxPlayoutDepth)
+		while (!tempState.IsGameOver() && depth < maxPlayoutDepth)
 		{
 			string[] possibleMoves = tempState.GetAllMoves(CurrentPlayer);
 
@@ -59,10 +62,6 @@ public class MCTSNode(MCTSNode parent, BoardState state, int player)
 			// Select a random move and apply it
 			string randomMove = possibleMoves[new Random().Next(possibleMoves.Length)];
 			tempState.AddMove(randomMove);
-
-			// Check if the game is over (e.g., player has won)
-			isGameOver = tempState.IsGameOver();
-
 			CurrentPlayer = 1 - CurrentPlayer;
 			depth++;
 		}
