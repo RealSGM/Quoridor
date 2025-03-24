@@ -468,4 +468,11 @@ public partial class BoardState : Control
 
 		return isMaximising ? evaluation : -evaluation;
 	}
+
+	public int GetGameResult(int simulatingPlayer)
+	{
+		if (GetWinner(simulatingPlayer)) return int.MaxValue;
+		if (GetWinner(1 - simulatingPlayer)) return int.MinValue;
+		return 0;
+	}
 }

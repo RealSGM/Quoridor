@@ -3,4 +3,8 @@
 [ext_resource type="Script" uid="uid://do2jpi73j8qv8" path="res://src/autoload/mcts/MCTS.cs" id="1_162mw"]
 
 [node name="MCTS" type="Node2D"]
+process_mode = 3
+process_thread_group = 2
+process_thread_group_order = 0
+process_thread_messages = 0
 script = ExtResource("1_162mw")
