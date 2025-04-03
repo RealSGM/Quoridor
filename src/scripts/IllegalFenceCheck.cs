@@ -10,20 +10,21 @@ public partial class IllegalFenceCheck : Node
 	public void GetIllegalFences(BoardState board, int currentPlayer)
 	{
 		// Ignore if player has no more fences
-		if (board.GetFenceCount(currentPlayer) == 0) return;
+		if (board.GetFenceCount(currentPlayer) == Helper.MaxFences) return;
 	
-		FenceData[] placedFences = board.GetPlacedFences();
-
-		List<int> possibleFences = [.. placedFences
-			.SelectMany(fence => board.GetAllSurroundingFences(Array.IndexOf(placedFences, fence)))
+		List<int> possibleFences = [.. board.GetPlacedFences()
+			.SelectMany(board.GetAllSurroundingFences)
+			.Where(fence => fence != -1)
 			.Distinct()];
 
+		
 		Parallel.ForEach(possibleFences, fence =>
 		{
 			int index = Math.Abs(fence);
 			int direction = fence < 0 ? 1 : 0;
 
 			board.SetIllegalFence(index, direction, false);
+
 			if (!board.GetFenceEnabled(index, direction)) return;
 
 			Parallel.ForEach(Helper.Bits, player =>

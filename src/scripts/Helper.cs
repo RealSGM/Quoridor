@@ -93,6 +93,4 @@ public partial class Helper : Node
 		int bottomRight = GetSouthAdjacent(topRight, boardSize);
 		return [topLeft, topRight, bottomLeft, bottomRight];
 	}
-
-
 }

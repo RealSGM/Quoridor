@@ -62,8 +62,8 @@ func reset_board() -> void:
 
 
 ## Setup the board with the selected size
-func setup_board(board_size: int, fence_amount: int) -> void:
-	board.InitialiseBoard(board_size, fence_amount)
+func setup_board(board_size: int) -> void:
+	board.InitialiseBoard(board_size)
 
 	# Update both players fence counts in UI
 	for player: int in Global.BITS:
