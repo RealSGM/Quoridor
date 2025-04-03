@@ -338,7 +338,7 @@ public partial class BoardState : Control
 		// Loop through both directions and add all possible fence placements
 		foreach (var direction in Helper.Bits)
 		{
-			if (GetFenceCount(currentPlayer) <= 0) continue;
+			if (GetFenceCount(currentPlayer) > Helper.MaxFences) continue;
 
 			for (int i = 0; i < GetFenceAmount(); i++)
 			{

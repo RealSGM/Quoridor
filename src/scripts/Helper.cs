@@ -10,6 +10,7 @@ public partial class Helper : Node
 	public static readonly int FENCE_WEIGHT = 2;
 
 	public static readonly int PlayerCount = 2;
+	public static readonly int MaxFences = 10;
 
 	public static readonly int[] Bits = [0, 1];
 	public static readonly int[] CardinalDirections = [0, 1, 2, 3];

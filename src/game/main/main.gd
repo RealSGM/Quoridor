@@ -33,7 +33,6 @@ extends Control
 @export var player_one_container: VBoxContainer
 @export var p_one_colours: OptionButton
 @export var player_one_name: LineEdit
-@export var fence_option_button: OptionButton
 @export var fence_coloured_button: Button
 
 @export_category("Local Options")
@@ -52,7 +51,6 @@ extends Control
 
 @export_category("Game Settings")
 @export var size_options: Array[int] = [7, 9, 11]
-@export var fence_amounts: Array[int] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 @export var algorithm_names: Array[String] = ["Minimax", "MCTS"]
 @export var algorithms: Array = [MiniMaxAlgorithm, MCTS]
 @export var board_dimensions: float = 800
@@ -114,7 +112,6 @@ func setup_menus() -> void:
 	bot_two_colours.select(3)
 
 	setup_board_sizes()
-	setup_fence_amounts()
 	setup_algorithm_names()
 
 	fence_coloured_button.set_pressed(true)
@@ -126,13 +123,6 @@ func setup_board_sizes() -> void:
 		size_option_button.add_item("%s * %s" % [board_size_option, board_size_option])
 	size_option_button.selected = 1
 	size_option_button.clear_radio_boxes()
-
-
-func setup_fence_amounts() -> void:
-	for fence_amount: int in fence_amounts:
-		fence_option_button.add_item("%s" % [fence_amount])
-	fence_option_button.selected = fence_amounts.size() - 1
-	fence_option_button.clear_radio_boxes()
 
 
 func setup_algorithm_names() -> void:
@@ -211,8 +201,7 @@ func _on_start_game_pressed() -> void:
 	var game: BaseGame = Resources.get_resource(game_type.to_lower() + "_game").instantiate()
 	Global.game = game
 	Global.coloured_fences = fence_coloured_button.is_pressed()
-	Global.max_fences = fence_amounts[fence_option_button.selected]
-	game.setup_board(size_options[size_option_button.selected], Global.max_fences)
+	game.setup_board(size_options[size_option_button.selected], Global.MAX_FENCES)
 	
 	foreground.add_child(game, true)
 	game.board.scale = Vector2.ONE * float(board_dimensions) / float(game.board_container.size.x)

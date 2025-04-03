@@ -67,7 +67,7 @@ func setup_board(board_size: int, fence_amount: int) -> void:
 
 	# Update both players fence counts in UI
 	for player: int in Global.BITS:
-		user_interface.update_fence_counts(player, Global.max_fences - board.GetFenceCount(player))
+		user_interface.update_fence_counts(player, Global.MAX_FENCES - board.GetFenceCount(player))
 
 	instance_tile_buttons(board_size)
 	instance_fence_buttons(board_size - 1)
@@ -109,14 +109,14 @@ func instance_tile_buttons(board_size: int) -> void:
 func update_fence_buttons() -> void:
 	for fence: int in range(board.GetFenceAmount()):
 		var fence_button: FenceButton = fence_buttons[fence]
-		fence_button.disabled = not board.GetFenceEnabled(fence, Global.fence_direction) if board.GetFenceCount(current_player) < Global.max_fences else true
+		fence_button.disabled = not board.GetFenceEnabled(fence, Global.fence_direction) if board.GetFenceCount(current_player) < Global.MAX_FENCES else true
 		# Disable mouse filter if the button is disabled
 		fence_button.mouse_filter = Control.MOUSE_FILTER_IGNORE if fence_button.disabled else Control.MOUSE_FILTER_STOP
 
 
 func confirm_place_fence(fence: int, direction: int) -> void:
 	user_interface.add_message("Add Fence: " + Helper.GetMoveString(fence, direction), current_player)
-	user_interface.update_fence_counts(current_player, Global.max_fences - board.GetFenceCount(current_player) - 1)
+	user_interface.update_fence_counts(current_player, Global.MAX_FENCES - board.GetFenceCount(current_player) - 1)
 
 
 func update_fence_direction() -> void:
@@ -266,7 +266,7 @@ func finish_undo_board() -> void:
 	board.InitialiseIllegalFences()
 
 	for player: int in Global.BITS:
-		user_interface.update_fence_counts(player, Global.max_fences - board.GetFenceCount(player))
+		user_interface.update_fence_counts(player, Global.MAX_FENCES - board.GetFenceCount(player))
 
 	illegal_fence_check.GetIllegalFences(board, current_player)
 	move_code = ""
