@@ -7,13 +7,11 @@ using System.Text;
 [GlobalClass]
 public partial class BoardState : Control
 {
-	[Export] private int[] PlacedFences { get; set; } // Array of placed fences, index = fence, value = direction => [-1 = Empty, 0 = Horizontally Placed, 1 = Vertically Placed]
-	[Export] private int[] PawnPositions { get; set; }
-	[Export] private int[] FenceCounts { get; set; }
+	[Export] private byte[] PawnPositions { get; set; }
 
+	public FenceData[] PlacedFences { get; set; }
 	private int[][] Tiles { get; set; }
 	private bool[][] IllegalFences { get; set; }
-	private int[] EvaluationScores { get; set; }
 
 	public int BoardSize { get; set; }
 	public StringBuilder MoveHistory { get; set; } = new();
@@ -23,12 +21,10 @@ public partial class BoardState : Control
 
 	public BoardState Clone() => new()
 	{
-		PlacedFences = PlacedFences.Clone() as int[],
-		PawnPositions = PawnPositions.Clone() as int[],
-		FenceCounts = FenceCounts.Clone() as int[],
-		Tiles = Tiles.Select(tile => tile.Clone() as int[]).ToArray(),
-		IllegalFences = IllegalFences.Select(fence => fence.Clone() as bool[]).ToArray(),
-		EvaluationScores = EvaluationScores.Clone() as int[],
+		PlacedFences = PlacedFences.Clone() as FenceData[],
+		PawnPositions = PawnPositions.Clone() as byte[],
+		Tiles = [.. Tiles.Select(tile => tile.Clone() as int[])],
+		IllegalFences = [.. IllegalFences.Select(fence => fence.Clone() as bool[])],
 		BoardSize = BoardSize,
 		MoveHistory = new StringBuilder(MoveHistory.ToString()),
 	};
@@ -36,36 +32,32 @@ public partial class BoardState : Control
 	public void InitialiseBoard(int boardSize, int fencesPerPlayer)
 	{
 		BoardSize = boardSize;
-		FenceCounts = Enumerable.Repeat(fencesPerPlayer, Helper.PlayerCount).ToArray();
-		EvaluationScores = new int[Helper.PlayerCount];
-		Array.Fill(EvaluationScores, 0);
 		InitialisePawnPositions();
 		InitialiseTiles();
 		InitialiseFences();
 		InitialiseIllegalFences();
 	}
 
-	private void InitialiseFences() => PlacedFences = Enumerable.Repeat(-1, (BoardSize - 1) * (BoardSize - 1)).ToArray();
+	private void InitialiseFences() 
+	{
+		PlacedFences = [.. Enumerable.Range(0, (BoardSize - 1) * (BoardSize - 1)).Select(_ => new FenceData())];
+	}
 
 	public void InitialisePawnPositions()
 	{
-		PawnPositions = new int[Helper.PlayerCount];
-		PawnPositions[0] = (int)(BoardSize * (BoardSize - 0.5));
-		PawnPositions[1] = BoardSize / 2;
+		PawnPositions = new byte[Helper.PlayerCount];
+		PawnPositions[0] = (byte)(BoardSize * (BoardSize - 0.5));
+		PawnPositions[1] = (byte)(BoardSize / 2);
 	}
 
 	public void InitialiseTiles()
 	{
-		Tiles = Enumerable.Range(0, BoardSize * BoardSize)
-			.Select(index => Helper.InitialiseConnections(index, BoardSize))
-			.ToArray();
+		Tiles = [.. Enumerable.Range(0, BoardSize * BoardSize).Select(index => Helper.InitialiseConnections(index, BoardSize))];
 	}
 
 	public void InitialiseIllegalFences()
 	{
-		IllegalFences = Enumerable.Range(0, (BoardSize - 1) * (BoardSize - 1))
-			.Select(_ => new bool[2] { false, false })
-			.ToArray();
+		IllegalFences = [.. Enumerable.Range(0, (BoardSize - 1) * (BoardSize - 1)).Select(_ => new bool[2] { false, false })];
 	}
 
 	#region Setters ---
@@ -75,10 +67,6 @@ public partial class BoardState : Control
 
 	#region Getters ---
 	#endregion
-
-	public int[] GetPlacedFences() => PlacedFences;
-
-	public int GetPlacedFence(int fence) => PlacedFences[fence];
 
 	public int[] GetTileConnections(int tile) => Tiles[tile];
 
@@ -95,7 +83,7 @@ public partial class BoardState : Control
 	public int[] GetGoalTiles(int player)
 	{
 		int startRow = player * (BoardSize - 1) * BoardSize;
-		return Enumerable.Range(startRow, BoardSize).ToArray();
+		return [.. Enumerable.Range(startRow, BoardSize)];
 	}
 
 	public bool GetWinner(int player) => GetGoalTiles(player).Contains(GetPawnPosition(player));
@@ -111,6 +99,11 @@ public partial class BoardState : Control
 		if (MoveHistory.Length == 0) return "";
 		return MoveHistory.ToString().Split([';'], StringSplitOptions.RemoveEmptyEntries).Last();
 	}
+
+	public bool IsFencePlaced(int fenceIndex) => PlacedFences[fenceIndex].IsPlaced();
+
+	// Returns all fences that have been placed
+	public FenceData[] GetPlacedFences() => [.. PlacedFences.Where(fence => fence.IsPlaced())];
 
 	#region Movement ---
 	#endregion
@@ -168,53 +161,43 @@ public partial class BoardState : Control
 		return leapedTiles;
 	}
 
-	public void MovePawn(int tileIndex, int currentPlayer) => PawnPositions[currentPlayer] = tileIndex;
+	public void MovePawn(int tileIndex, int currentPlayer) => PawnPositions[currentPlayer] = (byte)tileIndex;
 
 	#region Fences ---
 	#endregion
 
-	public bool IsFencePlaced(int fence) => PlacedFences[fence] != -1;
-
 	public int GetFenceAmount() => PlacedFences.Length;
 
-	public int GetFenceCount(int index) => FenceCounts[index];
+	public int GetFenceCount(int player) => PlacedFences.Count(fence => fence.GetPlacedBy() == player);
 
 	// Check if the fence at the respective index and direction can be placed
+	// Check if the adjacent fences have been placed in the same direction
 	public bool GetFenceEnabled(int fence, int direction)
 	{
 		// Return false if the fence is already placed
-		if (IsFencePlaced(fence)) return false;
+		if (!PlacedFences[fence].IsFencePlaceable(direction)) return false;
 
 		// Return false if the fence is illegal
 		if (IllegalFences[fence][direction]) return false;
 
-		// Horizontal Fence -> Check if the WEST or EAST adjacent fences are placed
-		if (direction == 0)
+		foreach (int bit in Helper.Bits)
 		{
-			int westFence = Helper.GetWestAdjacent(fence, BoardSize - 1);
-			int eastFence = Helper.GetEastAdjacent(fence, BoardSize - 1);
+			// bit = 0, 1
+			// polarDirection = 0, 2 if direction = 1
+			// polarDirection = 1, 3 if direction = 0
+			int polarDirection = 2 * bit + (1 - direction);
 
-			if (eastFence != -1 && GetPlacedFence(eastFence) == 0) return false;
-			if (westFence != -1 && GetPlacedFence(westFence) == 0) return false;
+			int adjfence = Helper.AdjacentFunctions[polarDirection](fence, BoardSize - 1);
+			if (adjfence != -1 && PlacedFences[adjfence].GetDirection() == direction) return false;
 		}
-
-		// Horizontal Fence -> Check if the NORTH or SOUTH adjacent fences are placed
-		if (direction == 1)
-		{
-			int northFence = Helper.GetNorthAdjacent(fence, BoardSize - 1);
-			int southFence = Helper.GetSouthAdjacent(fence, BoardSize - 1);
-
-			if (northFence != -1 && GetPlacedFence(northFence) == 1) return false;
-			if (southFence != -1 && GetPlacedFence(southFence) == 1) return false;
-		}
-
 		return true;
 	}
 
 	public void PlaceFence(int direction, int fenceIndex, int currentPlayer)
 	{
 		// Set the fence as placed
-		PlacedFences[fenceIndex] = direction;
+		PlacedFences[fenceIndex].SetPlaced((sbyte)currentPlayer);
+		PlacedFences[fenceIndex].SetDirection((sbyte)direction);
 
 		// Convert the index to a 2D grid index
 		int convertedIndex = fenceIndex + (fenceIndex / (BoardSize - 1));
@@ -226,39 +209,26 @@ public partial class BoardState : Control
 			RemoveTileConnection(tileGrid[pair[0]], tileGrid[pair[1]]);
 			RemoveTileConnection(tileGrid[pair[1]], tileGrid[pair[0]]);
 		}
-
-		FenceCounts[currentPlayer]--;
 	}
 
 	public List<int> GetAllSurroundingFences(int fenceIndex)
 	{
 		List<int> surroundingFences = [];
 
-		int[] adjFences = Helper.InitialiseConnections(fenceIndex, BoardSize - 1)
-			.Where(fence => fence >= 0)
-			.ToArray();
+		int[] adjFences = [.. Helper.InitialiseConnections(fenceIndex, BoardSize - 1).Where(fence => fence >= 0)];
 
-		int[] cornerFences = Helper.InitialiseCornerConnections(fenceIndex, BoardSize - 1)
-			.Where(fence => fence >= 0)
-			.ToArray();
+		int[] cornerFences = [.. Helper.InitialiseCornerConnections(fenceIndex, BoardSize - 1).Where(fence => fence >= 0)];
 
 		// Add every adjacent fence and corner fence in both directions
 		foreach (int fenceDirection in Helper.Bits)
 		{
 			int mappedFenceDirection = fenceDirection == 0 ? 1 : -1;
 
-			foreach (int fence in adjFences)
-			{
-				surroundingFences.Add(mappedFenceDirection * fence);
-			}
-
-			foreach (int fence in cornerFences)
-			{
-				surroundingFences.Add(mappedFenceDirection * fence);
-			}
+			surroundingFences.AddRange(adjFences.Select(fence => mappedFenceDirection * fence));
+			surroundingFences.AddRange(cornerFences.Select(fence => mappedFenceDirection * fence));
 		}
 
-		return surroundingFences.Distinct().ToList();
+		return [.. surroundingFences.Distinct()];
 	}
 
 	public void RemoveTileConnection(int tile, int tileToRemove)
@@ -313,7 +283,7 @@ public partial class BoardState : Control
 		int direction = moveCode[1];
 		int fence = moveCode[0];
 
-		PlacedFences[fence] = -1;
+		PlacedFences[fence] = new FenceData();
 
 		// Convert the index to a 2D grid index
 		int convertedIndex = fence + (fence / (BoardSize - 1));
@@ -325,9 +295,6 @@ public partial class BoardState : Control
 			AddTileConnection(tileGrid[pair[0]], tileGrid[pair[1]]);
 			AddTileConnection(tileGrid[pair[1]], tileGrid[pair[0]]);
 		}
-
-		int currentPlayer = int.Parse(LastMove[0].ToString());
-		FenceCounts[currentPlayer]++;
 	}
 
 	private void AddTileConnection(int tile, int tileToAdd)
@@ -371,7 +338,7 @@ public partial class BoardState : Control
 		// Loop through both directions and add all possible fence placements
 		foreach (var direction in Helper.Bits)
 		{
-			if (FenceCounts[currentPlayer] <= 0) continue;
+			if (GetFenceCount(currentPlayer) <= 0) continue;
 
 			for (int i = 0; i < GetFenceAmount(); i++)
 			{
@@ -385,7 +352,7 @@ public partial class BoardState : Control
 		GetReachableTiles(currentPlayer).ToList()
 			.ForEach(index => allMoves.Append($"{currentPlayer}m{Helper.GetMoveString(index, 0)};"));
 
-		return allMoves.ToString().Split(';', StringSplitOptions.RemoveEmptyEntries).Distinct().ToArray();
+		return [.. allMoves.ToString().Split(';', StringSplitOptions.RemoveEmptyEntries).Distinct()];
 	}
 
 	#region  Evaluation ---
@@ -398,7 +365,7 @@ public partial class BoardState : Control
 		Queue<int> queue = new();
 		Dictionary<int, int> previous = [];
 		HashSet<int> visited = [];
-		HashSet<int> goalTiles = new(GetGoalTiles(player));
+		HashSet<int> goalTiles = [.. GetGoalTiles(player)];
 
 		queue.Enqueue(GetPawnPosition(player));
 
@@ -446,22 +413,7 @@ public partial class BoardState : Control
 		int evaluation = (opponentPath - playerPath) * Helper.PATH_WEIGHT;
 
 		// Add the different in number of fences remaining
-		evaluation += (FenceCounts[currentPlayer] - FenceCounts[1 - currentPlayer]) * Helper.FENCE_WEIGHT;
-
-		// If this move decreases the player's path length, decrease the evaluation score
-		if (playerPath > EvaluationScores[currentPlayer])
-		{
-			evaluation -= 100;
-		}
-
-		// If this move increases the opponent's path length, increase the evaluation score
-		if (opponentPath > EvaluationScores[1 - currentPlayer])
-		{
-			evaluation += 100;
-		}
-
-		EvaluationScores[currentPlayer] = playerPath;
-		EvaluationScores[1 - currentPlayer] = opponentPath;
+		evaluation += (GetFenceCount(currentPlayer) - GetFenceCount(1 - currentPlayer)) * Helper.FENCE_WEIGHT;
 
 		// Add +- 1 random value to the evaluation score to avoid ties
 		evaluation += Helper.Random.Next(-1, 2);

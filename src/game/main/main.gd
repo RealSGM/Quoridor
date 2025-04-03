@@ -211,7 +211,9 @@ func _on_start_game_pressed() -> void:
 	var game: BaseGame = Resources.get_resource(game_type.to_lower() + "_game").instantiate()
 	Global.game = game
 	Global.coloured_fences = fence_coloured_button.is_pressed()
-	game.setup_board(size_options[size_option_button.selected], fence_amounts[fence_option_button.selected])
+	Global.max_fences = fence_amounts[fence_option_button.selected]
+	game.setup_board(size_options[size_option_button.selected], Global.max_fences)
+	
 	foreground.add_child(game, true)
 	game.board.scale = Vector2.ONE * float(board_dimensions) / float(game.board_container.size.x)
 

@@ -12,19 +12,11 @@ public partial class IllegalFenceCheck : Node
 		// Ignore if player has no more fences
 		if (board.GetFenceCount(currentPlayer) == 0) return;
 	
-		int[] placedFences = board.GetPlacedFences();
+		FenceData[] placedFences = board.GetPlacedFences();
 
-		List<int> possibleFences = [];
-
-		for (int fenceIndex = 0; fenceIndex < placedFences.Length; fenceIndex++)		
-		{
-			// Ignore if fence is not placed
-			if (placedFences[fenceIndex] == -1) continue;
-
-			possibleFences.AddRange(board.GetAllSurroundingFences(fenceIndex));
-		}
-
-		possibleFences = possibleFences.Distinct().ToList();
+		List<int> possibleFences = [.. placedFences
+			.SelectMany(fence => board.GetAllSurroundingFences(Array.IndexOf(placedFences, fence)))
+			.Distinct()];
 
 		Parallel.ForEach(possibleFences, fence =>
 		{
