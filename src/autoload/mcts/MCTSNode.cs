@@ -29,7 +29,7 @@ public class MCTSNode(MCTSNode parent, BoardState state, int player)
 	{
 		// TODO Run Illegal Fence Check
 		string[] possibleMoves = State.GetAllMoves(CurrentPlayer);
-		HashSet<BoardState> exploredStates = new(Children.Select(c => c.State));
+		HashSet<BoardState> exploredStates = [.. Children.Select(c => c.State)];
 
 		foreach (string move in possibleMoves)
 		{
