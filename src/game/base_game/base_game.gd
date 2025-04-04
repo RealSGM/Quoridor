@@ -263,8 +263,6 @@ func undo_board_ui() -> void:
 
 
 func finish_undo_board() -> void:
-	board.InitialiseIllegalFences()
-
 	for player: int in Global.BITS:
 		user_interface.update_fence_counts(player, Global.MAX_FENCES - board.GetFenceCount(player))
 

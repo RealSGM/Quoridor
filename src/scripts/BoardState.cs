@@ -3,6 +3,7 @@ using System;
 using System.Linq;
 using System.Collections.Generic;
 using System.Text;
+using System.Formats.Asn1;
 
 [GlobalClass]
 public partial class BoardState : Control
@@ -303,28 +304,58 @@ public partial class BoardState : Control
 		EvaluateBoard();
 	}
 
-	public string[] GetAllMoves(int currentPlayer)
+	public List<string> GetShortestMove(int currentPlayer)
 	{
-		StringBuilder allMoves = new();
+		List<string> currentMoves = [];
+		
+		int[] shortestPath = GetShortestPath(currentPlayer);
 
-		// Loop through both directions and add all possible fence placements
+		if (shortestPath.Length == 0) return currentMoves;
+
+		int[] reachableTiles = GetReachableTiles(currentPlayer);
+
+		for (int i = 1; i < Math.Min(3, shortestPath.Length); i++)
+		{
+			int tileIndex = shortestPath[i];
+
+			if (!reachableTiles.Contains(tileIndex)) continue;
+
+			currentMoves.Add($"{currentPlayer}m{Helper.GetMoveString(tileIndex, 0)}");
+		}
+
+		return currentMoves;
+	}
+
+	public List<string> GetAllFenceMoves(int currentPlayer, List<string> currentMoves)
+	{
+		if (GetFenceCount(currentPlayer) > Helper.MaxFences) return currentMoves;
+
 		foreach (var direction in Helper.Bits)
 		{
-			if (GetFenceCount(currentPlayer) > Helper.MaxFences) continue;
-
 			for (int i = 0; i < GetFenceAmount(); i++)
 			{
 				if (!GetFenceEnabled(i, direction)) continue;
 
-				allMoves.Append($"{currentPlayer}f{Helper.GetMoveString(i, direction)};");
+                currentMoves.Add($"{currentPlayer}f{Helper.GetMoveString(i, direction)}");
 			}
 		}
+		return currentMoves;
+	}
 
-		// Add all possible pawn moves
-		GetReachableTiles(currentPlayer).ToList()
-			.ForEach(index => allMoves.Append($"{currentPlayer}m{Helper.GetMoveString(index, 0)};"));
 
-		return [.. allMoves.ToString().Split(';', StringSplitOptions.RemoveEmptyEntries).Distinct()];
+	public string[] GetAllMoves(int currentPlayer)
+	{
+		List<string> allMoves = GetShortestMove(currentPlayer);
+
+		if (allMoves.Count == 0)
+		{
+			GetReachableTiles(currentPlayer).ToList()
+			.ForEach(index => allMoves.Add($"{currentPlayer}m{Helper.GetMoveString(index, 0)}"));
+		}
+
+		allMoves = GetAllFenceMoves(currentPlayer, allMoves);
+
+		return [.. allMoves.Distinct()];
 	}
 
 	#region  Evaluation ---
