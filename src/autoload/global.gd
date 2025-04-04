@@ -2,6 +2,7 @@ extends Node
 
 const BITS: Array[int] = [0, 1]
 const MAX_FENCES: int = 10
+const BOARD_SIZE: int = 9
 
 const COLORS: Array[Color] = [
 	Color.LIGHT_CORAL,

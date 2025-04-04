@@ -62,22 +62,23 @@ func reset_board() -> void:
 
 
 ## Setup the board with the selected size
-func setup_board(board_size: int) -> void:
-	board.InitialiseBoard(board_size)
+func setup_board() -> void:
+	board.InitialiseBoard()
 
 	# Update both players fence counts in UI
 	for player: int in Global.BITS:
 		user_interface.update_fence_counts(player, Global.MAX_FENCES - board.GetFenceCount(player))
 
-	instance_tile_buttons(board_size)
-	instance_fence_buttons(board_size - 1)
+	instance_tile_buttons()
+	instance_fence_buttons()
 	spawn_pawns()
 	reset_board()
 
 
 ## Set the fence container size and instance the fence buttons under the
 ## container
-func instance_fence_buttons(fence_size: int) -> void:
+func instance_fence_buttons() -> void:
+	var fence_size: int = Global.BOARD_SIZE - 1
 	var fence_button_resource: Resource = Resources.get_resource("fence_button")
 	var total_fences: int = fence_size * fence_size
 	fence_button_container.columns = fence_size
@@ -90,12 +91,12 @@ func instance_fence_buttons(fence_size: int) -> void:
 
 
 ## Set the grid container size and instance the tiles under the grid
-func instance_tile_buttons(board_size: int) -> void:
+func instance_tile_buttons() -> void:
 	var tile_resource: Resource = Resources.get_resource("tile_button")
-	tile_container.columns = board_size
+	tile_container.columns = Global.BOARD_SIZE
 
 	# Instance board state tiles
-	for i: int in range(board_size * board_size):
+	for i: int in range(Global.BOARD_SIZE * Global.BOARD_SIZE):
 		var tile_button: TileButton = tile_resource.instantiate()
 		tile_button.id = i
 		tile_container.add_child(tile_button, true)
@@ -229,7 +230,7 @@ func _on_confirm_pressed() -> void:
 	move_code = ""
 
 	# Check if the pawn has reached end goal
-	if board.GetWinner(current_player):
+	if board.IsWinner(current_player):
 		user_interface.update_win(current_player)
 	# Switch to next player
 	else:
