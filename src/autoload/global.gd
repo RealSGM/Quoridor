@@ -131,7 +131,7 @@ func print_tiles() -> String:
 	var text: String = ""
 
 	for index: int in range(game.board.GetBoardSize() * game.board.GetBoardSize()):
-		var tile: PackedInt32Array = game.board.GetTileConnections(index)
+		var tile: PackedInt32Array = game.board.GetTile(index)
 		var connections_string: String = ""
 
 		for connection in tile:

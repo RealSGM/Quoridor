@@ -43,8 +43,8 @@ public partial class MiniMaxAlgorithm : Node
 		nodesVisited++;
 
 		// Check for winner
-		if (board.GetWinner(1 - currentPlayer)) return (int.MaxValue, board.GetLastMove());
-		if (board.GetWinner(currentPlayer)) return (int.MinValue, board.GetLastMove());
+		if (board.IsWinner(1 - currentPlayer)) return (int.MaxValue, board.GetLastMove());
+		if (board.IsWinner(currentPlayer)) return (int.MinValue, board.GetLastMove());
 		if (depth == 0) return (board.EvaluateBoard(START_DEPTH % 2 == 1), board.GetLastMove());
 
 		string[] moves = board.GetAllMoves(currentPlayer);

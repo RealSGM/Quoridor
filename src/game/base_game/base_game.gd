@@ -26,7 +26,7 @@ var fence_buttons: Array[FenceButton] = []
 			match move_code[1]:
 				# Clear current fence
 				"f":
-					if !board.IsFencePlaced(index):
+					if !board.GetFences()[index].IsPlaced():
 						fence_buttons[index].clear_fences()
 				# Clear current tile
 				"m":

@@ -13,7 +13,7 @@ public partial class IllegalFenceCheck : Node
 		if (board.GetFenceCount(currentPlayer) == Helper.MaxFences) return;
 	
 		List<int> possibleFences = [.. board.GetPlacedFences()
-			.SelectMany(board.GetAllSurroundingFences)
+			.SelectMany(Helper.GetAllSurroundingFences)
 			.Where(fence => fence != -1)
 			.Distinct()];
 
@@ -23,14 +23,14 @@ public partial class IllegalFenceCheck : Node
 			int index = Math.Abs(fence);
 			int direction = fence < 0 ? 1 : 0;
 
-			board.SetIllegalFence(index, direction, false);
+			board.GetFences()[index].SetIllegal(direction, false);
 
 			if (!board.GetFenceEnabled(index, direction)) return;
 
 			Parallel.ForEach(Helper.Bits, player =>
 			{
 				if (!IsFenceIllegal(board, index, direction, player)) return;
-				board.SetIllegalFence(index, direction, true);
+				board.GetFences()[index].SetIllegal(direction, true);
 			});
 		});
 	}
@@ -43,7 +43,7 @@ public partial class IllegalFenceCheck : Node
 
 		int start = boardClone.GetPawnPosition(player);
 
-		HashSet<int> goalTiles = [.. boardClone.GetGoalTiles(player)];
+		HashSet<int> goalTiles = [.. Helper.GetGoalTiles(player)];
 
 		return Algorithms.RecursiveDFS(boardClone, start, goalTiles, [], player);
 	}
