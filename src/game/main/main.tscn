@@ -16,7 +16,7 @@ expand_margin_bottom = 8.0
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ayg4q"]
 bg_color = Color(0.105882, 0.105882, 0.109804, 1)
 
-[node name="Main" type="Control" node_paths=PackedStringArray("main_menu", "play_menu", "multiplayer_menu", "board_options_menu", "foreground", "start_game_button", "play_button", "exit_button", "singleplayer_button", "multiplayer_button", "play_back_button", "bot_v_bot_button", "local_button", "online_button", "multiplayer_back_button", "board_vbc", "board_options_back_button", "board_container", "size_option_button", "player_one_container", "p_one_colours", "player_one_name", "fence_coloured_button", "p_two_colours", "player_two_name", "player_two_container", "bot_one_container", "bot_one_algorithms", "bot_one_colours", "bot_two_container", "bot_two_algorithms", "bot_two_colours")]
+[node name="Main" type="Control" node_paths=PackedStringArray("main_menu", "play_menu", "multiplayer_menu", "board_options_menu", "foreground", "start_game_button", "play_button", "exit_button", "singleplayer_button", "multiplayer_button", "play_back_button", "bot_v_bot_button", "local_button", "online_button", "multiplayer_back_button", "board_vbc", "board_options_back_button", "board_container", "player_one_container", "p_one_colours", "player_one_name", "fence_coloured_button", "p_two_colours", "player_two_name", "player_two_container", "bot_one_container", "bot_one_algorithms", "bot_one_colours", "bot_two_container", "bot_two_algorithms", "bot_two_colours")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -43,7 +43,6 @@ multiplayer_back_button = NodePath("Background/Foreground/MultiplayerMenu/VBC/Ba
 board_vbc = NodePath("Background/Foreground/BoardOptionsMenu/VBC/BoardOptions/BoardVBC")
 board_options_back_button = NodePath("Background/Foreground/BoardOptionsMenu/VBC/MenuButtonsContainer/VBoxContainer/BackButton")
 board_container = NodePath("Background/Foreground/BoardOptionsMenu/VBC/BoardOptions/BoardVBC/BoardContainer")
-size_option_button = NodePath("Background/Foreground/BoardOptionsMenu/VBC/BoardOptions/BoardVBC/BoardContainer/BoardSizeContainer/SizeOptionButton")
 player_one_container = NodePath("Background/Foreground/BoardOptionsMenu/VBC/BoardOptions/BoardVBC/PlayerOneContainer")
 p_one_colours = NodePath("Background/Foreground/BoardOptionsMenu/VBC/BoardOptions/BoardVBC/PlayerOneContainer/PlayerOneColour/PlayerOneColourOption")
 player_one_name = NodePath("Background/Foreground/BoardOptionsMenu/VBC/BoardOptions/BoardVBC/PlayerOneContainer/PlayerOneName/LineEdit")
@@ -57,6 +56,9 @@ bot_one_colours = NodePath("Background/Foreground/BoardOptionsMenu/VBC/BoardOpti
 bot_two_container = NodePath("Background/Foreground/BoardOptionsMenu/VBC/BoardOptions/BoardVBC/BotTwoContainer")
 bot_two_algorithms = NodePath("Background/Foreground/BoardOptionsMenu/VBC/BoardOptions/BoardVBC/BotTwoContainer/BotType/BotTwoAlgorithmsOptionButton")
 bot_two_colours = NodePath("Background/Foreground/BoardOptionsMenu/VBC/BoardOptions/BoardVBC/BotTwoContainer/BotColours/BotColourOption")
+size_options = null
+algorithm_names = null
+board_dimensions = null
 
 [node name="Background" type="ColorRect" parent="."]
 layout_mode = 1
@@ -455,27 +457,6 @@ script = ExtResource("3_58fea")
 
 [node name="BoardContainer" type="VBoxContainer" parent="Background/Foreground/BoardOptionsMenu/VBC/BoardOptions/BoardVBC"]
 layout_mode = 2
-
-[node name="BoardSizeContainer" type="HBoxContainer" parent="Background/Foreground/BoardOptionsMenu/VBC/BoardOptions/BoardVBC/BoardContainer"]
-layout_mode = 2
-theme_override_constants/separation = 8
-
-[node name="Panel" type="PanelContainer" parent="Background/Foreground/BoardOptionsMenu/VBC/BoardOptions/BoardVBC/BoardContainer/BoardSizeContainer"]
-custom_minimum_size = Vector2(320, 0)
-layout_mode = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_ayg4q")
-
-[node name="Label" type="Label" parent="Background/Foreground/BoardOptionsMenu/VBC/BoardOptions/BoardVBC/BoardContainer/BoardSizeContainer/Panel"]
-custom_minimum_size = Vector2(360, 0)
-layout_mode = 2
-text = "Board Size"
-horizontal_alignment = 1
-
-[node name="SizeOptionButton" type="OptionButton" parent="Background/Foreground/BoardOptionsMenu/VBC/BoardOptions/BoardVBC/BoardContainer/BoardSizeContainer"]
-custom_minimum_size = Vector2(320, 0)
-layout_mode = 2
-size_flags_horizontal = 3
-script = ExtResource("3_58fea")
 
 [node name="FenceColouredContainer" type="HBoxContainer" parent="Background/Foreground/BoardOptionsMenu/VBC/BoardOptions/BoardVBC/BoardContainer"]
 layout_mode = 2

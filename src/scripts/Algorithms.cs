@@ -102,4 +102,46 @@ public partial class Algorithms : Node
 
 		return true;
 	}
+
+	public static int[] GetShortestPath(int player, BoardState board)
+	{
+		Queue<int> queue = new();
+		Dictionary<int, int> previous = [];
+		HashSet<int> visited = [];
+		HashSet<int> goalTiles = [.. Helper.GetGoalTiles(player)];
+
+		queue.Enqueue(board.GetPawnPosition(player));
+
+		while (queue.Count > 0)
+		{
+			int current = queue.Dequeue();
+
+			if (goalTiles.Contains(current))
+			{
+				List<int> path = [current];
+
+				while (previous.ContainsKey(current))
+				{
+					current = previous[current];
+					path.Add(current);
+				}
+
+				path.Reverse();
+				return [.. path];
+			}
+
+			if (visited.Contains(current)) continue;
+
+			visited.Add(current);
+
+			foreach (int connectedTile in board.GetPathConnections(current, player))
+			{
+				if (visited.Contains(connectedTile) || connectedTile == -1) continue;
+				queue.Enqueue(connectedTile);
+				previous[connectedTile] = current;
+			}
+		}
+
+		return [];
+	}
 }

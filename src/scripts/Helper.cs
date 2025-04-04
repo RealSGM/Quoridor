@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Godot;
 
 [GlobalClass]
@@ -11,6 +12,8 @@ public partial class Helper : Node
 
 	public static readonly int PlayerCount = 2;
 	public static readonly int MaxFences = 10;
+	public static readonly int BoardSize = 9;
+	public static readonly int FenceSize = 8;
 
 	public static readonly int[] Bits = [0, 1];
 	public static readonly int[] CardinalDirections = [0, 1, 2, 3];
@@ -72,19 +75,6 @@ public partial class Helper : Node
 		GetWestAdjacent(index, size)
 	];
 
-	public class FenceEqualityComparer : IEqualityComparer<int[]>
-	{
-		public bool Equals(int[] x, int[] y)
-		{
-			return x[0] == y[1] && x[1] == y[0];
-		}
-
-		public int GetHashCode(int[] obj)
-		{
-			return obj[0].GetHashCode() ^ obj[1].GetHashCode();
-		}
-	}
-
 	public static int[] GetTileGrid(int index, int boardSize)
 	{
 		int topLeft = index;
@@ -92,5 +82,30 @@ public partial class Helper : Node
 		int bottomLeft = GetSouthAdjacent(index, boardSize);
 		int bottomRight = GetSouthAdjacent(topRight, boardSize);
 		return [topLeft, topRight, bottomLeft, bottomRight];
+	}
+
+	public static int[] GetGoalTiles(int player)
+	{
+		int startRow = player * (BoardSize - 1) * BoardSize;
+		return [.. Enumerable.Range(startRow, BoardSize)];
+	}
+
+	public static List<int> GetAllSurroundingFences(int fenceIndex)
+	{
+		List<int> surroundingFences = [];
+
+		int[] adjFences = [.. InitialiseConnections(fenceIndex, BoardSize - 1).Where(fence => fence >= 0)];
+		int[] cornerFences = [.. InitialiseCornerConnections(fenceIndex, BoardSize - 1).Where(fence => fence >= 0)];
+
+		// Add every adjacent fence and corner fence in both directions
+		foreach (int fenceDirection in Bits)
+		{
+			int mappedFenceDirection = fenceDirection == 0 ? 1 : -1;
+
+			surroundingFences.AddRange(adjFences.Select(fence => mappedFenceDirection * fence));
+			surroundingFences.AddRange(cornerFences.Select(fence => mappedFenceDirection * fence));
+		}
+
+		return [.. surroundingFences.Distinct()];
 	}
 }

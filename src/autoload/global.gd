@@ -2,6 +2,7 @@ extends Node
 
 const BITS: Array[int] = [0, 1]
 const MAX_FENCES: int = 10
+const BOARD_SIZE: int = 9
 
 const COLORS: Array[Color] = [
 	Color.LIGHT_CORAL,
@@ -131,7 +132,7 @@ func print_tiles() -> String:
 	var text: String = ""
 
 	for index: int in range(game.board.GetBoardSize() * game.board.GetBoardSize()):
-		var tile: PackedInt32Array = game.board.GetTileConnections(index)
+		var tile: PackedInt32Array = game.board.GetTile(index)
 		var connections_string: String = ""
 
 		for connection in tile:
