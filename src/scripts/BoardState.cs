@@ -3,7 +3,6 @@ using System;
 using System.Linq;
 using System.Collections.Generic;
 using System.Text;
-using System.Formats.Asn1;
 
 [GlobalClass]
 public partial class BoardState : Control
