@@ -146,6 +146,15 @@ public partial class BoardState : Control
 		MovePawn(position, player);
 	}
 
+	private void AddTileConnection(int tileIndex, int tileToAdd)
+	{
+		Tile tile = Tiles[tileIndex];
+		int[] connections = tile.GetConnections();
+		int index = Array.IndexOf(connections, -1);
+
+		if (index != -1) connections[index] = tileToAdd;
+	}
+
 	private void UndoFenceMove()
 	{
 		string LastMove = GetLastMove();
@@ -169,17 +178,7 @@ public partial class BoardState : Control
 		}
 	}
 
-	private void AddTileConnection(int tileIndex, int tileToAdd)
-	{
-		Tile tile = Tiles[tileIndex];
-		int[] connections = tile.GetConnections();
-		int index = Array.IndexOf(connections, -1);
-
-		if (index == -1) return;
-		connections[index] = tileToAdd;
-	}
-
-		#region Tiles ---
+	#region Tiles ---
 	#endregion
 
 	/// Enemy is on an adjacent tile to the Player
@@ -324,6 +323,13 @@ public partial class BoardState : Control
 
 	public bool IsGameOver() => IsWinner(0) || IsWinner(1);
 
+	public int GetGameResult(int simulatingPlayer)
+	{
+		if (IsWinner(simulatingPlayer)) return int.MaxValue;
+		if (IsWinner(1 - simulatingPlayer)) return int.MinValue;
+		return 0;
+	}
+
 	public int EvaluateBoard(bool isMaximising = true)
 	{
 		string lastMove = GetLastMove();
@@ -341,12 +347,5 @@ public partial class BoardState : Control
 		evaluation += Helper.Random.Next(-1, 2);
 
 		return isMaximising ? evaluation : -evaluation;
-	}
-
-	public int GetGameResult(int simulatingPlayer)
-	{
-		if (IsWinner(simulatingPlayer)) return int.MaxValue;
-		if (IsWinner(1 - simulatingPlayer)) return int.MinValue;
-		return 0;
 	}
 }
