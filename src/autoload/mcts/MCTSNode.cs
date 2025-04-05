@@ -70,7 +70,6 @@ public class MCTSNode(MCTSNode parent, BoardState state, int player)
 		return tempState.GetGameResult(simulatingPlayer);
 	}
 
-
 	public void Backpropagate(int result)
 	{
 		MCTSNode node = this;
@@ -90,5 +89,4 @@ public class MCTSNode(MCTSNode parent, BoardState state, int player)
 			node = node.Parent;
 		}
 	}
-
 }

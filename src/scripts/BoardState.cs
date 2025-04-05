@@ -37,6 +37,14 @@ public partial class BoardState : Control
 
 	public int[] GetTileConnections(int tileIndex) => Tiles[tileIndex].GetConnections();
 
+	public void PrintAllMoves()
+	{
+		foreach (var move in GetAllMovesWeighted(0))
+		{
+			GD.Print($"{move.Key} : {move.Value}");
+		}
+	}
+
 	#region Getters ---
 	#endregion
 
@@ -312,22 +320,53 @@ public partial class BoardState : Control
 		return [.. allMoves.Distinct()];
 	}
 
-	// public Dictionary<string, float> GetAllMovesWeighted(int currentPlayer)
-	// {
-	// 	Dictionary<string, float> allMoves = [];
+	public Dictionary<string, float> GetWeightedFenceMoves(int currentPlayer)
+	{
+		// Stores all possible moves with their weights
+		Dictionary<string, float> allMoves = [];
 
-	// 	int[] reachableTiles = GetReachableTiles(currentPlayer);
+		if (GetFenceCount(currentPlayer) > Helper.MaxFences) return allMoves;
 
-	// 	foreach (int tileIndex in reachableTiles)
-	// 	{
-	// 		allMoves[$"{currentPlayer}m{Helper.GetMoveString(tileIndex, 0)}"] = 1;
-	// 	}
+		foreach (var direction in Helper.Bits)
+		{
+			for (int i = 0; i < (Helper.BoardSize - 1) * (Helper.BoardSize - 1); i++)
+			{
+				if (!GetFenceEnabled(i, direction)) continue;
 
-	// 	// Add the best move to the dictionary
-	// 	GetShortestMove(currentPlayer).ForEach(move => allMoves[move] = 3);
+				// Convert pawn positions and fence as int to relative fence row as a float
+				float relativePlayerIndex = PawnPositions[currentPlayer] / Helper.BoardSize + 0.5f;
+				float relativeEnemyIndex = PawnPositions[1 - currentPlayer] / Helper.BoardSize  + 0.5f;
+				float relativeFenceIndex = i / (Helper.BoardSize - 1);
+				float playerFactor = currentPlayer == 0 ? 1 : -1;
+				float enemyFactor = -playerFactor;
+				float weight = 0;
 
-	// 	return allMoves;
-	// }
+				weight += playerFactor * (relativeFenceIndex > relativePlayerIndex ? 2 : -10);
+                weight += enemyFactor * (relativeFenceIndex > relativeEnemyIndex ? 1 : -5);
+				
+				allMoves[$"{currentPlayer}f{Helper.GetMoveString(i, direction)}"] = weight;
+			}
+		}
+
+		return allMoves;
+	}
+
+	public Dictionary<string, float> GetAllMovesWeighted(int currentPlayer)
+	{
+		// Stores all possible moves with their weights
+		Dictionary<string, float> allMoves = [];
+
+		// Get the move which is the first in the shortest path
+		string shortestMove = GetShortestMove(currentPlayer);
+
+		// Add move to the dictionary with a weight of 3
+		if (shortestMove != "") allMoves[shortestMove] = 3;
+
+		// Add the fences
+		allMoves = allMoves.Concat(GetWeightedFenceMoves(currentPlayer)).ToDictionary(x => x.Key, x => x.Value);
+
+		return allMoves;
+	}
 
 	#region  Evaluation ---
 	#endregion
