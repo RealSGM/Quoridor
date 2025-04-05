@@ -26,7 +26,7 @@ var fence_buttons: Array[FenceButton] = []
 			match move_code[1]:
 				# Clear current fence
 				"f":
-					if !board.GetFences()[index].IsPlaced():
+					if !board.IsFencePlaced(index):
 						fence_buttons[index].clear_fences()
 				# Clear current tile
 				"m":
@@ -108,7 +108,7 @@ func instance_tile_buttons() -> void:
 
 
 func update_fence_buttons() -> void:
-	for fence: int in range(board.GetFenceAmount()):
+	for fence: int in range((Global.BOARD_SIZE - 1) * (Global.BOARD_SIZE - 1)):
 		var fence_button: FenceButton = fence_buttons[fence]
 		fence_button.disabled = not board.GetFenceEnabled(fence, Global.fence_direction) if board.GetFenceCount(current_player) < Global.MAX_FENCES else true
 		# Disable mouse filter if the button is disabled

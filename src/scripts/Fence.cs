@@ -1,12 +1,10 @@
-using Godot;
-
-public struct FenceData
+public struct Fence
 {   
     sbyte PlacedBy;
     sbyte Direction;
-    bool[] isIllegal;
+    readonly bool[] isIllegal;
 
-    public FenceData()
+    public Fence()
     {
         PlacedBy = -1;
         Direction = -1;

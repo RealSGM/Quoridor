@@ -24,6 +24,7 @@ class_name UserInterface extends Control
 
 var is_bots: bool = false
 
+
 func _input(event: InputEvent) -> void:
 	if event.is_action_pressed("pause"):
 		pause_menu.visible = !pause_menu.visible
@@ -33,6 +34,7 @@ func _input(event: InputEvent) -> void:
 		return
 	if event.is_action_pressed("confirm") and !confirm_button.disabled:
 		SignalManager.confirm_pressed.emit()
+
 
 func _ready() -> void:
 	win_exit_button.pressed.connect(SignalManager.exit_pressed.emit)

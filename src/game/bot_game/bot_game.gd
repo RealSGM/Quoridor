@@ -6,6 +6,7 @@ class_name BotGame extends BaseGame
 
 var turn_ready: bool = false
 
+
 func _ready() -> void:
 	super._ready()
 	user_interface.is_bots = true
@@ -32,7 +33,6 @@ func play_turn() -> void:
 	MiniMaxAlgorithm.SetMaxDepth(board)
 	move_code = Global.chosen_algorithms[current_player].GetMove(board, current_player, true, debug_minimax_button.is_pressed())
 	_on_confirm_pressed()
-
 
 
 func confirm_place_fence(fence: int, direction: int) -> void:

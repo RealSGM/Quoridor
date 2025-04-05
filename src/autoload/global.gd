@@ -106,11 +106,11 @@ func print_fences() -> String:
 
 	var text: String = ""
 
-	var amount: int = game.board.GetFenceAmount()
+	var amount: int = (Global.BOARD_SIZE - 1) * (Global.BOARD_SIZE - 1)
 
 	for index: int in range(amount):
 		var fence_string: String = ""
-		match game.board.GetPlacedFence(index):
+		match game.board.IsFencePlaced(index):
 			0:
 				fence_string = "-"
 			1:
@@ -131,15 +131,12 @@ func print_tiles() -> String:
 
 	var text: String = ""
 
-	for index: int in range(game.board.GetBoardSize() * game.board.GetBoardSize()):
-		var tile: PackedInt32Array = game.board.GetTile(index)
+	for index: int in range(BOARD_SIZE * BOARD_SIZE):
+		var tile: PackedInt32Array = game.board.GetTileConnections(index)
 		var connections_string: String = ""
 
 		for connection in tile:
 			connections_string += " %s " % connection
 
-		text += "[ %s ]" % connections_string
-
-		if (index + 1) % game.board.BoardSize == 0:
-			text += "\n\n"
+		text += "Tile %s:  [ %s ] \n" % [index, connections_string]
 	return text

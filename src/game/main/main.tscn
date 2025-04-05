@@ -56,7 +56,6 @@ bot_one_colours = NodePath("Background/Foreground/BoardOptionsMenu/VBC/BoardOpti
 bot_two_container = NodePath("Background/Foreground/BoardOptionsMenu/VBC/BoardOptions/BoardVBC/BotTwoContainer")
 bot_two_algorithms = NodePath("Background/Foreground/BoardOptionsMenu/VBC/BoardOptions/BoardVBC/BotTwoContainer/BotType/BotTwoAlgorithmsOptionButton")
 bot_two_colours = NodePath("Background/Foreground/BoardOptionsMenu/VBC/BoardOptions/BoardVBC/BotTwoContainer/BotColours/BotColourOption")
-size_options = null
 algorithm_names = null
 board_dimensions = null
 
