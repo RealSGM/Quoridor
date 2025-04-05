@@ -2,7 +2,7 @@ using Godot;
 using System.Collections.Generic;
 
 [GlobalClass]
-public partial class Algorithms : Node
+public partial class Algorithms: Node
 {
 	public static bool RecursiveDFS(BoardState board, int current, HashSet<int> goalTiles, HashSet<int> visited, int player)
 	{

@@ -65,14 +65,10 @@ public partial class BoardState : Control
 		int[] connections = Tiles[tileIndex].GetConnections();
 		int index = Array.IndexOf(connections, tileToRemove);
 		if (index != -1) connections[index] = -1;
-
-		GD.Print($"Removed connection from tile {tileIndex} to tile {tileToRemove}");
-		GD.Print($"Connections: {string.Join(", ", connections)}");
 	}
 
 	public void PlaceFence(int direction, int fenceIndex, int currentPlayer)
 	{
-		GD.Print($"Placing fence {fenceIndex} in direction {direction} for player {currentPlayer}");
 		// Set the fence as placed
 		Fences[fenceIndex].SetPlaced((sbyte)currentPlayer);
 		Fences[fenceIndex].SetDirection((sbyte)direction);
@@ -87,8 +83,6 @@ public partial class BoardState : Control
 			RemoveTileConnection(tileGrid[pair[0]], tileGrid[pair[1]]);
 			RemoveTileConnection(tileGrid[pair[1]], tileGrid[pair[0]]);
 		}
-
-
 	}
 
 	public void AddMove(string code)
