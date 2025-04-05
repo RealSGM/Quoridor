@@ -257,26 +257,24 @@ public partial class BoardState : Control
 	#region Get Moves ---
 	#endregion
 
-	public List<string> GetShortestMove(int currentPlayer)
+	public string GetShortestMove(int currentPlayer)
 	{
-		List<string> currentMoves = [];
-		
 		int[] shortestPath = Algorithms.GetShortestPath(currentPlayer, this);
 
-		if (shortestPath.Length == 0) return currentMoves;
+		if (shortestPath.Length == 0) return "";
 
 		int[] reachableTiles = GetReachableTiles(currentPlayer);
 
-		for (int i = 1; i < Math.Min(3, shortestPath.Length); i++)
+		for (int i = 1; i < shortestPath.Length; i++)
 		{
 			int tileIndex = shortestPath[i];
 
 			if (!reachableTiles.Contains(tileIndex)) continue;
 
-			currentMoves.Add($"{currentPlayer}m{Helper.GetMoveString(tileIndex, 0)}");
+			return $"{currentPlayer}m{Helper.GetMoveString(tileIndex, 0)}";
 		}
 
-		return currentMoves;
+		return "";
 	}
 
 	public List<string> GetAllFenceMoves(int currentPlayer, List<string> currentMoves)
@@ -297,7 +295,11 @@ public partial class BoardState : Control
 
 	public string[] GetAllMoves(int currentPlayer)
 	{
-		List<string> allMoves = GetShortestMove(currentPlayer);
+		List<string> allMoves = [];
+
+		string shortesMove = GetShortestMove(currentPlayer);
+
+		if (shortesMove != "") allMoves.Add(shortesMove);
 
 		if (allMoves.Count == 0)
 		{
@@ -309,6 +311,23 @@ public partial class BoardState : Control
 
 		return [.. allMoves.Distinct()];
 	}
+
+	// public Dictionary<string, float> GetAllMovesWeighted(int currentPlayer)
+	// {
+	// 	Dictionary<string, float> allMoves = [];
+
+	// 	int[] reachableTiles = GetReachableTiles(currentPlayer);
+
+	// 	foreach (int tileIndex in reachableTiles)
+	// 	{
+	// 		allMoves[$"{currentPlayer}m{Helper.GetMoveString(tileIndex, 0)}"] = 1;
+	// 	}
+
+	// 	// Add the best move to the dictionary
+	// 	GetShortestMove(currentPlayer).ForEach(move => allMoves[move] = 3);
+
+	// 	return allMoves;
+	// }
 
 	#region  Evaluation ---
 	#endregion
