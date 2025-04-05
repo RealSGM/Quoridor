@@ -58,14 +58,8 @@ var game_type: String
 
 @onready var menus: Array[PanelContainer] = [main_menu, play_menu, multiplayer_menu, board_options_menu]
 @onready var global_options: Array[BoxContainer] = [board_container]
-@onready var game_type_dict: Dictionary = {
-	"Singleplayer":
-		[player_one_container, bot_two_container],
-	"Local":
-		[player_one_container, player_two_container],
-	"BotVBot":
-		[bot_one_container, bot_two_container]
-	}
+@onready
+var game_type_dict: Dictionary = {"Singleplayer": [player_one_container, bot_two_container], "Local": [player_one_container, player_two_container], "BotVBot": [bot_one_container, bot_two_container]}
 
 
 func _input(event: InputEvent) -> void:
