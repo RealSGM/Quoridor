@@ -17,7 +17,6 @@ public partial class IllegalFenceCheck : Node
 			.Where(fence => fence != -1)
 			.Distinct()];
 
-		
 		Parallel.ForEach(possibleFences, fence =>
 		{
 			int index = Math.Abs(fence);

@@ -8,9 +8,8 @@ using System.Text;
 public partial class BoardState : Control
 {
 	[Export] private byte[] PawnPositions { get; set; }
-	private int[][] Tiles { get; set; }
-	
-	public FenceData[] Fences { get; set; }
+	private Tile[] Tiles { get; set; }
+	public Fence[] Fences { get; set; }
 	public StringBuilder MoveHistory { get; set; } = new();
 
 	#region Initialisation ---
@@ -18,132 +17,62 @@ public partial class BoardState : Control
 
 	public BoardState Clone() => new()
 	{
-		Fences = Fences.Clone() as FenceData[],
+		Fences = Fences.Clone() as Fence[],
 		PawnPositions = PawnPositions.Clone() as byte[],
-		Tiles = [.. Tiles.Select(tile => tile.Clone() as int[])],
+		Tiles = [.. Tiles.Select(tile => tile.Clone())],
 		MoveHistory = new StringBuilder(MoveHistory.ToString()),
 	};
 
 	public void InitialiseBoard()
 	{
-		Fences = [.. Enumerable.Range(0, (Helper.BoardSize - 1) * (Helper.BoardSize - 1)).Select(_ => new FenceData())];
-		Tiles = [.. Enumerable.Range(0, Helper.BoardSize * Helper.BoardSize).Select(index => Helper.InitialiseConnections(index, Helper.BoardSize))];
+		Fences = [.. Enumerable.Range(0, (Helper.BoardSize - 1) * (Helper.BoardSize - 1)).Select(_ => new Fence())];
+		Tiles = [.. Enumerable.Range(0, Helper.BoardSize * Helper.BoardSize).Select(index => new Tile(index))];
 		PawnPositions = [(byte)(Helper.BoardSize * (Helper.BoardSize - 0.5)), (byte)(Helper.BoardSize / 2)];
 	}
+
+	#region Godot Functions ---
+	#endregion
+
+	public bool IsFencePlaced(int fenceIndex) => Fences[fenceIndex].IsPlaced();
+
+	public int[] GetTileConnections(int tileIndex) => Tiles[tileIndex].GetConnections();
 
 	#region Getters ---
 	#endregion
 
-	public FenceData[] GetFences() => Fences;
+	public Fence[] GetFences() => Fences;
+
+	public Tile[] GetTiles() => Tiles;
 
 	public string GetMoveHistory() => MoveHistory.ToString();
 
-	public int[] GetTile(int tile) => Tiles[tile];
+	public Tile GetTile(int tileIndex) => Tiles[tileIndex];
 
 	public int GetPawnPosition(int index) => PawnPositions[index];
 
-	public string GetLastMove() => MoveHistory.Length == 0 ? "" : MoveHistory.ToString().Split(';', StringSplitOptions.RemoveEmptyEntries).Last();
+	public string GetLastMove() => MoveHistory.Length == 0 ? "" : MoveHistory.ToString().Split(';', StringSplitOptions.RemoveEmptyEntries)[^1];
 
-	public int[] GetPathConnections(int tile, int player)
-	{
-		return player == 0 
-			? [Tiles[tile][0], Tiles[tile][1], Tiles[tile][3], Tiles[tile][2]] 
-			: [Tiles[tile][2], Tiles[tile][3], Tiles[tile][1], Tiles[tile][0]];
-	}
-
-	// Returns all placed fences
+	/// Returns all placed fences
 	public int[] GetPlacedFences() => [.. Fences.Select((fence, index) => fence.IsPlaced() ? index : -1).Where(index => index != -1)];
 
-	#region Pawn Movement ---
+	#region Player Moves ---
 	#endregion
 
 	public void MovePawn(int tileIndex, int currentPlayer) => PawnPositions[currentPlayer] = (byte)tileIndex;
 
-	public List<int> CheckForEnemy(int connectedTile, int player)
+	public void RemoveTileConnection(int tileIndex, int tileToRemove)
 	{
-		int enemyPawnPosition = PawnPositions[1 - player];
+		int[] connections = Tiles[tileIndex].GetConnections();
+		int index = Array.IndexOf(connections, tileToRemove);
+		if (index != -1) connections[index] = -1;
 
-		// Check if the enemy pawn is not on the tile
-		if (enemyPawnPosition != connectedTile) return [connectedTile];
-
-		// Get the direction of the enemy pawn
-		int directionIndex = Array.IndexOf(Tiles[PawnPositions[player]], enemyPawnPosition);
-
-		// Check if the leaped tile is within boundaries
-		int[] AdjacentOffsets = [-Helper.BoardSize, 1, Helper.BoardSize, -1];
-		int leapedTileIndex = connectedTile + AdjacentOffsets[directionIndex];
-
-		// Return an empty list, as the leaped tile is out of boundaries
-		if (leapedTileIndex < 0 || leapedTileIndex >= Tiles.Length) return [];
-
-		return [.. GetLeapedTiles(PawnPositions[player], leapedTileIndex, connectedTile, directionIndex)];
-	}
-
-	public int[] GetReachableTiles(int player)
-	{
-		int playerPawnPosition = PawnPositions[player];
-		int[] playerPawnTile = Tiles[playerPawnPosition];
-		List<int> reachableTiles = [];
-
-		// Loop through all tiles
-		foreach (int connectedTile in playerPawnTile)
-		{
-			// Check if the tile is not empty
-			if (connectedTile == -1) continue;
-
-			// CheckFor Enemy and merge list
-			reachableTiles.AddRange(CheckForEnemy(connectedTile, player));
-		}
-		return [.. reachableTiles];
-	}
-
-	public int[] GetLeapedTiles(int playerIndex, int leapedTileIndex, int tileIndex, int dirIndex)
-	{
-		int[] leapedTile = Tiles[leapedTileIndex];
-
-		// Check no fence blocking it
-		if (Tiles[tileIndex][dirIndex] == leapedTileIndex) return [leapedTileIndex];
-
-		// Fence blocking it, check adjacent tiles over the enemy pawn
-		var leapedTiles = Tiles[tileIndex]
-			.Where(tile => tile != -1 && tile != playerIndex)
-			.ToArray();
-
-		return leapedTiles;
-	}
-
-	#region Fences ---
-	#endregion
-
-	public int GetFenceAmount() => Fences.Length;
-
-	public int GetFenceCount(int player) => Fences.Count(fence => fence.GetPlacedBy() == player);
-
-	// Check if the fence at the respective index and direction can be placed
-	// Check if the adjacent fences have been placed in the same direction
-	public bool GetFenceEnabled(int fence, int direction)
-	{
-		// Return false if the fence is already placed
-		if (!Fences[fence].IsFencePlaceable(direction)) return false;
-
-		// Return false if the fence is illegal
-		if (Fences[fence].GetIllegal(direction)) return false;
-
-		foreach (int bit in Helper.Bits)
-		{
-			// bit = 0, 1
-			// polarDirection = 0, 2 if direction = 1
-			// polarDirection = 1, 3 if direction = 0
-			int polarDirection = 2 * bit + (1 - direction);
-
-			int adjfence = Helper.AdjacentFunctions[polarDirection](fence, Helper.BoardSize - 1);
-			if (adjfence != -1 && Fences[adjfence].GetDirection() == direction) return false;
-		}
-		return true;
+		GD.Print($"Removed connection from tile {tileIndex} to tile {tileToRemove}");
+		GD.Print($"Connections: {string.Join(", ", connections)}");
 	}
 
 	public void PlaceFence(int direction, int fenceIndex, int currentPlayer)
 	{
+		GD.Print($"Placing fence {fenceIndex} in direction {direction} for player {currentPlayer}");
 		// Set the fence as placed
 		Fences[fenceIndex].SetPlaced((sbyte)currentPlayer);
 		Fences[fenceIndex].SetDirection((sbyte)direction);
@@ -158,15 +87,29 @@ public partial class BoardState : Control
 			RemoveTileConnection(tileGrid[pair[0]], tileGrid[pair[1]]);
 			RemoveTileConnection(tileGrid[pair[1]], tileGrid[pair[0]]);
 		}
+
+
 	}
 
-	public void RemoveTileConnection(int tile, int tileToRemove)
+	public void AddMove(string code)
 	{
-		int[] connections = Tiles[tile];
-		int index = Array.IndexOf(connections, tileToRemove);
+		int currentPlayer = int.Parse(code[0].ToString());
+		char moveType = code[1];
+		int direction = code[2] == '-' ? 1 : 0;
+		int value = int.Parse(code[3..]);
 
-		if (index == -1) return;
-		connections[index] = -1;
+		switch (moveType)
+		{
+			case 'm':
+				code += "_" + GetPawnPosition(currentPlayer);
+				MovePawn(value, currentPlayer);
+				break;
+			case 'f':
+				PlaceFence(direction, value, currentPlayer);
+				break;
+		}
+
+		MoveHistory.Append(code + ";");
 	}
 
 	#region Undo Move ---
@@ -212,7 +155,7 @@ public partial class BoardState : Control
 		int direction = moveCode[1];
 		int fence = moveCode[0];
 
-		Fences[fence] = new FenceData();
+		Fences[fence] = new Fence();
 
 		// Convert the index to a 2D grid index
 		int convertedIndex = fence + (fence / (Helper.BoardSize - 1));
@@ -226,38 +169,100 @@ public partial class BoardState : Control
 		}
 	}
 
-	private void AddTileConnection(int tile, int tileToAdd)
+	private void AddTileConnection(int tileIndex, int tileToAdd)
 	{
-		int[] connections = Tiles[tile];
+		Tile tile = Tiles[tileIndex];
+		int[] connections = tile.GetConnections();
 		int index = Array.IndexOf(connections, -1);
 
 		if (index == -1) return;
 		connections[index] = tileToAdd;
 	}
 
-	#region Turn ---
+		#region Tiles ---
 	#endregion
 
-	public void AddMove(string code)
+	/// Enemy is on an adjacent tile to the Player
+	/// Check if the leaped tile is not blocked by a fence
+	public int[] GetLeapedTiles(int playerPawnPosition, int enemyPawnPosition, int leapedTileIndex)
 	{
-		int currentPlayer = int.Parse(code[0].ToString());
-		char moveType = code[1];
-		int direction = code[2] == '-' ? 1 : 0;
-		int value = int.Parse(code[3..]);
+		Tile enemyTile = Tiles[enemyPawnPosition];
+		int[] enemyTileConnections = enemyTile.GetConnections();
 
-		switch (moveType)
-		{
-			case 'm':
-				code += "_" + GetPawnPosition(currentPlayer);
-				MovePawn(value, currentPlayer);
-				break;
-			case 'f':
-				PlaceFence(direction, value, currentPlayer);
-				break;
-		}
+ 		// Return all valid surrounding tiles of the enemy pawn, ignoring the player pawn
+		if (!enemyTileConnections.Contains(leapedTileIndex)) return [.. enemyTileConnections.Where(tile => tile != -1 && tile != playerPawnPosition)];
 
-		MoveHistory.Append(code + ";");
+		// Leaped tile is not blocked / is valid
+		return [leapedTileIndex];
 	}
+
+	/// Check if the enemy pawn is on the tile
+	/// If the enemy is not the pawn, return the tile
+	/// If the enemy is not on the tile check for leaped tiles
+	public int[] CheckForEnemy(int connectedTile, int player)
+	{
+		int enemyPawnPosition = PawnPositions[1 - player];
+		int playerPawnPosition = PawnPositions[player];
+
+		// Enemy pawn IS NOT on the tile
+		if (enemyPawnPosition != connectedTile) return [connectedTile];
+
+		// Enemy pawn IS on the tile
+		Tile playerPawnTile = Tiles[playerPawnPosition];
+		int[] playerPawnConnections = playerPawnTile.GetConnections();
+
+		// Get the direction of the enemy pawn
+		int directionIndex = Array.IndexOf(playerPawnConnections, enemyPawnPosition);
+
+		// Calculate the leaped tile index of the enemy pawn
+		int leapedTileIndex = Helper.AdjacentFunctions[directionIndex](enemyPawnPosition, Helper.BoardSize);
+
+		return GetLeapedTiles(playerPawnPosition, enemyPawnPosition, leapedTileIndex);
+	}
+
+	/// Loop through connections
+	/// Check if the tile is not blocked by a fence
+	/// Check if the tile is not occupied by the enemy pawn
+	public int[] GetReachableTiles(int player)
+	{
+		int playerPawnPosition = PawnPositions[player];
+		Tile playerPawnTile = Tiles[playerPawnPosition];
+		
+		return [.. playerPawnTile.GetConnections()
+			.Where(connectedTile => connectedTile != -1)
+			.SelectMany(connectedTile => CheckForEnemy(connectedTile, player))];
+	}
+
+	#region Fences ---
+	#endregion
+
+	public int GetFenceCount(int player) => Fences.Count(fence => fence.GetPlacedBy() == player);
+
+	/// Check if the fence at the respective index and direction can be placed
+	/// Check if the adjacent fences have been placed in the same direction
+	public bool GetFenceEnabled(int fence, int direction)
+	{
+		// Return false if the fence is already placed
+		if (!Fences[fence].IsFencePlaceable(direction)) return false;
+
+		// Return false if the fence is illegal
+		if (Fences[fence].GetIllegal(direction)) return false;
+
+		foreach (int bit in Helper.Bits)
+		{
+			// bit = 0, 1
+			// polarDirection = 0, 2 if direction = 1
+			// polarDirection = 1, 3 if direction = 0
+			int polarDirection = 2 * bit + (1 - direction);
+
+			int adjfence = Helper.AdjacentFunctions[polarDirection](fence, Helper.BoardSize - 1);
+			if (adjfence != -1 && Fences[adjfence].GetDirection() == direction) return false;
+		}
+		return true;
+	}
+	
+	#region Get Moves ---
+	#endregion
 
 	public List<string> GetShortestMove(int currentPlayer)
 	{
@@ -287,7 +292,7 @@ public partial class BoardState : Control
 
 		foreach (var direction in Helper.Bits)
 		{
-			for (int i = 0; i < GetFenceAmount(); i++)
+			for (int i = 0; i < (Helper.BoardSize - 1) * (Helper.BoardSize - 1); i++)
 			{
 				if (!GetFenceEnabled(i, direction)) continue;
 

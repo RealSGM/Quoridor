@@ -24,6 +24,8 @@ public partial class Helper : Node
 		[[0, 1], [2, 3]]
 	];
 
+	public static readonly int[] AdjacentOffsets = [-BoardSize, 1, BoardSize, -1];
+
 	public static readonly List<Func<int, int, int>> AdjacentFunctions =
     [
         GetNorthAdjacent,
