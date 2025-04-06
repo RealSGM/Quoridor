@@ -19,16 +19,16 @@ public partial class Helper : Node
 	public static readonly int[] CardinalDirections = [0, 1, 2, 3];
 
 	public static readonly int[][][] DefaultTileGridConnections =
-    [
-        [[0, 2], [1, 3]],
+	[
+		[[0, 2], [1, 3]],
 		[[0, 1], [2, 3]]
 	];
 
 	public static readonly int[] AdjacentOffsets = [-BoardSize, 1, BoardSize, -1];
 
 	public static readonly List<Func<int, int, int>> AdjacentFunctions =
-    [
-        GetNorthAdjacent,
+	[
+		GetNorthAdjacent,
 		GetEastAdjacent,
 		GetSouthAdjacent,
 		GetWestAdjacent
@@ -89,8 +89,8 @@ public partial class Helper : Node
 
 	// Initalise the NESW connections for given index
 	public static int[] InitialiseConnections(int index, int size) =>
-    [
-        GetNorthAdjacent(index, size),
+	[
+		GetNorthAdjacent(index, size),
 		GetEastAdjacent(index, size),
 		GetSouthAdjacent(index, size),
 		GetWestAdjacent(index, size)

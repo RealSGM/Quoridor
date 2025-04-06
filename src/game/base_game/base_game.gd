@@ -49,7 +49,7 @@ func set_current_player(val: int) -> void:
 	set_tiles(board.GetPawnPosition(current_player))
 	update_fence_buttons()
 	user_interface.update_turn(val)
-	# board.PrintAllMoves()
+	board.PrintAllMoves()
 
 
 ## Disable all tiles, and reset their modulate

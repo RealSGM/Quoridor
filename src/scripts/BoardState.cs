@@ -13,7 +13,6 @@ public partial class BoardState : Control
 	public StringBuilder MoveHistory { get; set; } = new();
 
 	#region Initialisation ---
-	#endregion
 
 	public BoardState Clone() => new()
 	{
@@ -30,8 +29,9 @@ public partial class BoardState : Control
 		PawnPositions = [(byte)(Helper.BoardSize * (Helper.BoardSize - 0.5)), (byte)(Helper.BoardSize / 2)];
 	}
 
-	#region Godot Functions ---
 	#endregion
+
+	#region Godot Functions ---
 
 	public bool IsFencePlaced(int fenceIndex) => Fences[fenceIndex].IsPlaced();
 
@@ -39,15 +39,16 @@ public partial class BoardState : Control
 
 	public void PrintAllMoves()
 	{
-		foreach (var move in GetAllMovesWeighted(0))
+		foreach (var move in GetAllMovesWeighted(1))
 		{
 			GD.Print($"{move.Key} : {move.Value}");
 		}
 	}
 
-	#region Getters ---
 	#endregion
 
+	#region Getters ---
+	
 	public Fence[] GetFences() => Fences;
 
 	public Tile[] GetTiles() => Tiles;
@@ -63,9 +64,10 @@ public partial class BoardState : Control
 	/// Returns all placed fences
 	public int[] GetPlacedFences() => [.. Fences.Select((fence, index) => fence.IsPlaced() ? index : -1).Where(index => index != -1)];
 
-	#region Player Moves ---
 	#endregion
 
+	#region Player Moves ---
+	
 	public void ShiftPawn(int tileIndex, int currentPlayer) => PawnPositions[currentPlayer] = (byte)tileIndex;
 
 	public void RemoveTileConnection(int tileIndex, int tileToRemove)
@@ -110,9 +112,10 @@ public partial class BoardState : Control
 		MoveHistory.Append(code + ";");
 	}
 
-	#region Undo Move ---
 	#endregion
 
+	#region Undo Move ---
+	
 	private string UndoMove()
 	{
 		string LastMove = GetLastMove();
@@ -171,9 +174,10 @@ public partial class BoardState : Control
 		}
 	}
 
-	#region Tiles ---
 	#endregion
 
+	#region Tiles ---
+	
 	/// Enemy is on an adjacent tile to the Player
 	/// Check if the leaped tile is not blocked by a fence
 	public int[] GetLeapedTiles(int playerPawnPosition, int enemyPawnPosition, int leapedTileIndex)
@@ -225,9 +229,10 @@ public partial class BoardState : Control
 			.SelectMany(connectedTile => CheckForEnemy(connectedTile, player))];
 	}
 
-	#region Fences ---
 	#endregion
 
+	#region Fences ---
+	
 	public int GetFenceCount(int player) => Fences.Count(fence => fence.GetPlacedBy() == player);
 
 	/// Check if the fence at the respective index and direction can be placed
@@ -252,72 +257,43 @@ public partial class BoardState : Control
 		}
 		return true;
 	}
+
+	#endregion
 	
 	#region Get Moves ---
-	#endregion
-
-	public string GetShortestMove(int currentPlayer)
-	{
-		int[] shortestPath = Algorithms.GetShortestPath(currentPlayer, this);
-
-		if (shortestPath.Length == 0) return "";
-
-		int[] reachableTiles = GetReachableTiles(currentPlayer);
-
-		for (int i = 1; i < shortestPath.Length; i++)
-		{
-			int tileIndex = shortestPath[i];
-
-			if (!reachableTiles.Contains(tileIndex)) continue;
-
-			return Helper.GetMoveCodeAsString(currentPlayer, "m", 0, tileIndex, shortestPath[0]);
-		}
-
-		return "";
-	}
-
-	public List<string> GetAllFenceMoves(int currentPlayer, List<string> currentMoves)
-	{
-		if (GetFenceCount(currentPlayer) > Helper.MaxFences) return currentMoves;
-
-		foreach (var direction in Helper.Bits)
-		{
-			for (int i = 0; i < (Helper.BoardSize - 1) * (Helper.BoardSize - 1); i++)
-			{
-				if (!GetFenceEnabled(i, direction)) continue;
-
-                currentMoves.Add( Helper.GetMoveCodeAsString(currentPlayer, "f", direction, i));
-			}
-		}
-		return currentMoves;
-	}
-
-	public string[] GetAllMoves(int currentPlayer)
-	{
-		List<string> allMoves = [];
-
-		string shortestMove = GetShortestMove(currentPlayer);
-
-		if (shortestMove != "") allMoves.Add(shortestMove);
-
-		if (allMoves.Count == 0)
-		{
-			int playerPawnPosition = PawnPositions[currentPlayer];
-			GetReachableTiles(currentPlayer).ToList()
-			.ForEach(index => allMoves.Add(Helper.GetMoveCodeAsString(currentPlayer, "m", 0, index, playerPawnPosition)));
-		}
-
-		allMoves = GetAllFenceMoves(currentPlayer, allMoves);
-
-		return [.. allMoves.Distinct()];
-	}
-
-	public Dictionary<string, float> GetWeightedFenceMoves(int currentPlayer)
+	
+	public Dictionary<string, float> GetReachableTilesWeighted(int currentPlayer)
 	{
 		// Stores all possible moves with their weights
 		Dictionary<string, float> allMoves = [];
 
-		if (GetFenceCount(currentPlayer) > Helper.MaxFences) return allMoves;
+		int[] playerShortestPath = Algorithms.GetShortestPath(currentPlayer, this);
+		int[] playerReachableTiles = GetReachableTiles(currentPlayer);
+		int playerPawnPosition = PawnPositions[currentPlayer];
+
+		// Scale weight based on how far the player is from the goal
+		int weight = playerShortestPath.Length - 1;
+		
+
+		// Add best moves to the dictionary
+		for (int i = 0; i < playerShortestPath.Length; i++)
+		{
+			int tileIndex = playerShortestPath[i];
+
+			if (!playerReachableTiles.Contains(tileIndex)) continue;
+
+			allMoves[Helper.GetMoveCodeAsString(currentPlayer, "m", 0, tileIndex, playerPawnPosition)] = weight;
+		}
+
+		return allMoves;
+	}
+
+	public Dictionary<string, float> GetFenceMovesWeighted(int currentPlayer)
+	{
+		// Stores all possible moves with their weights
+		Dictionary<string, float> allMoves = [];
+
+		if (GetFenceCount(currentPlayer) >= Helper.MaxFences) return allMoves;
 
 		foreach (var direction in Helper.Bits)
 		{
@@ -333,8 +309,8 @@ public partial class BoardState : Control
 				float enemyFactor = -playerFactor;
 				float weight = 0;
 
-				weight += playerFactor * (relativeFenceIndex > relativePlayerIndex ? 2 : -10);
-                weight += enemyFactor * (relativeFenceIndex > relativeEnemyIndex ? 1 : -5);
+				weight += playerFactor * (relativeFenceIndex > relativePlayerIndex ? 4 : -8);
+                // weight += enemyFactor * (relativeFenceIndex > relativeEnemyIndex ? 1 : -2);
 				allMoves[Helper.GetMoveCodeAsString(currentPlayer, "f", direction, i)] = weight;
 			}
 		}
@@ -347,21 +323,18 @@ public partial class BoardState : Control
 		// Stores all possible moves with their weights
 		Dictionary<string, float> allMoves = [];
 
-		// Get the move which is the first in the shortest path
-		string shortestMove = GetShortestMove(currentPlayer);
-
-		// Add move to the dictionary with a weight of 3
-		if (shortestMove != "") allMoves[shortestMove] = 10;
-
+		// Get all reachable tiles
+		allMoves = GetReachableTilesWeighted(currentPlayer).ToDictionary(x => x.Key, x => x.Value);
 		// Add the fences
-		allMoves = allMoves.Concat(GetWeightedFenceMoves(currentPlayer)).ToDictionary(x => x.Key, x => x.Value);
+		allMoves = allMoves.Concat(GetFenceMovesWeighted(currentPlayer)).ToDictionary(x => x.Key, x => x.Value);
 
 		return allMoves;
 	}
 
-	#region  Evaluation ---
 	#endregion
 
+	#region  Evaluation ---
+	
 	public bool IsWinner(int player) => Helper.GetGoalTiles(player).Contains(GetPawnPosition(player));
 
 	public bool IsGameOver() => IsWinner(0) || IsWinner(1);
@@ -391,4 +364,6 @@ public partial class BoardState : Control
 
 		return isMaximising ? evaluation : -evaluation;
 	}
+
+	#endregion
 }
