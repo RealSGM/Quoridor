@@ -270,7 +270,7 @@ public partial class BoardState : Control
 
 			if (!reachableTiles.Contains(tileIndex)) continue;
 
-			return Helper.GetMoveCodeAsString(currentPlayer, "m", 0, tileIndex);
+			return Helper.GetMoveCodeAsString(currentPlayer, "m", 0, tileIndex, shortestPath[0]);
 		}
 
 		return "";
@@ -296,14 +296,15 @@ public partial class BoardState : Control
 	{
 		List<string> allMoves = [];
 
-		string shortesMove = GetShortestMove(currentPlayer);
+		string shortestMove = GetShortestMove(currentPlayer);
 
-		if (shortesMove != "") allMoves.Add(shortesMove);
+		if (shortestMove != "") allMoves.Add(shortestMove);
 
 		if (allMoves.Count == 0)
 		{
+			int playerPawnPosition = PawnPositions[currentPlayer];
 			GetReachableTiles(currentPlayer).ToList()
-			.ForEach(index => allMoves.Add(Helper.GetMoveCodeAsString(currentPlayer, "m", 0, index)));
+			.ForEach(index => allMoves.Add(Helper.GetMoveCodeAsString(currentPlayer, "m", 0, index, playerPawnPosition)));
 		}
 
 		allMoves = GetAllFenceMoves(currentPlayer, allMoves);

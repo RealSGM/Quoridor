@@ -55,7 +55,7 @@ public partial class Helper : Node
 	/// Returns the move code as a string
 	public static string GetMoveCodeAsString(int player, string moveType, int direction, int index, int previousIndex = -1)
 	{
-		string moveCode = $"{player}{moveType}{(direction == 1 ? "-" : "+")}{index}";
+		string moveCode = $"{player}{moveType}{(direction == 1 ? -index : index)}";
 
 		if (previousIndex != -1)
 			moveCode += $"_{previousIndex}";

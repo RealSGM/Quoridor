@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Godot;
 
 public class MCTSNode(MCTSNode parent, BoardState state, int player)
 {
@@ -27,7 +28,9 @@ public class MCTSNode(MCTSNode parent, BoardState state, int player)
 	// Expands the node by adding all moves that have not been explored yet
 	public MCTSNode Expand()
 	{
-		// TODO Run Illegal Fence Check
+		var illegalFenceCheck = new IllegalFenceCheck();
+		illegalFenceCheck.GetIllegalFences(State, CurrentPlayer);
+
 		string[] possibleMoves = State.GetAllMoves(CurrentPlayer);
 		HashSet<BoardState> exploredStates = [.. Children.Select(c => c.State)];
 
