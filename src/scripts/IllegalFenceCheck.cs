@@ -13,7 +13,7 @@ public partial class IllegalFenceCheck : Node
 		if (board.GetFenceCount(currentPlayer) == Helper.MaxFences) return;
 	
 		List<int> possibleFences = [.. board.GetPlacedFences()
-			.SelectMany(Helper.GetAllSurroundingFences)
+			.SelectMany(board.GetAllSurroundingFences)
 			.Where(fence => fence != -1)
 			.Distinct()];
 

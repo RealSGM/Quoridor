@@ -39,10 +39,19 @@ public partial class BoardState : Control
 
 	public void PrintAllMoves()
 	{
-		foreach (var move in GetAllMovesWeighted(1))
-		{
-			GD.Print($"{move.Key} : {move.Value}");
-		}
+		// foreach (var move in GetAllMovesWeighted(1))
+		// {
+		// 	GD.Print($"{move.Key} : {move.Value}");
+		// }
+		// var foo = GetPlacedFences();
+
+		// for (int i = 0; i < foo.Length; i++)
+		// {
+		// 	int fenceIndex = foo[i];
+		// 	GD.Print($"Fence {fenceIndex}: Placer: {Fences[fenceIndex].GetPlacedBy()}");
+		// 	var bar = GetAllSurroundingFences(fenceIndex);
+		// 	GD.Print($"Surrounding fences: {string.Join(", ", bar)}");
+		// }
 	}
 
 	#endregion
@@ -330,6 +339,68 @@ public partial class BoardState : Control
 
 		return allMoves;
 	}
+
+
+	public List<int> GetAllSurroundingFences(int fenceIndex)
+	{
+		List<int> surroundingFences = [];
+
+		// Get the fences that extend in the same direction
+		// Get the direction of the fence, and add the adjcent fences that align
+		int direction = Fences[fenceIndex].GetDirection(); 
+		int oppositeDirection = 1 - direction;
+		int[] adjFences = [.. Helper.InitialiseConnections(fenceIndex, Helper.BoardSize - 1).Where(fence => fence >= 0)];
+
+		// Leaped alligned fences
+		foreach (int bit in Helper.Bits)
+		{
+			// Get the adjacent fence
+			int adjIndex = (2 * bit) + oppositeDirection;
+			int adjFence = adjFences[adjIndex];
+
+			// Ignore if out of bounds
+			if (adjFence == -1) continue;
+
+			// Get the leaped adjacent fence
+			int leapedAdjFence = Helper.AdjacentFunctions[adjIndex](adjFence, Helper.BoardSize - 1);
+
+			// Ignore if out of bounds
+			if (leapedAdjFence == -1) continue;
+
+			// Ignore if the fence is already placed
+			if (!Fences[leapedAdjFence].IsFencePlaceable(direction)) continue;
+
+			// Convert fence index to mapped index using direction
+			surroundingFences.Add(Helper.GetMappedIndex(leapedAdjFence, direction));
+		}
+
+		// Perpundicular adjacent fences
+		foreach (int adjFence in adjFences)
+		{
+			// Ignore if out of bounds
+			if (adjFence == -1) continue;
+
+			// Ignore if the fence is already placed
+			if (!Fences[adjFence].IsFencePlaceable(oppositeDirection)) continue;
+
+			// Convert fence index to mapped index using direction
+			surroundingFences.Add(Helper.GetMappedIndex(adjFence, oppositeDirection));
+		}
+		
+		// Perpendicular corner fences
+		int[] cornerFences = [.. Helper.InitialiseCornerConnections(fenceIndex, Helper.BoardSize - 1)
+			.Where(fence => fence >= 0)];
+
+		surroundingFences.AddRange(cornerFences
+			.Where(cornerFence => Fences[cornerFence].IsFencePlaceable(oppositeDirection))
+			.Select(cornerFence => Helper.GetMappedIndex(cornerFence, oppositeDirection)));
+
+		return [.. surroundingFences.Distinct()];
+	}
+
+
+
+
 
 	#endregion
 

@@ -63,6 +63,8 @@ public partial class Helper : Node
 		return moveCode;
 	}
 
+	public static int GetMappedIndex(int index, int direction) => direction == 0 ? index : -index;
+
 	public static int GetNorthAdjacent(int index, int size) => index >= size ? index - size : -1;
 
 	public static int GetEastAdjacent(int index, int size) => (index + 1) % size != 0 ? index + 1 : -1;
@@ -109,24 +111,5 @@ public partial class Helper : Node
 	{
 		int startRow = player * (BoardSize - 1) * BoardSize;
 		return [.. Enumerable.Range(startRow, BoardSize)];
-	}
-
-	public static List<int> GetAllSurroundingFences(int fenceIndex)
-	{
-		List<int> surroundingFences = [];
-
-		int[] adjFences = [.. InitialiseConnections(fenceIndex, BoardSize - 1).Where(fence => fence >= 0)];
-		int[] cornerFences = [.. InitialiseCornerConnections(fenceIndex, BoardSize - 1).Where(fence => fence >= 0)];
-
-		// Add every adjacent fence and corner fence in both directions
-		foreach (int fenceDirection in Bits)
-		{
-			int mappedFenceDirection = fenceDirection == 0 ? 1 : -1;
-
-			surroundingFences.AddRange(adjFences.Select(fence => mappedFenceDirection * fence));
-			surroundingFences.AddRange(cornerFences.Select(fence => mappedFenceDirection * fence));
-		}
-
-		return [.. surroundingFences.Distinct()];
 	}
 }
