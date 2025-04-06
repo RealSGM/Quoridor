@@ -54,7 +54,7 @@ public class MCTSNode(MCTSNode parent, BoardState state, int player)
     }
 
 	// Simulates a game from the current state until it reaches a terminal state
-    public int Simulate(int simulatingPlayer, int maxPlayoutDepth = 200)
+    public int Simulate(int simulatingPlayer, int maxPlayoutDepth = 50)
     {
         BoardState tempState = State.Clone();
         int depth = 0;
@@ -91,33 +91,11 @@ public class MCTSNode(MCTSNode parent, BoardState state, int player)
                 }
             }
 
-            // Apply the selected move
-			try
-			{
-				tempState.AddMove(selectedMove);
-			}
-			catch (Exception e)
-			{
-				GD.PrintErr($"Error applying move {selectedMove}: {e}");
-				GD.Print($"Current Player: {CurrentPlayer}");
-				GD.Print($"State: {tempState}");
-				GD.Print($"Move: {selectedMove}");
-				GD.Print($"Depth: {depth}");
-				GD.Print($"Simulating Player: {CurrentPlayer}");
-				GD.Print($"Weighted Moves: {string.Join(", ", weightedMoves.Select(kvp => $"{kvp.Key}: {kvp.Value}"))}");
-				GD.Print($"Random Value: {randomValue}");
-				GD.Print($"Cumulative Weight: {cumulativeWeight}");
-				GD.Print($"Total Weight: {totalWeight}");
-				GD.Print($"Selected Move: {selectedMove}");
-				GD.Print("--------------------");
-				break;
-			}
-
+			tempState.AddMove(selectedMove);
             CurrentPlayer = 1 - CurrentPlayer;
             depth++;
         }
 
-        // Return the result of the simulation (win: 1, lose: 0, draw: 0.5, etc.)
         return tempState.GetGameResult(simulatingPlayer);
     }
 
