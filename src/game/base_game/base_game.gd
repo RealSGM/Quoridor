@@ -22,7 +22,7 @@ var fence_buttons: Array[FenceButton] = []
 @onready var move_code: String = "":
 	set(val):
 		if not move_code.is_empty():
-			var index: int = abs(move_code.substr(2).to_int())
+			var index: int = abs(move_code.split("_")[0].substr(2).to_int())
 			match move_code[1]:
 				# Clear current fence
 				"f":
@@ -49,7 +49,7 @@ func set_current_player(val: int) -> void:
 	set_tiles(board.GetPawnPosition(current_player))
 	update_fence_buttons()
 	user_interface.update_turn(val)
-	board.PrintAllMoves()
+	# board.PrintAllMoves()
 
 
 ## Disable all tiles, and reset their modulate
@@ -117,7 +117,7 @@ func update_fence_buttons() -> void:
 
 
 func confirm_place_fence(fence: int, direction: int) -> void:
-	user_interface.add_message("Add Fence: " + Helper.GetMoveString(fence, direction), current_player)
+	user_interface.add_message("Place: " + Helper.GetMoveCodeAsString(current_player, "f", direction, abs(fence), -1), current_player)
 	user_interface.update_fence_counts(current_player, Global.MAX_FENCES - board.GetFenceCount(current_player) - 1)
 
 
@@ -180,7 +180,7 @@ func confirm_move_pawn(tile: int) -> void:
 	tile_button.pawn_moved = true
 
 	# Update UI
-	user_interface.add_message("Move Pawn: " + str(tile), current_player)
+	user_interface.add_message("Shift: " + Helper.GetMoveCodeAsString(current_player, "m", 0, tile, current_position), current_player)
 
 
 #region Signals
@@ -194,7 +194,7 @@ func _on_directional_button_pressed() -> void:
 
 
 func _on_fence_button_pressed(fence: int, direction: int = Global.fence_direction) -> void:
-	move_code = "%sf%s" % [current_player, Helper.GetMoveString(fence, direction)]
+	move_code = Helper.GetMoveCodeAsString(current_player, "f", direction, fence, -1)
 	var fence_button: FenceButton = fence_buttons[fence]
 	fence_button.h_fence.visible = direction == 0
 	fence_button.v_fence.visible = direction != 0
@@ -206,9 +206,13 @@ func _on_fence_button_pressed(fence: int, direction: int = Global.fence_directio
 	fence_button.v_fence.modulate = Global.players[current_player]["color"]
 
 
+# Format: 0a1_2
+# 0: Player, 
+# a: Move Type, 
+# 1: Tile To, 
+# 2: Tile From, 
 func _on_tile_pressed(tile: int) -> void:
-	move_code = "%sm%s" % [current_player, Helper.GetMoveString(tile, 0)]
-
+	move_code = Helper.GetMoveCodeAsString(current_player, "m", 0, tile, board.GetPawnPosition(current_player))
 	var pawn: Panel = tile_buttons[tile].pawns[current_player]
 	pawn.modulate.a = 0.5
 	pawn.show()
@@ -218,11 +222,12 @@ func _on_confirm_pressed() -> void:
 	reset_board()
 	user_interface.confirm_button.disabled = true
 	user_interface.undo_button.disabled = false
-	var index: int = move_code.substr(3).to_int()
+	var index: int = move_code.split("_")[0].substr(2).to_int()
+	var direction: int = 1 if index < 0 else 0
+	index = abs(index)
 
 	match move_code[1]:
 		"f":
-			var direction: int = 0 if move_code[2] == "+" else 1
 			confirm_place_fence(index, direction)
 		"m":
 			confirm_move_pawn(index)
@@ -255,13 +260,13 @@ func undo_board_ui() -> void:
 		"f":
 			fence_buttons[abs(last_move.substr(2).to_int())].clear_fences()
 			user_interface.fence_count_labels[player].text = str(board.GetFenceCount(player))
-			user_interface.add_message("Undo Place Fence: " + last_move.substr(2), 2)
+			user_interface.add_message("Undo Place: " + last_move, 2)
 		"m":
 			var moves_filtered: String = last_move.split("m")[1]
 			var moves: Array = moves_filtered.split("_")
 			tile_buttons[moves[0].to_int()].pawns[abs(last_move[0].to_int())].hide()
 			tile_buttons[moves[1].to_int()].pawns[abs(last_move[0].to_int())].show()
-			user_interface.add_message("Undo Move Pawn: " + moves[0], 2)
+			user_interface.add_message("Undo Shift: " + last_move, 2)
 
 
 func finish_undo_board() -> void:

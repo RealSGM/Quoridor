@@ -66,7 +66,7 @@ public partial class BoardState : Control
 	#region Player Moves ---
 	#endregion
 
-	public void MovePawn(int tileIndex, int currentPlayer) => PawnPositions[currentPlayer] = (byte)tileIndex;
+	public void ShiftPawn(int tileIndex, int currentPlayer) => PawnPositions[currentPlayer] = (byte)tileIndex;
 
 	public void RemoveTileConnection(int tileIndex, int tileToRemove)
 	{
@@ -95,19 +95,15 @@ public partial class BoardState : Control
 
 	public void AddMove(string code)
 	{
-		int currentPlayer = int.Parse(code[0].ToString());
-		char moveType = code[1];
-		int direction = code[2] == '-' ? 1 : 0;
-		int value = int.Parse(code[3..]);
+		var (currentPlayer, moveType, direction, index, _) = Helper.GetMoveCodeAsTuple(code);
 
 		switch (moveType)
 		{
-			case 'm':
-				code += "_" + GetPawnPosition(currentPlayer);
-				MovePawn(value, currentPlayer);
+			case "m":
+				ShiftPawn(index, currentPlayer);
 				break;
-			case 'f':
-				PlaceFence(direction, value, currentPlayer);
+			case "f":
+				PlaceFence(direction, index, currentPlayer);
 				break;
 		}
 
@@ -120,16 +116,16 @@ public partial class BoardState : Control
 	private string UndoMove()
 	{
 		string LastMove = GetLastMove();
-		if (LastMove == "") return "";
+		var (_, moveType, _, _, _) = Helper.GetMoveCodeAsTuple(LastMove);
 
-		char moveType = LastMove[1];
+		if (LastMove == "") return "";
 
 		switch (moveType)
 		{
-			case 'm':
+			case "m":
 				UndoPawnMove();
 				break;
-			case 'f':
+			case "f":
 				UndoFenceMove();
 				break;
 		}
@@ -143,9 +139,8 @@ public partial class BoardState : Control
 	private void UndoPawnMove()
 	{
 		string LastMove = GetLastMove();
-		int player = int.Parse(LastMove[0].ToString());
-		int position = int.Parse(LastMove.Split('_')[1]);
-		MovePawn(position, player);
+		var (player, _, _, _, newPosition) = Helper.GetMoveCodeAsTuple(LastMove);
+		ShiftPawn(newPosition, player);
 	}
 
 	private void AddTileConnection(int tileIndex, int tileToAdd)
@@ -160,16 +155,12 @@ public partial class BoardState : Control
 	private void UndoFenceMove()
 	{
 		string LastMove = GetLastMove();
-		// Separate the fence index and direction
-		int[] moveCode = Helper.GetMoveCode(LastMove[2..]);
+		var (_, _, direction, index, _) = Helper.GetMoveCodeAsTuple(LastMove);
 
-		int direction = moveCode[1];
-		int fence = moveCode[0];
-
-		Fences[fence] = new Fence();
+		Fences[index] = new Fence();
 
 		// Convert the index to a 2D grid index
-		int convertedIndex = fence + (fence / (Helper.BoardSize - 1));
+		int convertedIndex = index + (index / (Helper.BoardSize - 1));
 		// Get possible tile indexes in 2x2 grid
 		int[] tileGrid = Helper.GetTileGrid(convertedIndex, Helper.BoardSize);
 
@@ -279,7 +270,7 @@ public partial class BoardState : Control
 
 			if (!reachableTiles.Contains(tileIndex)) continue;
 
-			return $"{currentPlayer}m{Helper.GetMoveString(tileIndex, 0)}";
+			return Helper.GetMoveCodeAsString(currentPlayer, "m", 0, tileIndex);
 		}
 
 		return "";
@@ -295,7 +286,7 @@ public partial class BoardState : Control
 			{
 				if (!GetFenceEnabled(i, direction)) continue;
 
-                currentMoves.Add($"{currentPlayer}f{Helper.GetMoveString(i, direction)}");
+                currentMoves.Add( Helper.GetMoveCodeAsString(currentPlayer, "f", direction, i));
 			}
 		}
 		return currentMoves;
@@ -312,7 +303,7 @@ public partial class BoardState : Control
 		if (allMoves.Count == 0)
 		{
 			GetReachableTiles(currentPlayer).ToList()
-			.ForEach(index => allMoves.Add($"{currentPlayer}m{Helper.GetMoveString(index, 0)}"));
+			.ForEach(index => allMoves.Add(Helper.GetMoveCodeAsString(currentPlayer, "m", 0, index)));
 		}
 
 		allMoves = GetAllFenceMoves(currentPlayer, allMoves);
@@ -343,8 +334,7 @@ public partial class BoardState : Control
 
 				weight += playerFactor * (relativeFenceIndex > relativePlayerIndex ? 2 : -10);
                 weight += enemyFactor * (relativeFenceIndex > relativeEnemyIndex ? 1 : -5);
-				
-				allMoves[$"{currentPlayer}f{Helper.GetMoveString(i, direction)}"] = weight;
+				allMoves[Helper.GetMoveCodeAsString(currentPlayer, "f", direction, i)] = weight;
 			}
 		}
 
@@ -360,7 +350,7 @@ public partial class BoardState : Control
 		string shortestMove = GetShortestMove(currentPlayer);
 
 		// Add move to the dictionary with a weight of 3
-		if (shortestMove != "") allMoves[shortestMove] = 3;
+		if (shortestMove != "") allMoves[shortestMove] = 10;
 
 		// Add the fences
 		allMoves = allMoves.Concat(GetWeightedFenceMoves(currentPlayer)).ToDictionary(x => x.Key, x => x.Value);

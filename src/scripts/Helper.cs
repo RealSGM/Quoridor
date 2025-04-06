@@ -34,14 +34,33 @@ public partial class Helper : Node
 		GetWestAdjacent
 	];
 
-	public static string GetMoveString(int index, int direction = 0) => $"{(direction == 1 ? "-" : "+")}{index}";
-
-	public static int[] GetMoveCode(string moveCode)
+	/// Separates the move code into its components
+	public static (int, string, int, int, int) GetMoveCodeAsTuple(string moveCode)
 	{
-		int direction = moveCode[0] == '-' ? 1 : 0;
-		int index = int.Parse(moveCode[1..]);
+		// Template: 0m12_13, 1m1_2, 1f5, 1f-5, 0f24, 0f-24
+		string[] filteredMoveCode = moveCode.Split('_');
+		string cleanedMoveCode = filteredMoveCode[0];
 
-		return [index, direction];
+		int previousIndex = filteredMoveCode.Length > 1 ? int.Parse(filteredMoveCode[1]) : -1;
+		int player = int.Parse(cleanedMoveCode[0].ToString());
+		string moveType = cleanedMoveCode[1].ToString();
+		int moveIndex = int.Parse(cleanedMoveCode[2..]);
+
+		int index = Math.Abs(moveIndex);
+		int direction = moveIndex < 0 ? 1 : 0;
+
+		return (player, moveType, direction, index, previousIndex);
+	}
+
+	/// Returns the move code as a string
+	public static string GetMoveCodeAsString(int player, string moveType, int direction, int index, int previousIndex = -1)
+	{
+		string moveCode = $"{player}{moveType}{(direction == 1 ? "-" : "+")}{index}";
+
+		if (previousIndex != -1)
+			moveCode += $"_{previousIndex}";
+
+		return moveCode;
 	}
 
 	public static int GetNorthAdjacent(int index, int size) => index >= size ? index - size : -1;
