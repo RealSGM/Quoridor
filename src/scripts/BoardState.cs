@@ -135,7 +135,7 @@ public partial class BoardState : Control
 		switch (moveType)
 		{
 			case "m":
-				UndoPawnMove();
+				UndoShiftPawn();
 				break;
 			case "f":
 				UndoFenceMove();
@@ -148,7 +148,7 @@ public partial class BoardState : Control
 		return returnLastMove;
 	}
 
-	private void UndoPawnMove()
+	private void UndoShiftPawn()
 	{
 		string LastMove = GetLastMove();
 		var (player, _, _, _, newPosition) = Helper.GetMoveCodeAsTuple(LastMove);
