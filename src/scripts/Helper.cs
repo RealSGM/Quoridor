@@ -10,21 +10,16 @@ public partial class Helper : Node
 	public static readonly int PATH_WEIGHT = 25;
 	public static readonly int FENCE_WEIGHT = 2;
 
-	public static readonly int PlayerCount = 2;
 	public static readonly int MaxFences = 10;
 	public static readonly int BoardSize = 9;
-	public static readonly int FenceSize = 8;
 
 	public static readonly int[] Bits = [0, 1];
-	public static readonly int[] CardinalDirections = [0, 1, 2, 3];
 
 	public static readonly int[][][] DefaultTileGridConnections =
 	[
 		[[0, 2], [1, 3]],
 		[[0, 1], [2, 3]]
 	];
-
-	public static readonly int[] AdjacentOffsets = [-BoardSize, 1, BoardSize, -1];
 
 	public static readonly List<Func<int, int, int>> AdjacentFunctions =
 	[
