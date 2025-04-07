@@ -306,25 +306,15 @@ public partial class BoardState : Control
 
 		if (GetFenceCount(currentPlayer) >= Helper.MaxFences) return allMoves;
 
-		// Add horizontal fences which are behind the player
-		for (int i = 0; i < (Helper.BoardSize - 1) * (Helper.BoardSize - 1); i++)
-		{
-			if (!GetFenceEnabled(i, 0)) continue;
-
-			float relativePlayerIndex = PawnPositions[currentPlayer] / Helper.BoardSize + 0.5f;
-			float relativeFenceIndex = i / (Helper.BoardSize - 1);
-
-			if (currentPlayer == 0 && relativeFenceIndex < relativePlayerIndex) continue;
-			if (currentPlayer == 1 && relativeFenceIndex > relativePlayerIndex) continue;
-
-			// If this key already exists, it will be overwritten with the new weight (5)
-			allMoves[Helper.GetMoveCodeAsString(currentPlayer, "f", 0, i)] = 5;
-		}
-
 		List<int> surroundingFences = [.. GetPlacedFences()
 			.SelectMany(GetAllSurroundingFences)
-			.Where(fence => fence != -1)
-			.Distinct()];
+			.Where(fence => fence != -1)];
+		
+		// Add horizontal fences which are behind the player
+		surroundingFences.AddRange(Enumerable.Range(0, (Helper.BoardSize - 1) * (Helper.BoardSize - 1))
+			.Where(i => GetFenceEnabled(i, 0))
+			.Select(i => Helper.GetMappedIndex(i, 0))
+			.Distinct());
 
 		foreach (int fenceIndex in surroundingFences)
 		{
@@ -332,6 +322,12 @@ public partial class BoardState : Control
 			int index = Math.Abs(fenceIndex);
 
 			if (!GetFenceEnabled(index, 1)) continue;
+
+			float relativePlayerIndex = PawnPositions[currentPlayer] / Helper.BoardSize + 0.5f;
+			float relativeFenceIndex = index / (Helper.BoardSize - 1);
+
+			if (currentPlayer == 0 && relativeFenceIndex < relativePlayerIndex) continue;
+			if (currentPlayer == 1 && relativeFenceIndex > relativePlayerIndex) continue;
 
 			string moveCode = Helper.GetMoveCodeAsString(currentPlayer, "f", direction, index);
 
