@@ -39,10 +39,10 @@ public partial class BoardState : Control
 
 	public void PrintAllMoves()
 	{
-		// foreach (var move in GetAllMovesWeighted(1))
-		// {
-		// 	GD.Print($"{move.Key} : {move.Value}");
-		// }
+		foreach (var move in GetAllMovesWeighted(1))
+		{
+			GD.Print($"{move.Key} : {move.Value}");
+		}
 		// var foo = GetPlacedFences();
 
 		// for (int i = 0; i < foo.Length; i++)
@@ -280,18 +280,20 @@ public partial class BoardState : Control
 		int[] playerReachableTiles = GetReachableTiles(currentPlayer);
 		int playerPawnPosition = PawnPositions[currentPlayer];
 
-		// Scale weight based on how far the player is from the goal
-		int weight = playerShortestPath.Length - 1;
-		
-
-		// Add best moves to the dictionary
-		for (int i = 0; i < playerShortestPath.Length; i++)
+		// Add best moves which are reachable
+		foreach (int tileIndex in playerShortestPath.Intersect(playerReachableTiles))
 		{
-			int tileIndex = playerShortestPath[i];
+			allMoves[Helper.GetMoveCodeAsString(currentPlayer, "m", 0, tileIndex, playerPawnPosition)] = 10;
+		}
 
-			if (!playerReachableTiles.Contains(tileIndex)) continue;
-
-			allMoves[Helper.GetMoveCodeAsString(currentPlayer, "m", 0, tileIndex, playerPawnPosition)] = weight;
+		// Add reachable tiles to the dictionary, if no best move was found
+		if (allMoves.Count == 0)
+		{
+			// Add all reachable tiles to the dictionary
+			foreach (int tileIndex in playerReachableTiles)
+			{
+				allMoves[Helper.GetMoveCodeAsString(currentPlayer, "m", 0, tileIndex, playerPawnPosition)] = 1;
+			}
 		}
 
 		return allMoves;
@@ -304,24 +306,40 @@ public partial class BoardState : Control
 
 		if (GetFenceCount(currentPlayer) >= Helper.MaxFences) return allMoves;
 
-		foreach (var direction in Helper.Bits)
+		// Add horizontal fences which are behind the player
+		for (int i = 0; i < (Helper.BoardSize - 1) * (Helper.BoardSize - 1); i++)
 		{
-			for (int i = 0; i < (Helper.BoardSize - 1) * (Helper.BoardSize - 1); i++)
-			{
-				if (!GetFenceEnabled(i, direction)) continue;
+			if (!GetFenceEnabled(i, 0)) continue;
 
-				// Convert pawn positions and fence as int to relative fence row as a float
-				float relativePlayerIndex = PawnPositions[currentPlayer] / Helper.BoardSize + 0.5f;
-				float relativeEnemyIndex = PawnPositions[1 - currentPlayer] / Helper.BoardSize  + 0.5f;
-				float relativeFenceIndex = i / (Helper.BoardSize - 1);
-				float playerFactor = currentPlayer == 0 ? 1 : -1;
-				float enemyFactor = -playerFactor;
-				float weight = 0;
+			float relativePlayerIndex = PawnPositions[currentPlayer] / Helper.BoardSize + 0.5f;
+			float relativeFenceIndex = i / (Helper.BoardSize - 1);
 
-				weight += playerFactor * (relativeFenceIndex > relativePlayerIndex ? 4 : -8);
-                // weight += enemyFactor * (relativeFenceIndex > relativeEnemyIndex ? 1 : -2);
-				allMoves[Helper.GetMoveCodeAsString(currentPlayer, "f", direction, i)] = weight;
-			}
+			if (currentPlayer == 0 && relativeFenceIndex < relativePlayerIndex) continue;
+			if (currentPlayer == 1 && relativeFenceIndex > relativePlayerIndex) continue;
+
+			// If this key already exists, it will be overwritten with the new weight (5)
+			allMoves[Helper.GetMoveCodeAsString(currentPlayer, "f", 0, i)] = 5;
+		}
+
+		List<int> surroundingFences = [.. GetPlacedFences()
+			.SelectMany(GetAllSurroundingFences)
+			.Where(fence => fence != -1)
+			.Distinct()];
+
+		foreach (int fenceIndex in surroundingFences)
+		{
+			int direction = fenceIndex < 0 ? 1 : 0;
+			int index = Math.Abs(fenceIndex);
+
+			if (!GetFenceEnabled(index, 1)) continue;
+
+			string moveCode = Helper.GetMoveCodeAsString(currentPlayer, "f", direction, index);
+
+			// If the key already exists, we don't add it again, preventing duplicate keys
+			if (allMoves.ContainsKey(moveCode)) continue;
+
+			// Add the fence to the dictionary
+			allMoves[moveCode] = 5;
 		}
 
 		return allMoves;
@@ -329,23 +347,14 @@ public partial class BoardState : Control
 
 	public Dictionary<string, float> GetAllMovesWeighted(int currentPlayer)
 	{
-		// Stores all possible moves with their weights
-		Dictionary<string, float> allMoves = GetFenceMovesWeighted(currentPlayer).ToDictionary(x => x.Key, x => x.Value);
+		Dictionary<string, float> allMoves = [];
+		
+		allMoves = GetReachableTilesWeighted(currentPlayer)
+			.ToDictionary(x => x.Key, x => x.Value);
 
-		Dictionary<string, float> weightedTiles = GetReachableTilesWeighted(currentPlayer).ToDictionary(x => x.Key, x => x.Value);
-
-		float maxFenceWeight = allMoves.Count > 0 ? allMoves.Values.Max() : 0;
-		float maxTileWeight = weightedTiles.Count > 0 ? weightedTiles.Values.Max() : 0;
-
-		foreach (var tile in weightedTiles.Where(tile => tile.Value == maxTileWeight))
-		{
-			allMoves[tile.Key] = maxFenceWeight; // Overwrite or add
-		}
-
-		foreach (var kvp in weightedTiles)
-		{
-			allMoves[kvp.Key] = kvp.Value; // Overwrite or add
-		}
+		allMoves = allMoves
+			.Concat(GetFenceMovesWeighted(currentPlayer))
+			.ToDictionary(x => x.Key, x => x.Value);
 
 		return allMoves;
 	}
@@ -358,7 +367,7 @@ public partial class BoardState : Control
 		// Get the direction of the fence, and add the adjcent fences that align
 		int direction = Fences[fenceIndex].GetDirection(); 
 		int oppositeDirection = 1 - direction;
-		int[] adjFences = [.. Helper.InitialiseConnections(fenceIndex, Helper.BoardSize - 1).Where(fence => fence >= 0)];
+		int[] adjFences = [.. Helper.InitialiseConnections(fenceIndex, Helper.BoardSize - 1)];
 
 		// Leaped alligned fences
 		foreach (int bit in Helper.Bits)
