@@ -7,10 +7,16 @@ using System.Threading.Tasks;
 [GlobalClass]
 public partial class IllegalFenceCheck : Node
 {
-	public static void GetIllegalFences(BoardState board, int currentPlayer)
+	public void GetIllegalFences(BoardState board, int currentPlayer)
 	{
 		// Ignore if player has no more fences
 		if (board.GetFenceCount(currentPlayer) == Helper.MaxFences) return;
+
+		foreach (Fence fence in board.GetFences())
+		{
+			fence.SetIllegal(0, false);
+			fence.SetIllegal(1, false);
+		}
 	
 		List<int> possibleFences = [.. board.GetPlacedFences()
 			.SelectMany(board.GetAllSurroundingFences)

@@ -330,16 +330,25 @@ public partial class BoardState : Control
 	public Dictionary<string, float> GetAllMovesWeighted(int currentPlayer)
 	{
 		// Stores all possible moves with their weights
-		Dictionary<string, float> allMoves = [];
+		Dictionary<string, float> allMoves = GetFenceMovesWeighted(currentPlayer).ToDictionary(x => x.Key, x => x.Value);
 
-		// Get all reachable tiles
-		allMoves = GetReachableTilesWeighted(currentPlayer).ToDictionary(x => x.Key, x => x.Value);
-		// Add the fences
-		allMoves = allMoves.Concat(GetFenceMovesWeighted(currentPlayer)).ToDictionary(x => x.Key, x => x.Value);
+		Dictionary<string, float> weightedTiles = GetReachableTilesWeighted(currentPlayer).ToDictionary(x => x.Key, x => x.Value);
+
+		float maxFenceWeight = allMoves.Count > 0 ? allMoves.Values.Max() : 0;
+		float maxTileWeight = weightedTiles.Count > 0 ? weightedTiles.Values.Max() : 0;
+
+		foreach (var tile in weightedTiles.Where(tile => tile.Value == maxTileWeight))
+		{
+			allMoves[tile.Key] = maxFenceWeight; // Overwrite or add
+		}
+
+		foreach (var kvp in weightedTiles)
+		{
+			allMoves[kvp.Key] = kvp.Value; // Overwrite or add
+		}
 
 		return allMoves;
 	}
-
 
 	public List<int> GetAllSurroundingFences(int fenceIndex)
 	{
@@ -397,10 +406,6 @@ public partial class BoardState : Control
 
 		return [.. surroundingFences.Distinct()];
 	}
-
-
-
-
 
 	#endregion
 
