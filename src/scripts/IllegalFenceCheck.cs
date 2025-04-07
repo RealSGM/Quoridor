@@ -12,6 +12,7 @@ public partial class IllegalFenceCheck : Node
 		// Ignore if player has no more fences
 		if (board.GetFenceCount(currentPlayer) == Helper.MaxFences) return;
 
+		// Reset all fences to legal, incase pawn shift occurs
 		foreach (Fence fence in board.GetFences())
 		{
 			fence.SetIllegal(0, false);
