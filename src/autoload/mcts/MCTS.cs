@@ -3,8 +3,8 @@ using System.Linq;
 
 public partial class MCTS : Node
 {
-	private const int SIMULATIONS = 4000;  // Increased simulations for better decision-making
-	private const double EXPLORATION_CONSTANT = 10; // sqrt(2), UCB1 exploration factor
+	private const int SIMULATIONS = 1000;  // Increased simulations for better decision-making
+	private const double EXPLORATION_CONSTANT = 1.41; // sqrt(2), UCB1 exploration factor
 
 	Window Console;
 
@@ -22,7 +22,8 @@ public partial class MCTS : Node
 
 		MCTSNode bestChild = root.Children.OrderByDescending(c => c.Visits).First();
 
-		GD.Print($"Best Move: {bestChild.State.GetLastMove()}, Wins: {bestChild.Wins}, Visits: {bestChild.Visits}");
+		Console = GetNode<Window>("Console");
+		Console.Call("add_entry", $"Best Move: {bestChild.State.GetLastMove()}, Wins: {bestChild.Wins}, Visits: {bestChild.Visits}", 0);
 		return bestChild.State.GetLastMove().Split('_')[0];
 	}
 }
