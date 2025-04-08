@@ -29,17 +29,15 @@ public class MCTSNode(MCTSNode parent, BoardState state, int player)
     public MCTSNode Expand()
     {
         // Get all possible moves with their weights
-        Dictionary<string, float> weightedMoves = State.GetAllMovesWeighted(CurrentPlayer);
+        List<string> allMoves = [.. State.GetAllMovesWeighted(CurrentPlayer).Select(kvp => kvp.Key)];
+        allMoves = [.. allMoves.OrderBy(_ => Helper.Random.Next())];
         HashSet<BoardState> exploredStates = [.. Children.Select(c => c.State)];
 
-		foreach (var move in weightedMoves.OrderByDescending(m => m.Value))
+		foreach (string move in allMoves)
 		{
-            string moveString = move.Key;
-            float moveWeight = move.Value;
-
             // Clone the current state to simulate the move
             BoardState newState = State.Clone();
-            newState.AddMove(moveString);
+            newState.AddMove(move);
 
             // If the move leads to a state that hasn't been explored yet, add it as a child
             if (!exploredStates.Contains(newState))
@@ -63,34 +61,12 @@ public class MCTSNode(MCTSNode parent, BoardState state, int player)
         // While the game is not over and the simulation depth is not reached
         while (!tempState.IsGameOver() && depth < maxPlayoutDepth)
         {
-            // Get all possible weighted moves
-            Dictionary<string, float> rawMoves = tempState.GetAllMovesWeighted(CurrentPlayer);
+            List<string> allMoves = [.. State.GetAllMovesWeighted(CurrentPlayer).Select(kvp => kvp.Key)];
+            allMoves = [.. allMoves.OrderBy(_ => Helper.Random.Next())];
 
-			if (rawMoves.Count == 0) break;
+			if (allMoves.Count == 0) break;
 
-			// Normalize weights
-			float minWeight = rawMoves.Values.Min();
-			float offset = Math.Abs(minWeight) + 0.001f;
-			var weightedMoves = rawMoves.ToDictionary(kv => kv.Key, kv => kv.Value + offset);
-
-            if (weightedMoves.Count == 0) break;
-
-            // Select a random move based on its weight
-            float totalWeight = weightedMoves.Values.Sum();
-            float randomValue = (float)(random.NextDouble() * totalWeight);
-            float cumulativeWeight = 0f;
-            string selectedMove = null;
-
-            foreach (var move in weightedMoves)
-            {
-                cumulativeWeight += move.Value;
-                if (randomValue <= cumulativeWeight)
-                {
-                    selectedMove = move.Key;
-                    break;
-                }
-            }
-
+            string selectedMove = allMoves[0];
 			tempState.AddMove(selectedMove);
             CurrentPlayer = 1 - CurrentPlayer;
             depth++;

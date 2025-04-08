@@ -3,13 +3,17 @@ using System.Linq;
 
 public partial class MCTS : Node
 {
-	private const int SIMULATIONS = 1000;  // Increased simulations for better decision-making
+	private const int SIMULATIONS = 4000;  // Increased simulations for better decision-making
 	private const double EXPLORATION_CONSTANT = 1.41; // sqrt(2), UCB1 exploration factor
 
 	Window Console;
 
 	public string GetMove(BoardState board, int currentPlayer, bool _isMaximising = false, bool _isDebugging = false)
 	{
+		Console = GetNode<Window>("/root/Console");
+		Console.Call("add_entry", "Creating Game Tree...", 0);
+		ulong startTime = Time.GetTicksMsec();
+
 		MCTSNode root = new(null, board, currentPlayer);
 
 		for (int i = 0; i < SIMULATIONS; i++)
@@ -22,7 +26,7 @@ public partial class MCTS : Node
 
 		MCTSNode bestChild = root.Children.OrderByDescending(c => c.Visits).First();
 
-		Console = GetNode<Window>("/root/Console");
+		Console.Call("add_entry", "Found Best Move in " + (Time.GetTicksMsec() - startTime) + " ms", 0);
 		Console.Call("add_entry", $"Best Move: {bestChild.State.GetLastMove()}, Wins: {bestChild.Wins}, Visits: {bestChild.Visits}", 0);
 		return bestChild.State.GetLastMove().Split('_')[0];
 	}
