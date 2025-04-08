@@ -7,7 +7,7 @@ using Godot;
 public partial class Helper : Node
 {
 	public static readonly Random Random = new();
-	public const int PATH_WEIGHT = 10;
+	public const int PATH_WEIGHT = 20;
 	public const int FENCE_WEIGHT = 20;
 	public const int MaxFences = 10;
 	public const int BoardSize = 9;

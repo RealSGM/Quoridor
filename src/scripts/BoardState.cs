@@ -52,10 +52,10 @@ public partial class BoardState : Control
 		// GD.Print($"Relative Player Index: {relativePlayerIndex}");
 		// GD.Print($"Relative Starting Tiles: {relativeStartingTiles}");
 		// GD.Print($"Distance: {distance}");
-		foreach (var move in GetAllMovesWeighted(currentPlayer))
-		{
-			GD.Print(move);
-		}
+		// foreach (var move in GetAllMovesWeighted(currentPlayer))
+		// {
+		// 	GD.Print(move);
+		// }
 		// var foo = GetPlacedFences();
 
 		// for (int i = 0; i < foo.Length; i++)
@@ -487,23 +487,18 @@ public partial class BoardState : Control
 
 	public int EvaluateBoard(bool isMaximising = true, int currentPlayer = 0)
 	{
+		int evaluation = 0;
+
 		// Calculate the score, relative to the current player, where negative is not in favour of the player
 		int playerPath = Algorithms.GetShortestPath(currentPlayer, this).Length;
 		int opponentPath = Algorithms.GetShortestPath(1 - currentPlayer, this).Length;
-		int evaluation = (opponentPath - playerPath) * Helper.PATH_WEIGHT;
 		
-		// Get the row at which the player is
-		int relativePlayerIndex = PawnPositions[currentPlayer] / Helper.BoardSize;
-		
-		// Get the row at which the player's starting position is
-		int relativeStartingTiles = Helper.GetGoalTiles(1 - currentPlayer)[0] / Helper.BoardSize;
-		
-		// Calculate the distance between the player and the starting tiles
-		int distance = Helper.BoardSize - (relativePlayerIndex - relativeStartingTiles) * (currentPlayer == 1 ? -1 : 1);
-		evaluation -= Math.Max(0, distance) * Helper.PATH_WEIGHT;
+		// Calculate who has used more fences
+		int fenceScore = GetFenceCount(1 - currentPlayer) - GetFenceCount(currentPlayer);
 
-		// Add +- random value to the evaluation score to avoid ties
-		evaluation += Helper.Random.Next(-1, 2);
+		evaluation += (opponentPath - playerPath) * Helper.PATH_WEIGHT;
+		evaluation += fenceScore * Helper.FENCE_WEIGHT;
+		evaluation += Helper.Random.Next(-5, 5);
 
 		return isMaximising ? evaluation : -evaluation;
 	}

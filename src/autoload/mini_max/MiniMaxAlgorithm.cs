@@ -1,5 +1,6 @@
 using Godot;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 public partial class MiniMaxAlgorithm : Node
@@ -52,6 +53,8 @@ public partial class MiniMaxAlgorithm : Node
 		string bestMove = moves[0];
 		int bestValue = isMaximising ? int.MinValue : int.MaxValue;
 
+		Dictionary<string, int> moveScores = [];
+
 		// Recursively call MiniMax for each move for the current player
 		foreach (string move in moves)
 		{
@@ -60,6 +63,8 @@ public partial class MiniMaxAlgorithm : Node
 
 			// Value return: Negative number better for player 1, positive number better for player 0, 0 is a neutral standing
 			int value = MiniMax(newBoard, depth - 1, !isMaximising, 1 - currentPlayer, alpha, beta).v;
+
+			moveScores[move] = value;
 
 			if (debugging && depth == START_DEPTH) Console.Call("add_entry", $"Move: {move}, Value: {value}, Depth: {depth}, Player: {currentPlayer}, Last Move: {board.GetLastMove()}", 0);
 
@@ -78,6 +83,19 @@ public partial class MiniMaxAlgorithm : Node
 
 			if (beta <= alpha) break;
 		}
+
+		if (depth == START_DEPTH)
+		{
+			// Sort moves by score
+			moveScores = moveScores.OrderByDescending(x => x.Value).ToDictionary(x => x.Key, x => x.Value);
+
+			// Print sorted moves
+			foreach (var kvp in moveScores)
+			{
+				Console.Call("add_entry", $"Move: {kvp.Key}, Value: {kvp.Value}", 0);
+			}
+		}
+		
 
 		return (bestValue, bestMove);
 	}
