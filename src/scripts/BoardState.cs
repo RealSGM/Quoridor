@@ -39,9 +39,9 @@ public partial class BoardState : Control
 
 	public void PrintAllMoves()
 	{
-		foreach (var move in GetAllMovesWeighted(1))
+		foreach (var move in GetAllMoves(1))
 		{
-			GD.Print($"{move.Key} : {move.Value}");
+			GD.Print(move);
 		}
 		// var foo = GetPlacedFences();
 
@@ -246,7 +246,7 @@ public partial class BoardState : Control
 
 	/// Check if the fence at the respective index and direction can be placed
 	/// Check if the adjacent fences have been placed in the same direction
-	public bool GetFenceEnabled(int fence, int direction)
+	public bool IsFenceEnabled(int fence, int direction)
 	{
 		// Return false if the fence is already placed
 		if (!Fences[fence].IsFencePlaceable(direction)) return false;
@@ -312,7 +312,7 @@ public partial class BoardState : Control
 		
 		// Add horizontal fences which are behind the player
 		surroundingFences.AddRange(Enumerable.Range(0, (Helper.BoardSize - 1) * (Helper.BoardSize - 1))
-			.Where(i => GetFenceEnabled(i, 0))
+			.Where(i => IsFenceEnabled(i, 0))
 			.Select(i => Helper.GetMappedIndex(i, 0))
 			.Distinct());
 
@@ -321,7 +321,7 @@ public partial class BoardState : Control
 			int direction = fenceIndex < 0 ? 1 : 0;
 			int index = Math.Abs(fenceIndex);
 
-			if (!GetFenceEnabled(index, 1)) continue;
+			if (!IsFenceEnabled(index, 1)) continue;
 
 			float relativePlayerIndex = PawnPositions[currentPlayer] / Helper.BoardSize + 0.5f;
 			float relativeFenceIndex = index / (Helper.BoardSize - 1);
@@ -410,6 +410,36 @@ public partial class BoardState : Control
 			.Select(cornerFence => Helper.GetMappedIndex(cornerFence, oppositeDirection)));
 
 		return [.. surroundingFences.Distinct()];
+	}
+
+	public string[] GetAllFences(int currentPlayer)
+	{
+		List<string> allFences = [];
+
+		if (GetFenceCount(currentPlayer) >= Helper.MaxFences) return [.. allFences];
+
+		foreach (int direction in Helper.Bits)
+		{
+			for (int i = 0; i < Fences.Length; i++)
+			{
+				if (!IsFenceEnabled(i, direction)) continue;
+				allFences.Add(Helper.GetMoveCodeAsString(currentPlayer, "f", direction, i));
+			}
+		}
+
+		return [.. allFences.Distinct()];
+	}
+
+	public List<string> GetAllMoves(int currentPlayer)
+	{
+		List<string> allMoves = [];
+
+		allMoves.AddRange(GetReachableTiles(currentPlayer)
+			.Select(tileIndex => Helper.GetMoveCodeAsString(currentPlayer, "m", 0, tileIndex)));
+
+		allMoves.AddRange(GetAllFences(currentPlayer));
+
+		return allMoves;
 	}
 
 	#endregion

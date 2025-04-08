@@ -31,7 +31,7 @@ public partial class IllegalFenceCheck : Node
 
 			board.GetFences()[index].SetIllegal(direction, false);
 
-			if (!board.GetFenceEnabled(index, direction)) return;
+			if (!board.IsFenceEnabled(index, direction)) return;
 
 			Parallel.ForEach(Helper.Bits, player =>
 			{
