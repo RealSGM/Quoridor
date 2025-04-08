@@ -22,7 +22,8 @@ public partial class MCTS : Node
 
 		MCTSNode bestChild = root.Children.OrderByDescending(c => c.Visits).First();
 
-		GD.Print($"Best Move: {bestChild.State.GetLastMove()}, Wins: {bestChild.Wins}, Visits: {bestChild.Visits}");
+		Console = GetNode<Window>("Console");
+		Console.Call("add_entry", $"Best Move: {bestChild.State.GetLastMove()}, Wins: {bestChild.Wins}, Visits: {bestChild.Visits}", 0);
 		return bestChild.State.GetLastMove().Split('_')[0];
 	}
 }
