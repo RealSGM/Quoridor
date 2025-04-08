@@ -46,7 +46,7 @@ public partial class MiniMaxAlgorithm : Node
 		// Check for winner
 		if (board.IsWinner(1 - currentPlayer)) return (int.MaxValue, board.GetLastMove());
 		if (board.IsWinner(currentPlayer)) return (int.MinValue, board.GetLastMove());
-		if (depth == 0) return (board.EvaluateBoard(START_DEPTH % 2 == 1), board.GetLastMove());
+		if (depth == 0) return (board.EvaluateBoard(!isMaximising, 1 - currentPlayer), board.GetLastMove());
 
 		string[] moves = [.. board.GetAllMovesWeighted(currentPlayer).Keys];
 		string bestMove = moves[0];

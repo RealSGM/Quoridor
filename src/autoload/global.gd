@@ -33,7 +33,7 @@ func clear() -> String:
 func evaluate_board(is_maximising: bool) -> String:
 	if !game:
 		return "Game not started"
-	return "Evaluation: %s, Last Move: %s" % [game.board.EvaluateBoard(is_maximising), game.board.GetLastMove()]
+	return "Evaluation: %s, Last Move: %s" % [game.board.EvaluateBoard(is_maximising, 0), game.board.GetLastMove()]
 
 
 func get_move_history() -> String:
