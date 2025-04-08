@@ -7,11 +7,10 @@ using Godot;
 public partial class Helper : Node
 {
 	public static readonly Random Random = new();
-	public static readonly int PATH_WEIGHT = 25;
-	public static readonly int FENCE_WEIGHT = 2;
-
-	public static readonly int MaxFences = 10;
-	public static readonly int BoardSize = 9;
+	public const int PATH_WEIGHT = 25;
+	public const int FENCE_WEIGHT = 2;
+	public const int MaxFences = 10;
+	public const int BoardSize = 9;
 
 	public static readonly int[] Bits = [0, 1];
 
@@ -29,20 +28,21 @@ public partial class Helper : Node
 		GetWestAdjacent
 	];
 
+	#region Move Codes ---
+
 	/// Separates the move code into its components
-	public static (int, string, int, int, int) GetMoveCodeAsTuple(string moveCode)
+	/// Template: 0m12_13, 1m1_2, 1f5, 1f-5, 0f24, 0f-24
+	public static (int player, string moveType, int direction, int index, int previousIndex) GetMoveCodeAsTuple(string moveCode)
 	{
-		// Template: 0m12_13, 1m1_2, 1f5, 1f-5, 0f24, 0f-24
+		// Separate previousIndex from moveCode
+		string[] parts = moveCode.Split('_');
+		int previousIndex = parts.Length > 1 ? int.Parse(parts[1]) : -1;
+		moveCode = parts[0];
 
-		string[] filteredMoveCode = moveCode.Split('_');
-		string cleanedMoveCode = filteredMoveCode[0];
-
-		int previousIndex = filteredMoveCode.Length > 1 ? int.Parse(filteredMoveCode[1]) : -1;
-
-		int player = int.Parse(cleanedMoveCode[0].ToString());
-		string moveType = cleanedMoveCode[1].ToString();
-		int direction = cleanedMoveCode[2] == '-' ? 1 : 0;
-		int index = int.Parse(cleanedMoveCode[3..]);
+		int player = int.Parse(moveCode[0].ToString());
+		string moveType = moveCode[1].ToString();
+		int direction = moveCode[2] == '-' ? 1 : 0;
+		int index = int.Parse(moveCode[3..]);
 
 		return (player, moveType, direction, index, previousIndex);
 	}
@@ -61,6 +61,7 @@ public partial class Helper : Node
 
 	public static string GetMappedIndex(int index, int direction) => $"{(direction == 0 ? "+" : "-")}{Math.Abs(index)}";
 	
+	#endregion
 
 	public static int GetNorthAdjacent(int index, int size) => index >= size ? index - size : -1;
 
@@ -70,20 +71,12 @@ public partial class Helper : Node
 
 	public static int GetWestAdjacent(int index, int size) => index % size != 0 ? index - 1 : -1;
 
-	public static int GetNorthEastAdjacent(int index, int size) => GetNorthAdjacent(GetEastAdjacent(index, size), size);
-
-	public static int GetSouthEastAdjacent(int index, int size) => GetSouthAdjacent(GetEastAdjacent(index, size), size);
-
-	public static int GetSouthWestAdjacent(int index, int size) => GetSouthAdjacent(GetWestAdjacent(index, size), size);
-
-	public static int GetNorthWestAdjacent(int index, int size) => GetNorthAdjacent(GetWestAdjacent(index, size), size);
-
 	public static int[] InitialiseCornerConnections(int index, int size) =>
 	[
-		GetNorthEastAdjacent(index, size),
-		GetSouthEastAdjacent(index, size),
-		GetSouthWestAdjacent(index, size),
-		GetNorthWestAdjacent(index, size)
+		GetNorthAdjacent(GetEastAdjacent(index, size), size),
+		GetSouthAdjacent(GetEastAdjacent(index, size), size),
+		GetSouthAdjacent(GetWestAdjacent(index, size), size),
+		GetNorthAdjacent(GetWestAdjacent(index, size), size),
 	];
 
 	// Initalise the NESW connections for given index
