@@ -37,12 +37,12 @@ public partial class BoardState : Control
 
 	public int[] GetTileConnections(int tileIndex) => Tiles[tileIndex].GetConnections();
 
-	public void PrintAllMoves()
+	public void PrintAllMoves(int currentPlayer)
 	{
-		// foreach (var move in GetAllMoves(1))
-		// {
-			// GD.Print(move);
-		// }
+		foreach (var move in GetAllMovesWeighted(currentPlayer))
+		{
+			GD.Print(move);
+		}
 		// var foo = GetPlacedFences();
 
 		// for (int i = 0; i < foo.Length; i++)
@@ -256,9 +256,6 @@ public partial class BoardState : Control
 
 		foreach (int bit in Helper.Bits)
 		{
-			// bit = 0, 1
-			// polarDirection = 0, 2 if direction = 1
-			// polarDirection = 1, 3 if direction = 0
 			int polarDirection = 2 * bit + (1 - direction);
 
 			int adjfence = Helper.AdjacentFunctions[polarDirection](fence, Helper.BoardSize - 1);
@@ -383,7 +380,7 @@ public partial class BoardState : Control
 			if (!IsFenceEnabled(index, 1)) continue;
 
 			float relativePlayerIndex = PawnPositions[currentPlayer] / Helper.BoardSize + 0.5f;
-			float relativeFenceIndex = index / (Helper.BoardSize - 1);
+			float relativeFenceIndex = index / (Helper.BoardSize - 1) + 1;
 
 			if (currentPlayer == 0 && relativeFenceIndex < relativePlayerIndex) continue;
 			if (currentPlayer == 1 && relativeFenceIndex > relativePlayerIndex) continue;

@@ -3,7 +3,7 @@ using System.Linq;
 
 public partial class MCTS : Node
 {
-	private const int SIMULATIONS = 4000;  // Increased simulations for better decision-making
+	private const int SIMULATIONS = 1000;  // Increased simulations for better decision-making
 	private const double EXPLORATION_CONSTANT = 1.41; // sqrt(2), UCB1 exploration factor
 
 	Window Console;
