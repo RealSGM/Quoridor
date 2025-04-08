@@ -48,7 +48,7 @@ func set_current_player(val: int) -> void:
 	set_tiles(board.GetPawnPosition(current_player))
 	update_fence_buttons()
 	user_interface.update_turn(val)
-	board.PrintAllMoves()
+	board.PrintAllMoves(current_player)
 
 
 ## Disable all tiles, and reset their modulate
@@ -219,8 +219,10 @@ func _on_tile_pressed(tile: int) -> void:
 
 func _on_confirm_pressed() -> void:
 	reset_board()
+	
 	user_interface.confirm_button.disabled = true
 	user_interface.undo_button.disabled = false
+	
 	var index: int = move_code.split("_")[0].substr(2).to_int()
 	var direction: int = 1 if index < 0 else 0
 	index = abs(index)
@@ -249,6 +251,9 @@ func _on_undo_button_pressed() -> void:
 	finish_undo_board()
 
 	current_player = 1 - current_player
+	
+	if board.GetMoveHistory() == "":
+		user_interface.undo_button.disabled = true
 
 
 func undo_board_ui() -> void:
