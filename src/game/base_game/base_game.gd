@@ -22,13 +22,12 @@ var fence_buttons: Array[FenceButton] = []
 @onready var move_code: String = "":
 	set(val):
 		if not move_code.is_empty():
-			var index: int = abs(move_code.split("_")[0].substr(2).to_int())
+			var index: int = abs(move_code.split("_")[0].substr(3).to_int())
+			
 			match move_code[1]:
-				# Clear current fence
 				"f":
 					if !board.IsFencePlaced(index):
 						fence_buttons[index].clear_fences()
-				# Clear current tile
 				"m":
 					tile_buttons[index].clear_pawns()
 		move_code = val
@@ -258,7 +257,7 @@ func undo_board_ui() -> void:
 
 	match last_move[1]:
 		"f":
-			fence_buttons[abs(last_move.substr(2).to_int())].clear_fences()
+			fence_buttons[abs(last_move.substr(3).to_int())].clear_fences()
 			user_interface.fence_count_labels[player].text = str(board.GetFenceCount(player))
 			user_interface.add_message("Undo Place: " + last_move, 2)
 		"m":

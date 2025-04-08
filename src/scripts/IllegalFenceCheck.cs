@@ -19,15 +19,15 @@ public partial class IllegalFenceCheck : Node
 			fence.SetIllegal(1, false);
 		}
 	
-		List<int> possibleFences = [.. board.GetPlacedFences()
+		List<string> possibleFences = [.. board.GetPlacedFences()
 			.SelectMany(board.GetAllSurroundingFences)
-			.Where(fence => fence != -1)
+			.Where(fence => fence != "")
 			.Distinct()];
 
 		Parallel.ForEach(possibleFences, fence =>
 		{
-			int index = Math.Abs(fence);
-			int direction = fence < 0 ? 1 : 0;
+			int index = int.Parse(fence[1..]);
+			int direction = fence[0] == '+' ? 0 : 1;
 
 			board.GetFences()[index].SetIllegal(direction, false);
 

@@ -39,10 +39,10 @@ public partial class BoardState : Control
 
 	public void PrintAllMoves()
 	{
-		foreach (var move in GetAllMoves(1))
-		{
-			GD.Print(move);
-		}
+		// foreach (var move in GetAllMoves(1))
+		// {
+			// GD.Print(move);
+		// }
 		// var foo = GetPlacedFences();
 
 		// for (int i = 0; i < foo.Length; i++)
@@ -306,20 +306,22 @@ public partial class BoardState : Control
 
 		if (GetFenceCount(currentPlayer) >= Helper.MaxFences) return allMoves;
 
-		List<int> surroundingFences = [.. GetPlacedFences()
+		List<string> surroundingFences = [.. GetPlacedFences()
 			.SelectMany(GetAllSurroundingFences)
-			.Where(fence => fence != -1)];
+			.Where(fence => fence != "")];
 		
 		// Add horizontal fences which are behind the player
-		surroundingFences.AddRange(Enumerable.Range(0, (Helper.BoardSize - 1) * (Helper.BoardSize - 1))
-			.Where(i => IsFenceEnabled(i, 0))
-			.Select(i => Helper.GetMappedIndex(i, 0))
-			.Distinct());
+		surroundingFences.AddRange(
+			Enumerable.Range(0, (Helper.BoardSize - 1) * (Helper.BoardSize - 1))
+				.Where(i => IsFenceEnabled(i, 0))
+				.Select(i => Helper.GetMappedIndex(i, 0))
+				.Except(surroundingFences)
+		);
 
-		foreach (int fenceIndex in surroundingFences)
+		foreach (string fenceIndex in surroundingFences)
 		{
-			int direction = fenceIndex < 0 ? 1 : 0;
-			int index = Math.Abs(fenceIndex);
+			int direction = fenceIndex[0].ToString() == "+" ? 0 : 1;
+			int index = int.Parse(fenceIndex[1..]);
 
 			if (!IsFenceEnabled(index, 1)) continue;
 
@@ -355,9 +357,9 @@ public partial class BoardState : Control
 		return allMoves;
 	}
 
-	public List<int> GetAllSurroundingFences(int fenceIndex)
+	public List<string> GetAllSurroundingFences(int fenceIndex)
 	{
-		List<int> surroundingFences = [];
+		List<string> surroundingFences = [];
 
 		// Get the fences that extend in the same direction
 		// Get the direction of the fence, and add the adjcent fences that align

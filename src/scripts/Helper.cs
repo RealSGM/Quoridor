@@ -33,24 +33,25 @@ public partial class Helper : Node
 	public static (int, string, int, int, int) GetMoveCodeAsTuple(string moveCode)
 	{
 		// Template: 0m12_13, 1m1_2, 1f5, 1f-5, 0f24, 0f-24
+
 		string[] filteredMoveCode = moveCode.Split('_');
 		string cleanedMoveCode = filteredMoveCode[0];
 
 		int previousIndex = filteredMoveCode.Length > 1 ? int.Parse(filteredMoveCode[1]) : -1;
+
 		int player = int.Parse(cleanedMoveCode[0].ToString());
 		string moveType = cleanedMoveCode[1].ToString();
-		int moveIndex = int.Parse(cleanedMoveCode[2..]);
-
-		int index = Math.Abs(moveIndex);
-		int direction = moveIndex < 0 ? 1 : 0;
+		int direction = cleanedMoveCode[2] == '-' ? 1 : 0;
+		int index = int.Parse(cleanedMoveCode[3..]);
 
 		return (player, moveType, direction, index, previousIndex);
 	}
 
 	/// Returns the move code as a string
+	/// Template: 0m+12_13, 1m+1_2, 1f+5, 1f-5, 0f+24, 0f-24
 	public static string GetMoveCodeAsString(int player, string moveType, int direction, int index, int previousIndex = -1)
 	{
-		string moveCode = $"{player}{moveType}{(direction == 1 ? -index : index)}";
+		string moveCode = $"{player}{moveType}{(direction == 1 ? "-" : "+")}{Math.Abs(index)}";
 
 		if (previousIndex != -1)
 			moveCode += $"_{previousIndex}";
@@ -58,7 +59,8 @@ public partial class Helper : Node
 		return moveCode;
 	}
 
-	public static int GetMappedIndex(int index, int direction) => direction == 0 ? index : -index;
+	public static string GetMappedIndex(int index, int direction) => $"{(direction == 0 ? "+" : "-")}{Math.Abs(index)}";
+	
 
 	public static int GetNorthAdjacent(int index, int size) => index >= size ? index - size : -1;
 
