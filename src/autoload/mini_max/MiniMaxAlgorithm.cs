@@ -35,7 +35,7 @@ public partial class MiniMaxAlgorithm : Node
 		// Set first move depth to 1, as first move is super time consuming
 		string moveHistory = board.GetMoveHistory();
 		string[] moves = moveHistory.ToString().Split([';'], StringSplitOptions.RemoveEmptyEntries);
-		START_DEPTH = moves.Length <= 2 ? 1 : 3;
+		START_DEPTH = moves.Length <= 2 ? 1 : 4;
 	}
 
 
