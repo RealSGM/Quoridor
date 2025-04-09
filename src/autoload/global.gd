@@ -33,7 +33,9 @@ func clear() -> String:
 func evaluate_board(is_maximising: bool) -> String:
 	if !game:
 		return "Game not started"
-	return "Evaluation: %s, Last Move: %s" % [game.board.EvaluateBoard(is_maximising, 0), game.board.GetLastMove()]
+	var evaluation: int = game.board.EvaluateBoard(is_maximising)
+	var last_move: String = game.board.GetLastMove()
+	return "Evaluation: %s, Last Move: %s" % [evaluation, last_move]
 
 
 func get_move_history() -> String:
@@ -139,4 +141,19 @@ func print_tiles() -> String:
 			connections_string += " %s " % connection
 
 		text += "Tile %s:  [ %s ] \n" % [index, connections_string]
+	return text
+
+
+func evaluate_all_moves() -> String:
+	if !game:
+		return "Game not started"
+
+	var text: String = ""
+
+	for move: String in game.board.GetAllMoves(game.current_player):
+		var temp_state: BoardState = game.board.Clone()
+		temp_state.AddMove(move)
+		var evaluation: int = temp_state.EvaluateBoard(game.current_player)
+		text += "Move %s: %s\n" % [move, evaluation]
+
 	return text

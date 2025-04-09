@@ -393,7 +393,7 @@ public partial class BoardState : Control
 			int direction = fenceIndex[0].ToString() == "+" ? 0 : 1;
 			int index = int.Parse(fenceIndex[1..]);
 
-			if (!IsFenceEnabled(index, 1)) continue;
+			if (!IsFenceEnabled(index, direction)) continue;
 
 			float relativePlayerIndex = PawnPositions[currentPlayer] / Helper.BoardSize + 0.5f;
 			float relativeFenceIndex = index / (Helper.BoardSize - 1) + 1;
@@ -439,7 +439,6 @@ public partial class BoardState : Control
 		return allMoves;
 	}
 
-
 	public string[] GetAllFences(int currentPlayer)
 	{
 		List<string> allFences = [];
@@ -458,7 +457,7 @@ public partial class BoardState : Control
 		return [.. allFences.Distinct()];
 	}
 
-	public List<string> GetAllMoves(int currentPlayer)
+	public string[] GetAllMoves(int currentPlayer)
 	{
 		List<string> allMoves = [];
 
@@ -467,7 +466,7 @@ public partial class BoardState : Control
 
 		allMoves.AddRange(GetAllFences(currentPlayer));
 
-		return allMoves;
+		return [.. allMoves.Distinct()];
 	}
 
 	#endregion
@@ -485,22 +484,22 @@ public partial class BoardState : Control
 		return 0;
 	}
 
-	public int EvaluateBoard(bool isMaximising = true, int currentPlayer = 0)
+
+	/// Evaluate the board state 
+	public int EvaluateBoard(int maximisingPlayer)
 	{
+		int minimisingPlayer = 1 - maximisingPlayer;
+
+		int maximisingPlayerPath = Algorithms.GetShortestPath(maximisingPlayer, this).Length;
+		int minimisingPlayerPath = Algorithms.GetShortestPath(minimisingPlayer, this).Length;
+		int pathDifference = minimisingPlayerPath - maximisingPlayerPath;
+		int fenceScore = GetFenceCount(minimisingPlayer) - GetFenceCount(maximisingPlayer);
+
 		int evaluation = 0;
-
-		// Calculate the score, relative to the current player, where negative is not in favour of the player
-		int playerPath = Algorithms.GetShortestPath(currentPlayer, this).Length;
-		int opponentPath = Algorithms.GetShortestPath(1 - currentPlayer, this).Length;
-		
-		// Calculate who has used more fences
-		int fenceScore = GetFenceCount(1 - currentPlayer) - GetFenceCount(currentPlayer);
-
-		evaluation += (opponentPath - playerPath) * Helper.PATH_WEIGHT;
+		evaluation += pathDifference * Helper.PATH_WEIGHT;
 		evaluation += fenceScore * Helper.FENCE_WEIGHT;
-		evaluation += Helper.Random.Next(-5, 5);
 
-		return isMaximising ? evaluation : -evaluation;
+		return evaluation;
 	}
 
 	#endregion

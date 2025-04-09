@@ -21,7 +21,7 @@ public partial class MiniMaxAlgorithm : Node
 		debugging = isDebugging;
 		nodesVisited = 1;
 
-		ValueTuple<int, string> bestMoveTuple = MiniMax(board, START_DEPTH, isMaximising, currentPlayer, int.MinValue, int.MaxValue);
+		ValueTuple<int, string> bestMoveTuple = MiniMax(board, START_DEPTH, currentPlayer, currentPlayer, int.MinValue, int.MaxValue);
 		string bestMove = bestMoveTuple.Item2;
 		int bestValue = bestMoveTuple.Item1;
 
@@ -40,17 +40,17 @@ public partial class MiniMaxAlgorithm : Node
 	}
 
 
-	private (int v, string m) MiniMax(BoardState board, int depth, bool isMaximising, int currentPlayer, int alpha, int beta)
+	private (int v, string m) MiniMax(BoardState board, int depth, int currentPlayer, int maximisingPlayer, int alpha, int beta)
 	{
 		nodesVisited++;
 
-		// Check for winner
+		// Check for winner before evaluating, and before expanding further
 		if (board.IsWinner(1 - currentPlayer)) return (int.MaxValue, board.GetLastMove());
 		if (board.IsWinner(currentPlayer)) return (int.MinValue, board.GetLastMove());
-		if (depth == 0) return (board.EvaluateBoard(!isMaximising, 1 - currentPlayer), board.GetLastMove());
+		if (depth == 0) return (board.EvaluateBoard(maximisingPlayer), board.GetLastMove());
 
 		string[] moves = [.. board.GetAllMovesWeighted(currentPlayer).Keys];
-		string bestMove = moves[0];
+		bool isMaximising = currentPlayer == maximisingPlayer;
 		int bestValue = isMaximising ? int.MinValue : int.MaxValue;
 
 		Dictionary<string, int> moveScores = [];
@@ -61,21 +61,13 @@ public partial class MiniMaxAlgorithm : Node
 			BoardState newBoard = board.Clone();
 			newBoard.AddMove(move);
 
-			// Value return: Negative number better for player 1, positive number better for player 0, 0 is a neutral standing
-			int value = MiniMax(newBoard, depth - 1, !isMaximising, 1 - currentPlayer, alpha, beta).v;
-
+			int value = MiniMax(newBoard, depth - 1, 1 - currentPlayer, maximisingPlayer, alpha, beta).v;
+			newBoard.Free();
+			
 			moveScores[move] = value;
 
-			if (debugging && depth == START_DEPTH) Console.Call("add_entry", $"Move: {move}, Value: {value}, Depth: {depth}, Player: {currentPlayer}, Last Move: {board.GetLastMove()}", 0);
-
-			newBoard.Free();
-
-			// Update best move and best value
-			if ((isMaximising && value > bestValue) || (!isMaximising && value < bestValue))
-			{
-				bestValue = value;
-				bestMove = move;
-			}
+			// Update best value
+			bestValue = isMaximising ? Math.Max(bestValue, value) : Math.Min(bestValue, value);
 
 			// Alpha-beta pruning
 			if (isMaximising) alpha = Math.Max(alpha, value);
@@ -84,20 +76,20 @@ public partial class MiniMaxAlgorithm : Node
 			if (beta <= alpha) break;
 		}
 
+		/// DEBUGGING
 		if (depth == START_DEPTH)
 		{
-			// Sort moves by score
-			moveScores = moveScores.OrderByDescending(x => x.Value).ToDictionary(x => x.Key, x => x.Value);
-
 			// Print sorted moves
-			foreach (var kvp in moveScores)
+			foreach (var kvp in moveScores.OrderByDescending(x => x.Value))
 			{
 				Console.Call("add_entry", $"Move: {kvp.Key}, Value: {kvp.Value}", 0);
 			}
 		}
-		
 
-		return (bestValue, bestMove);
+		// Filter dictionary to only include moves with the best value
+		moveScores = moveScores.Where(x => x.Value == bestValue).ToDictionary(x => x.Key, x => x.Value);
+
+		return (bestValue, moveScores.Keys.ElementAt(Helper.Random.Next(0, moveScores.Count)));
 	}
 
 }
