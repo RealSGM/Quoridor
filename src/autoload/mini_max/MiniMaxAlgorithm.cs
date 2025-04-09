@@ -39,7 +39,6 @@ public partial class MiniMaxAlgorithm : Node
 		START_DEPTH = moves.Length <= 2 ? 1 : 3;
 	}
 
-
 	private (int v, string m) MiniMax(BoardState board, int depth, int currentPlayer, int maximisingPlayer, int alpha, int beta)
 	{
 		nodesVisited++;
@@ -50,6 +49,8 @@ public partial class MiniMaxAlgorithm : Node
 		if (depth == 0) return (board.EvaluateBoard(maximisingPlayer), board.GetLastMove());
 
 		string[] moves = [.. board.GetAllMovesWeighted(currentPlayer).Keys];
+		// string[] moves = board.GetAllMoves(currentPlayer);
+
 		bool isMaximising = currentPlayer == maximisingPlayer;
 		int bestValue = isMaximising ? int.MinValue : int.MaxValue;
 
@@ -91,5 +92,4 @@ public partial class MiniMaxAlgorithm : Node
 
 		return (bestValue, moveScores.Keys.ElementAt(Helper.Random.Next(0, moveScores.Count)));
 	}
-
 }

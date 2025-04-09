@@ -8,7 +8,7 @@ public partial class Helper : Node
 {
 	public static readonly Random Random = new();
 	public const int PATH_WEIGHT = 20;
-	public const int FENCE_WEIGHT = 20;
+	public const int FENCE_WEIGHT = 10;
 	public const int MaxFences = 10;
 	public const int BoardSize = 9;
 
@@ -101,5 +101,13 @@ public partial class Helper : Node
 	{
 		int startRow = player * (BoardSize - 1) * BoardSize;
 		return [.. Enumerable.Range(startRow, BoardSize)];
+	}
+
+	public static int GetFenceCorner(int tile, int offset, int cornerIndex)
+	{
+		if (tile == -1) return -1;
+		int row = tile / BoardSize;
+		int col = tile % BoardSize;
+		return (row + offset) * (BoardSize - 1) + col + (cornerIndex % 2 == 0 ? -1 : 0);
 	}
 }

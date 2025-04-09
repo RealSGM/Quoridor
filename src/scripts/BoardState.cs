@@ -39,32 +39,7 @@ public partial class BoardState : Control
 
 	public void PrintAllMoves(int currentPlayer)
 	{
-		// // Get the row at which the player is
-		// int relativePlayerIndex = PawnPositions[currentPlayer] / Helper.BoardSize;
-		
-		// // Get the row at which the player's starting position is
-		// int relativeStartingTiles = Helper.GetGoalTiles(1 - currentPlayer)[0] / Helper.BoardSize;
-
-		// int distance = (relativePlayerIndex - relativeStartingTiles) * (currentPlayer == 1 ? -1 : 1);
-
-		// GD.Print($"Player: {currentPlayer}");
-		// GD.Print($"Pawn Position: {PawnPositions[currentPlayer]}");
-		// GD.Print($"Relative Player Index: {relativePlayerIndex}");
-		// GD.Print($"Relative Starting Tiles: {relativeStartingTiles}");
-		// GD.Print($"Distance: {distance}");
-		// foreach (var move in GetAllMovesWeighted(currentPlayer))
-		// {
-		// 	GD.Print(move);
-		// }
-		// var foo = GetPlacedFences();
-
-		// for (int i = 0; i < foo.Length; i++)
-		// {
-		// 	int fenceIndex = foo[i];
-		// 	GD.Print($"Fence {fenceIndex}: Placer: {Fences[fenceIndex].GetPlacedBy()}");
-		// 	var bar = GetAllSurroundingFences(fenceIndex);
-		// 	GD.Print($"Surrounding fences: {string.Join(", ", bar)}");
-		// }
+		GetTileAdjacentFences(currentPlayer);
 	}
 
 	#endregion
@@ -307,8 +282,8 @@ public partial class BoardState : Control
 			// Ignore if out of bounds
 			if (leapedAdjFence == -1) continue;
 
-			// Ignore if the fence is already placed
-			if (!Fences[leapedAdjFence].IsFencePlaceable(direction)) continue;
+			// Ignore not enabled fences
+			if (!IsFenceEnabled(leapedAdjFence, direction)) continue;
 
 			// Convert fence index to mapped index using direction
 			surroundingFences.Add(Helper.GetMappedIndex(leapedAdjFence, direction));
@@ -320,8 +295,8 @@ public partial class BoardState : Control
 			// Ignore if out of bounds
 			if (adjFence == -1) continue;
 
-			// Ignore if the fence is already placed
-			if (!Fences[adjFence].IsFencePlaceable(oppositeDirection)) continue;
+			// Ignore not enabled fences
+			if (!IsFenceEnabled(adjFence, oppositeDirection)) continue;
 
 			// Convert fence index to mapped index using direction
 			surroundingFences.Add(Helper.GetMappedIndex(adjFence, oppositeDirection));
@@ -332,7 +307,7 @@ public partial class BoardState : Control
 			.Where(fence => fence >= 0)];
 
 		surroundingFences.AddRange(cornerFences
-			.Where(cornerFence => Fences[cornerFence].IsFencePlaceable(oppositeDirection))
+			.Where(cornerFence => IsFenceEnabled(cornerFence, oppositeDirection))
 			.Select(cornerFence => Helper.GetMappedIndex(cornerFence, oppositeDirection)));
 
 		return [.. surroundingFences.Distinct()];
@@ -366,6 +341,29 @@ public partial class BoardState : Control
 		return allMoves;
 	}
 
+	public List<string> GetTileAdjacentFences(int player)
+	{
+		
+
+		int playerPawnPosition = PawnPositions[player];
+		int[] connections = Tiles[playerPawnPosition].GetConnections();
+
+		int[] fenceCorners = [
+			Helper.GetFenceCorner(connections[0], 0, 0),
+			Helper.GetFenceCorner(connections[0], 0, 1),
+			Helper.GetFenceCorner(connections[2], -1, 2),
+			Helper.GetFenceCorner(connections[2], -1, 3),
+		];
+
+		List<string> allMoves = [.. fenceCorners
+			.Where(index => index != -1)
+			.SelectMany(index => Helper.Bits
+				.Where(direction => IsFenceEnabled(index, direction))
+				.Select(direction => Helper.GetMappedIndex(index, direction)))];
+
+		return allMoves;
+	}
+
 	public Dictionary<string, float> GetFenceMovesWeighted(int currentPlayer)
 	{
 		// Stores all possible moves with their weights
@@ -373,6 +371,7 @@ public partial class BoardState : Control
 
 		if (GetFenceCount(currentPlayer) >= Helper.MaxFences) return allMoves;
 
+		// Get all surrounding fences as a string mappedIndexes
 		List<string> surroundingFences = [.. GetPlacedFences()
 			.SelectMany(GetAllSurroundingFences)
 			.Where(fence => fence != "")];
@@ -387,6 +386,9 @@ public partial class BoardState : Control
 					.Where(mappedIndex => !surroundingFences.Contains(mappedIndex))
 			);
 		}
+
+		// Add fences that surround the enemy
+		surroundingFences.AddRange(GetTileAdjacentFences(1 - currentPlayer));
 
 		foreach (string fenceIndex in surroundingFences)
 		{
@@ -411,7 +413,6 @@ public partial class BoardState : Control
 		}
 
 		// Loop through all fence moves and make sure the fence is placeable
-
 		allMoves = allMoves
 			.Where(pair =>
 			{
@@ -484,7 +485,6 @@ public partial class BoardState : Control
 		return 0;
 	}
 
-
 	/// Evaluate the board state 
 	public int EvaluateBoard(int maximisingPlayer)
 	{
@@ -496,6 +496,7 @@ public partial class BoardState : Control
 		int fenceScore = GetFenceCount(minimisingPlayer) - GetFenceCount(maximisingPlayer);
 
 		int evaluation = 0;
+
 		evaluation += pathDifference * Helper.PATH_WEIGHT;
 		evaluation += fenceScore * Helper.FENCE_WEIGHT;
 
