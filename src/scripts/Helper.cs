@@ -60,7 +60,7 @@ public partial class Helper : Node
 	}
 
 	public static string GetMappedIndex(int index, int direction) => $"{(direction == 0 ? "+" : "-")}{Math.Abs(index)}";
-	
+
 	#endregion
 
 	public static int GetNorthAdjacent(int index, int size) => index >= size ? index - size : -1;

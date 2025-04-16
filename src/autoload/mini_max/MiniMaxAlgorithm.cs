@@ -64,7 +64,7 @@ public partial class MiniMaxAlgorithm : Node
 
 			int value = MiniMax(newBoard, depth - 1, 1 - currentPlayer, maximisingPlayer, alpha, beta).v;
 			newBoard.Free();
-			
+
 			moveScores[move] = value;
 
 			// Update best value

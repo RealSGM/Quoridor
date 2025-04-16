@@ -45,7 +45,7 @@ public partial class BoardState : Control
 	#endregion
 
 	#region Getters ---
-	
+
 	public Fence[] GetFences() => Fences;
 
 	public Tile[] GetTiles() => Tiles;
@@ -64,7 +64,7 @@ public partial class BoardState : Control
 	#endregion
 
 	#region Player Moves ---
-	
+
 	public void ShiftPawn(int tileIndex, int currentPlayer) => PawnPositions[currentPlayer] = (byte)tileIndex;
 
 	public void RemoveTileConnection(int tileIndex, int tileToRemove)
@@ -112,7 +112,7 @@ public partial class BoardState : Control
 	#endregion
 
 	#region Undo Move ---
-	
+
 	private string UndoMove()
 	{
 		string LastMove = GetLastMove();
@@ -174,7 +174,7 @@ public partial class BoardState : Control
 	#endregion
 
 	#region Tiles ---
-	
+
 	/// Enemy is on an adjacent tile to the Player
 	/// Check if the leaped tile is not blocked by a fence
 	public int[] GetLeapedTiles(int playerPawnPosition, int enemyPawnPosition, int leapedTileIndex)
@@ -220,7 +220,7 @@ public partial class BoardState : Control
 	{
 		int playerPawnPosition = PawnPositions[player];
 		Tile playerPawnTile = Tiles[playerPawnPosition];
-		
+
 		return [.. playerPawnTile.GetConnections()
 			.Where(connectedTile => connectedTile != -1)
 			.SelectMany(connectedTile => CheckForEnemy(connectedTile, player))];
@@ -229,7 +229,7 @@ public partial class BoardState : Control
 	#endregion
 
 	#region Fences ---
-	
+
 	public int GetFenceCount(int player) => Fences.Count(fence => fence.GetPlacedBy() == player);
 
 	/// Check if the fence at the respective index and direction can be placed
@@ -254,16 +254,16 @@ public partial class BoardState : Control
 	}
 
 	#endregion
-	
+
 	#region Get Moves ---
-	
+
 	public List<string> GetAllSurroundingFences(int fenceIndex)
 	{
 		List<string> surroundingFences = [];
 
 		// Get the fences that extend in the same direction
 		// Get the direction of the fence, and add the adjcent fences that align
-		int direction = Fences[fenceIndex].GetDirection(); 
+		int direction = Fences[fenceIndex].GetDirection();
 		int oppositeDirection = 1 - direction;
 		int[] adjFences = [.. Helper.InitialiseConnections(fenceIndex, Helper.BoardSize - 1)];
 
@@ -302,7 +302,7 @@ public partial class BoardState : Control
 			// Convert fence index to mapped index using direction
 			surroundingFences.Add(Helper.GetMappedIndex(adjFence, oppositeDirection));
 		}
-		
+
 		// Perpendicular corner fences
 		int[] cornerFences = [.. Helper.InitialiseCornerConnections(fenceIndex, Helper.BoardSize - 1)
 			.Where(fence => fence >= 0)];
@@ -344,7 +344,7 @@ public partial class BoardState : Control
 
 	public List<string> GetTileAdjacentFences(int player)
 	{
-		
+
 
 		int playerPawnPosition = PawnPositions[player];
 		int[] connections = Tiles[playerPawnPosition].GetConnections();
@@ -376,7 +376,7 @@ public partial class BoardState : Control
 		List<string> surroundingFences = [.. GetPlacedFences()
 			.SelectMany(GetAllSurroundingFences)
 			.Where(fence => fence != "")];
-		
+
 		// Add horizontal fences which are behind the player
 		foreach (int direction in Helper.Bits)
 		{
@@ -430,7 +430,7 @@ public partial class BoardState : Control
 	public Dictionary<string, float> GetAllMovesWeighted(int currentPlayer)
 	{
 		Dictionary<string, float> allMoves = [];
-		
+
 		allMoves = GetReachableTilesWeighted(currentPlayer)
 			.ToDictionary(x => x.Key, x => x.Value);
 
@@ -474,7 +474,7 @@ public partial class BoardState : Control
 	#endregion
 
 	#region  Evaluation ---
-	
+
 	public bool IsWinner(int player) => Helper.GetGoalTiles(player).Contains(GetPawnPosition(player));
 
 	public bool IsGameOver() => IsWinner(0) || IsWinner(1);
@@ -486,7 +486,7 @@ public partial class BoardState : Control
 		return 0;
 	}
 
-	/// Evaluate the board state 
+	/// Evaluate the board state
 	public int EvaluateBoard(int maximisingPlayer)
 	{
 		int minimisingPlayer = 1 - maximisingPlayer;

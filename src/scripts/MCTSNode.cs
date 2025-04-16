@@ -29,7 +29,7 @@ public class MCTSNode(MCTSNode parent, BoardState state, int player)
     public MCTSNode Expand()
     {
         // Get all possible moves with their weights
-        
+
         HashSet<BoardState> exploredStates = [.. Children.Select(c => c.State)];
 
         List<string> allMoves = [.. State.GetAllMovesWeighted(CurrentPlayer).Select(kvp => kvp.Key)];
@@ -37,7 +37,7 @@ public class MCTSNode(MCTSNode parent, BoardState state, int player)
         // Separate and shuffle pawn and fence moves
         List<string> pawnMoves = [.. State.GetReachableTilesWeighted(CurrentPlayer).Keys
             .OrderBy(_ => Helper.Random.Next())]; // Randomize the order of pawn moves
-        List<string> fenceMoves = [.. State.GetFenceMovesWeighted(CurrentPlayer).Keys  
+        List<string> fenceMoves = [.. State.GetFenceMovesWeighted(CurrentPlayer).Keys
             .OrderBy(_ => Helper.Random.Next())]; // Randomize the order of fence moves
 
         List<string> biasedMoves = Helper.Random.NextDouble() < 0.25
@@ -75,7 +75,7 @@ public class MCTSNode(MCTSNode parent, BoardState state, int player)
             string selectedMove = random.NextDouble() <= 0.75
                 ? tempState.GetReachableTilesWeighted(CurrentPlayer).Keys.FirstOrDefault()
                 : tempState.GetFenceMovesWeighted(CurrentPlayer).Keys.OrderBy(_ => random.Next()).FirstOrDefault();
-            
+
             if (selectedMove == null) break; // No valid moves available
 
 			tempState.AddMove(selectedMove);
@@ -90,12 +90,12 @@ public class MCTSNode(MCTSNode parent, BoardState state, int player)
 	public void Backpropagate(int result)
 	{
 		MCTSNode node = this;
-		
+
 		// Propagate the result back to the root node
 		while (node != null)
 		{
 			node.Visits += 1;
-			
+
 			// If the result is a win, increment the wins for this node
 			if (result == int.MaxValue)
 			{

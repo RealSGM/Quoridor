@@ -18,7 +18,7 @@ public partial class IllegalFenceCheck : Node
 			fence.SetIllegal(0, false);
 			fence.SetIllegal(1, false);
 		}
-	
+
 		List<string> possibleFences = [.. board.GetPlacedFences()
 			.SelectMany(board.GetAllSurroundingFences)
 			.Where(fence => fence != "")

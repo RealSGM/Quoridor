@@ -1,5 +1,5 @@
 public struct Fence
-{   
+{
     sbyte PlacedBy;
     sbyte Direction;
     readonly bool[] isIllegal;
@@ -38,5 +38,5 @@ public struct Fence
         isIllegal[index] = illegal;
     }
 
-    
+
 }
