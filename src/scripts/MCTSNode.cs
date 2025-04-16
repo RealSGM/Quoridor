@@ -29,27 +29,37 @@ public class MCTSNode(MCTSNode parent, BoardState state, int player)
     public MCTSNode Expand()
     {
         // Get all possible moves with their weights
-        List<string> allMoves = [.. State.GetAllMovesWeighted(CurrentPlayer).Select(kvp => kvp.Key)];
-        allMoves = [.. allMoves.OrderBy(_ => Helper.Random.Next())];
+        
         HashSet<BoardState> exploredStates = [.. Children.Select(c => c.State)];
 
-		foreach (string move in allMoves)
-		{
-            // Clone the current state to simulate the move
+        List<string> allMoves = [.. State.GetAllMovesWeighted(CurrentPlayer).Select(kvp => kvp.Key)];
+
+        // Separate and shuffle pawn and fence moves
+        List<string> pawnMoves = [.. State.GetReachableTilesWeighted(CurrentPlayer).Keys
+            .OrderBy(_ => Helper.Random.Next())]; // Randomize the order of pawn moves
+        List<string> fenceMoves = [.. State.GetFenceMovesWeighted(CurrentPlayer).Keys  
+            .OrderBy(_ => Helper.Random.Next())]; // Randomize the order of fence moves
+
+        List<string> biasedMoves = Helper.Random.NextDouble() < 0.25
+            ? [.. pawnMoves, .. fenceMoves]
+            : [.. fenceMoves, .. pawnMoves];
+
+        // Try adding the first unvisited state
+        foreach (string move in biasedMoves)
+        {
             BoardState newState = State.Clone();
             newState.AddMove(move);
 
-            // If the move leads to a state that hasn't been explored yet, add it as a child
-            if (!exploredStates.Contains(newState))
-            {
-                MCTSNode childNode = new(this, newState, 1 - CurrentPlayer);
-                Children.Add(childNode);
-                return childNode; // Return the first unvisited move
-            }
+            if (exploredStates.Contains(newState)) continue;
+
+            MCTSNode childNode = new(this, newState, 1 - CurrentPlayer);
+            Children.Add(childNode);
+            return childNode;
         }
 
-        return this; // No new moves, return the current node
+        return this; // All states already explored
     }
+
 
 	// Simulates a game from the current state until it reaches a terminal state
     public int Simulate(int simulatingPlayer, int maxPlayoutDepth = 50)
@@ -61,12 +71,13 @@ public class MCTSNode(MCTSNode parent, BoardState state, int player)
         // While the game is not over and the simulation depth is not reached
         while (!tempState.IsGameOver() && depth < maxPlayoutDepth)
         {
-            List<string> allMoves = [.. State.GetAllMovesWeighted(CurrentPlayer).Select(kvp => kvp.Key)];
-            allMoves = [.. allMoves.OrderBy(_ => Helper.Random.Next())];
+            // Randomly select a move, prioritizing pawn moves 60% of the time
+            string selectedMove = random.NextDouble() <= 0.75
+                ? tempState.GetReachableTilesWeighted(CurrentPlayer).Keys.FirstOrDefault()
+                : tempState.GetFenceMovesWeighted(CurrentPlayer).Keys.OrderBy(_ => random.Next()).FirstOrDefault();
+            
+            if (selectedMove == null) break; // No valid moves available
 
-			if (allMoves.Count == 0) break;
-
-            string selectedMove = allMoves[0];
 			tempState.AddMove(selectedMove);
             CurrentPlayer = 1 - CurrentPlayer;
             depth++;

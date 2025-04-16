@@ -236,7 +236,8 @@ public partial class BoardState : Control
 	/// Check if the adjacent fences have been placed in the same direction
 	public bool IsFenceEnabled(int fence, int direction)
 	{
-		// Return false if the fence is already placed
+		if (fence >= Fences.Length) return false;
+
 		if (!Fences[fence].IsFencePlaceable(direction)) return false;
 
 		// Return false if the fence is illegal
