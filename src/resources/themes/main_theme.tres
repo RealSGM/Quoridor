@@ -58,3 +58,5 @@ PopupMenu/icons/unchecked = null
 PopupMenu/icons/unchecked_disabled = null
 PopupMenu/styles/hover = SubResource("StyleBoxFlat_fgkes")
 PopupMenu/styles/panel = SubResource("StyleBoxFlat_qnscp")
+SpinBox/constants/buttons_width = 32
+SpinBox/constants/field_and_buttons_separation = 0

@@ -41,7 +41,15 @@ public partial class BoardState : Control
 	{
 		// GetTileAdjacentFences(currentPlayer);
 		// GD.Print(string.Join(",", PawnPositions));
-		GD.Print(GetStateKey());
+		// Store the rows each pawn position is in
+		// foreach (int pawnPosition in PawnPositions)
+		// {
+		// 	int row = pawnPosition / Helper.BoardSize;
+		// 	GD.Print($"Pawn {pawnPosition} is in row {row}");
+		// }
+		// Sum up the number of fences in each row
+		// Sum up the number of fences in each row
+		GD.Print($"State Key: {GetStateKey()}");
 	}
 
 	#endregion
@@ -65,10 +73,21 @@ public partial class BoardState : Control
 
 	public string GetStateKey()
 	{
-		return string.Concat(
-			string.Join("", PawnPositions.Select(p => $"p{p}")),
-			string.Join("", GetPlacedFences().Select(f => $"f{(Fences[f].GetDirection() == 0 ? "+" : "-")}{f}"))
-		);
+		StringBuilder stateKey = new();
+
+		// Store the rows each pawn position is in
+		stateKey.Append(string.Join("", PawnPositions.Select(pawnPosition => $"p{pawnPosition / Helper.BoardSize}")));
+
+		// Sum up the number of fences in each row, ensuring 0s are maintained
+		var rowCounts = Enumerable.Range(0, Helper.BoardSize - 1)
+			.Select(row => Fences
+				.Select((fence, index) => fence.IsPlaced() ? index / (Helper.BoardSize - 1) : -1)
+				.Count(fenceRow => fenceRow == row))
+			.ToList();
+
+		stateKey.Append($"f{string.Join("", rowCounts)}");
+
+		return stateKey.ToString();
 	}
 
 	#endregion
@@ -115,7 +134,6 @@ public partial class BoardState : Control
 				PlaceFence(direction, index, currentPlayer);
 				break;
 		}
-
 		MoveHistory.Append(code + ";");
 	}
 
@@ -474,6 +492,15 @@ public partial class BoardState : Control
 
 		allMoves.AddRange(GetReachableTiles(currentPlayer)
 			.Select(tileIndex => Helper.GetMoveCodeAsString(currentPlayer, "m", 0, tileIndex)));
+
+		allMoves.AddRange(GetAllFences(currentPlayer));
+
+		return [.. allMoves.Distinct()];
+	}
+
+	public string[] GetAllMovesSmart(int currentPlayer)
+	{
+		List<string> allMoves = [.. GetReachableTilesWeighted(currentPlayer).Keys];
 
 		allMoves.AddRange(GetAllFences(currentPlayer));
 

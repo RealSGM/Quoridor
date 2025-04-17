@@ -7,9 +7,11 @@ extends Control
 @export var board_options_menu: PanelContainer
 @export var foreground: ColorRect
 @export var start_game_button: Button
+@export var q_learning_menu: PanelContainer
 
 @export_category("Main Menu Buttons")
 @export var play_button: Button
+@export var q_learning_button: Button
 @export var exit_button: Button
 
 @export_category("Play Menu Buttons")
@@ -48,18 +50,20 @@ extends Control
 @export var bot_two_algorithms: OptionButton
 @export var bot_two_colours: OptionButton
 
+@export_category("Q Learning")
+@export var q_learning_return: Button
+
 @export_category("Game Settings")
-@export var algorithm_names: Array[String] = ["Minimax", "MCTS"]
-@export var algorithms: Array = [MiniMaxAlgorithm, MCTS]
 @export var board_dimensions: float = 800
+var algorithm_names: Array[String] = ["Minimax", "MCTS"]
+var algorithms: Array = [MiniMaxAlgorithm, MCTS]
 
 var menu_stack: Array = []
 var game_type: String
 
-@onready var menus: Array[PanelContainer] = [main_menu, play_menu, multiplayer_menu, board_options_menu]
+@onready var menus: Array[PanelContainer] = [main_menu, play_menu, multiplayer_menu, board_options_menu, q_learning_menu]
 @onready var global_options: Array[BoxContainer] = [board_container]
-@onready
-var game_type_dict: Dictionary = {"Singleplayer": [player_one_container, bot_two_container], "Local": [player_one_container, player_two_container], "BotVBot": [bot_one_container, bot_two_container]}
+@onready var game_type_dict: Dictionary = {"Singleplayer": [player_one_container, bot_two_container], "Local": [player_one_container, player_two_container], "BotVBot": [bot_one_container, bot_two_container]}
 
 
 func _input(event: InputEvent) -> void:
@@ -79,6 +83,7 @@ func setup_menus() -> void:
 	show_main_menu()
 
 	play_button.pressed.connect(_on_menu_button_pressed.bind(play_menu))
+	q_learning_button.pressed.connect(_on_menu_button_pressed.bind(q_learning_menu))
 	exit_button.pressed.connect(get_tree().quit)
 
 	singleplayer_button.pressed.connect(_on_menu_button_pressed.bind(board_options_menu, singleplayer_button))
@@ -102,6 +107,8 @@ func setup_menus() -> void:
 	p_two_colours.select(1)
 	bot_one_colours.select(2)
 	bot_two_colours.select(3)
+	
+	q_learning_return.pressed.connect(_on_back_button_pressed)
 
 	setup_algorithm_names()
 

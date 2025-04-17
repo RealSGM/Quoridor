@@ -1,8 +1,10 @@
-[gd_scene load_steps=7 format=3 uid="uid://c4r5qdtra0728"]
+[gd_scene load_steps=10 format=3 uid="uid://c4r5qdtra0728"]
 
 [ext_resource type="Script" uid="uid://bwaijs6w5tfn6" path="res://src/game/main/main.gd" id="1_52hxr"]
 [ext_resource type="Theme" uid="uid://gl4viqpfcsgn" path="res://src/resources/themes/main_theme.tres" id="1_vniis"]
 [ext_resource type="Script" uid="uid://c728sbp2xfub0" path="res://src/game/main/board_size_button.gd" id="3_58fea"]
+[ext_resource type="Script" uid="uid://orctkr0ua3vl" path="res://src/game/q_learning/q_learning_menu.gd" id="4_xin8e"]
+[ext_resource type="Script" uid="uid://b5l1wvw8njvol" path="res://src/scripts/QLearning.cs" id="5_3bb8u"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_55vop"]
 bg_color = Color(0.129412, 0.129412, 0.129412, 1)
@@ -16,7 +18,9 @@ expand_margin_bottom = 8.0
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ayg4q"]
 bg_color = Color(0.105882, 0.105882, 0.109804, 1)
 
-[node name="Main" type="Control" node_paths=PackedStringArray("main_menu", "play_menu", "multiplayer_menu", "board_options_menu", "foreground", "start_game_button", "play_button", "exit_button", "singleplayer_button", "multiplayer_button", "play_back_button", "bot_v_bot_button", "local_button", "online_button", "multiplayer_back_button", "board_vbc", "board_options_back_button", "board_container", "player_one_container", "p_one_colours", "player_one_name", "fence_coloured_button", "p_two_colours", "player_two_name", "player_two_container", "bot_one_container", "bot_one_algorithms", "bot_one_colours", "bot_two_container", "bot_two_algorithms", "bot_two_colours")]
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_xin8e"]
+
+[node name="Main" type="Control" node_paths=PackedStringArray("main_menu", "play_menu", "multiplayer_menu", "board_options_menu", "foreground", "start_game_button", "q_learning_menu", "play_button", "q_learning_button", "exit_button", "singleplayer_button", "multiplayer_button", "play_back_button", "bot_v_bot_button", "local_button", "online_button", "multiplayer_back_button", "board_vbc", "board_options_back_button", "board_container", "player_one_container", "p_one_colours", "player_one_name", "fence_coloured_button", "p_two_colours", "player_two_name", "player_two_container", "bot_one_container", "bot_one_algorithms", "bot_one_colours", "bot_two_container", "bot_two_algorithms", "bot_two_colours", "q_learning_return")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -31,7 +35,9 @@ multiplayer_menu = NodePath("Background/Foreground/MultiplayerMenu")
 board_options_menu = NodePath("Background/Foreground/BoardOptionsMenu")
 foreground = NodePath("Background/Foreground")
 start_game_button = NodePath("Background/Foreground/BoardOptionsMenu/VBC/MenuButtonsContainer/VBoxContainer/StartGameButton")
+q_learning_menu = NodePath("Background/Foreground/QLearningMenu")
 play_button = NodePath("Background/Foreground/MainMenu/VBC/PlayButton")
+q_learning_button = NodePath("Background/Foreground/MainMenu/VBC/QLearningButton")
 exit_button = NodePath("Background/Foreground/MainMenu/VBC/ExitButton")
 singleplayer_button = NodePath("Background/Foreground/PlayMenu/VBC/SingleplayerButton")
 multiplayer_button = NodePath("Background/Foreground/PlayMenu/VBC/MultiplayerButton")
@@ -56,8 +62,7 @@ bot_one_colours = NodePath("Background/Foreground/BoardOptionsMenu/VBC/BoardOpti
 bot_two_container = NodePath("Background/Foreground/BoardOptionsMenu/VBC/BoardOptions/BoardVBC/BotTwoContainer")
 bot_two_algorithms = NodePath("Background/Foreground/BoardOptionsMenu/VBC/BoardOptions/BoardVBC/BotTwoContainer/BotType/BotTwoAlgorithmsOptionButton")
 bot_two_colours = NodePath("Background/Foreground/BoardOptionsMenu/VBC/BoardOptions/BoardVBC/BotTwoContainer/BotColours/BotColourOption")
-algorithm_names = null
-board_dimensions = null
+q_learning_return = NodePath("Background/Foreground/QLearningMenu/Container/ButtonContainer/VBoxContainer/ReturnButton")
 
 [node name="Background" type="ColorRect" parent="."]
 layout_mode = 1
@@ -108,6 +113,11 @@ alignment = 1
 custom_minimum_size = Vector2(400, 0)
 layout_mode = 2
 text = "Play"
+
+[node name="QLearningButton" type="Button" parent="Background/Foreground/MainMenu/VBC"]
+custom_minimum_size = Vector2(400, 0)
+layout_mode = 2
+text = "QLearning"
 
 [node name="ExitButton" type="Button" parent="Background/Foreground/MainMenu/VBC"]
 custom_minimum_size = Vector2(400, 0)
@@ -195,6 +205,7 @@ layout_mode = 2
 text = "Back"
 
 [node name="BoardOptionsMenu" type="PanelContainer" parent="Background/Foreground"]
+visible = false
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -494,4 +505,66 @@ text = "Start Game"
 layout_mode = 2
 text = "Back"
 
+[node name="QLearningMenu" type="PanelContainer" parent="Background/Foreground" node_paths=PackedStringArray("q_learning")]
+process_thread_group = 2
+process_thread_group_order = 0
+process_thread_messages = 0
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxEmpty_xin8e")
+script = ExtResource("4_xin8e")
+q_learning = NodePath("QLearning")
+
+[node name="QLearning" type="Node" parent="Background/Foreground/QLearningMenu"]
+process_thread_group = 2
+process_thread_group_order = 0
+process_thread_messages = 0
+script = ExtResource("5_3bb8u")
+
+[node name="Container" type="Control" parent="Background/Foreground/QLearningMenu"]
+layout_mode = 2
+
+[node name="ButtonContainer" type="PanelContainer" parent="Background/Foreground/QLearningMenu/Container"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -150.0
+offset_top = -48.0
+offset_right = 150.0
+offset_bottom = 48.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_55vop")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Background/Foreground/QLearningMenu/Container/ButtonContainer"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="SpinBox" type="SpinBox" parent="Background/Foreground/QLearningMenu/Container/ButtonContainer/VBoxContainer"]
+layout_mode = 2
+max_value = 1000.0
+alignment = 1
+update_on_text_changed = true
+custom_arrow_step = 10.0
+select_all_on_focus = true
+
+[node name="TrainButton" type="Button" parent="Background/Foreground/QLearningMenu/Container/ButtonContainer/VBoxContainer"]
+custom_minimum_size = Vector2(400, 67)
+layout_mode = 2
+text = "Train Agent"
+
+[node name="ReturnButton" type="Button" parent="Background/Foreground/QLearningMenu/Container/ButtonContainer/VBoxContainer"]
+custom_minimum_size = Vector2(400, 67)
+layout_mode = 2
+text = "Return"
+
 [connection signal="toggled" from="Background/Foreground/BoardOptionsMenu/VBC/BoardOptions/BoardVBC/BoardContainer/FenceColouredContainer/ColourToggle" to="." method="_on_colour_toggle_toggled"]
+[connection signal="value_changed" from="Background/Foreground/QLearningMenu/Container/ButtonContainer/VBoxContainer/SpinBox" to="Background/Foreground/QLearningMenu" method="_on_spin_box_value_changed"]
+[connection signal="pressed" from="Background/Foreground/QLearningMenu/Container/ButtonContainer/VBoxContainer/TrainButton" to="Background/Foreground/QLearningMenu" method="_on_train_button_pressed"]

@@ -77,16 +77,6 @@ public partial class MiniMaxAlgorithm : Node
 			if (beta <= alpha) break;
 		}
 
-		/// DEBUGGING
-		if (depth == START_DEPTH)
-		{
-			// Print sorted moves
-			foreach (var kvp in moveScores.OrderByDescending(x => x.Value))
-			{
-				Console.Call("add_entry", $"Move: {kvp.Key}, Value: {kvp.Value}", 0);
-			}
-		}
-
 		// Filter dictionary to only include moves with the best value
 		moveScores = moveScores.Where(x => x.Value == bestValue).ToDictionary(x => x.Key, x => x.Value);
 
