@@ -27,16 +27,19 @@ public partial class QLearning : Node
 
 	public void TrainQAgent(int episodes)
 	{
-        GD.Print("Training Q-learning agent...");
+        // Load the Q-table from the default path if qTable is empty
+        if (qTable.IsEmpty)
+        {
+            GD.Print($"Loading Q-table from {defaultSavePath}...");
+            LoadQTable(defaultSavePath);
+        } 
 
-        LoadQTable(defaultSavePath);
+        GD.Print($"Starting training with {episodes} episodes...");
 
         epsilon = 1.0f; // Reset epsilon for training
 
-
 		for (int episode = 0; episode < episodes; episode++)
 		{
-            GD.Print($"Episode {episode + 1}/{episodes}");
             epsilon = Math.Max(minEpsilon, epsilon * epsilonDecay);
             TrainSingleEpisode();
 		}
