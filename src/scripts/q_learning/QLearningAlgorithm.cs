@@ -8,7 +8,7 @@ using System.Text.Encodings.Web;
 using System.Text.Json;
 
 [GlobalClass]
-public partial class QLearning : Node
+public partial class QLearningAlgorithm : Node
 {
     private string defaultSavePath = "data/q_table.json";
 	private ConcurrentDictionary<(string state, string action), float> qTable = [];

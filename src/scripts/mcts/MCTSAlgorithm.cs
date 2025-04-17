@@ -1,7 +1,8 @@
 using Godot;
 using System.Linq;
 
-public partial class MCTS : Node
+[GlobalClass]
+public partial class MCTSAlgorithm : Node
 {
 	private const int SIMULATIONS = 1000;  // Increased simulations for better decision-making
 	private const double EXPLORATION_CONSTANT = 1.41; // sqrt(2), UCB1 exploration factor

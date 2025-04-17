@@ -21,8 +21,7 @@ Resources="*res://src/autoload/resources.tscn"
 SignalManager="*res://src/autoload/signal_manager.gd"
 Global="*res://src/autoload/global.gd"
 Console="*res://src/autoload/console/console.tscn"
-MiniMaxAlgorithm="*res://src/autoload/mini_max/mini_max.tscn"
-MCTS="*res://src/autoload/mcts/MCTS.cs"
+AlgorithmManager="*res://src/autoload/algorithms.tscn"
 
 [debug]
 

@@ -1,9 +1,0 @@
-[gd_scene load_steps=2 format=3 uid="uid://bn3gs8hff0o4r"]
-
-[ext_resource type="Script" uid="uid://b3yvokh86wgv7" path="res://src/autoload/mini_max/MiniMaxAlgorithm.cs" id="1_fq0ip"]
-
-[node name="MiniMaxAlgorithm" type="Node"]
-process_thread_group = 2
-process_thread_group_order = 0
-process_thread_messages = 0
-script = ExtResource("1_fq0ip")

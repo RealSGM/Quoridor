@@ -1,10 +1,9 @@
-[gd_scene load_steps=10 format=3 uid="uid://c4r5qdtra0728"]
+[gd_scene load_steps=9 format=3 uid="uid://c4r5qdtra0728"]
 
 [ext_resource type="Script" uid="uid://bwaijs6w5tfn6" path="res://src/game/main/main.gd" id="1_52hxr"]
 [ext_resource type="Theme" uid="uid://gl4viqpfcsgn" path="res://src/resources/themes/main_theme.tres" id="1_vniis"]
 [ext_resource type="Script" uid="uid://c728sbp2xfub0" path="res://src/game/main/board_size_button.gd" id="3_58fea"]
 [ext_resource type="Script" uid="uid://orctkr0ua3vl" path="res://src/game/q_learning/q_learning_menu.gd" id="4_xin8e"]
-[ext_resource type="Script" uid="uid://b5l1wvw8njvol" path="res://src/scripts/QLearning.cs" id="5_3bb8u"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_55vop"]
 bg_color = Color(0.129412, 0.129412, 0.129412, 1)
@@ -505,7 +504,7 @@ text = "Start Game"
 layout_mode = 2
 text = "Back"
 
-[node name="QLearningMenu" type="PanelContainer" parent="Background/Foreground" node_paths=PackedStringArray("q_learning")]
+[node name="QLearningMenu" type="PanelContainer" parent="Background/Foreground" node_paths=PackedStringArray("agent_counter")]
 process_thread_group = 2
 process_thread_group_order = 0
 process_thread_messages = 0
@@ -517,13 +516,7 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxEmpty_xin8e")
 script = ExtResource("4_xin8e")
-q_learning = NodePath("QLearning")
-
-[node name="QLearning" type="Node" parent="Background/Foreground/QLearningMenu"]
-process_thread_group = 2
-process_thread_group_order = 0
-process_thread_messages = 0
-script = ExtResource("5_3bb8u")
+agent_counter = NodePath("Container/ButtonContainer/VBoxContainer/SpinBox")
 
 [node name="Container" type="Control" parent="Background/Foreground/QLearningMenu"]
 layout_mode = 2

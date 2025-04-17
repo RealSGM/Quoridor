@@ -8,7 +8,6 @@ class_name BaseGame extends Control
 @export var board_container: PanelContainer
 @export var fence_button_container: GridContainer
 @export var user_interface: UserInterface
-@export var illegal_fence_check: IllegalFenceCheck
 
 var tile_buttons: Array[TileButton] = []
 var fence_buttons: Array[FenceButton] = []
@@ -48,7 +47,6 @@ func set_current_player(val: int) -> void:
 	set_tiles(board.GetPawnPosition(current_player))
 	update_fence_buttons()
 	user_interface.update_turn(val)
-	board.PrintAllMoves(current_player)
 
 
 ## Disable all tiles, and reset their modulate
@@ -242,7 +240,7 @@ func _on_confirm_pressed() -> void:
 	# Switch to next player
 	else:
 		# Complete IFS before switching player
-		illegal_fence_check.GetIllegalFences(board, 1 - current_player)
+		AlgorithmManager.illegal_fence_check.GetIllegalFences(board, 1 - current_player)
 		current_player = 1 - current_player
 
 
@@ -277,7 +275,7 @@ func finish_undo_board() -> void:
 	for player: int in Global.BITS:
 		user_interface.update_fence_counts(player, Global.MAX_FENCES - board.GetFenceCount(player))
 
-	illegal_fence_check.GetIllegalFences(board, current_player)
+	AlgorithmManager.illegal_fence_check.GetIllegalFences(board, current_player)
 	move_code = ""
 
 	if board.GetMoveHistory().is_empty():

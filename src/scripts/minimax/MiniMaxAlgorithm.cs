@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
+[GlobalClass]
 public partial class MiniMaxAlgorithm : Node
 {
 	public int START_DEPTH = 1;

@@ -14,10 +14,12 @@ const COLORS: Array[Color] = [
 ## O is horizontal, 1 is vertical
 var fence_direction: int = 0
 var coloured_fences: bool = false
+
 # Third Element is for Testing
 var players: Array[Dictionary] = [{}, {}, {"color": Color.GHOST_WHITE}]
+
 var game: BaseGame
-var chosen_algorithms: Array = [null, null]
+var algorithms: AlgorithmManager
 
 
 func help() -> String:
@@ -33,6 +35,7 @@ func clear() -> String:
 func evaluate_board(is_maximising: bool) -> String:
 	if !game:
 		return "Game not started"
+		
 	var evaluation: int = game.board.EvaluateBoard(is_maximising)
 	var last_move: String = game.board.GetLastMove()
 	return "Evaluation: %s, Last Move: %s" % [evaluation, last_move]
@@ -66,19 +69,6 @@ func get_fence_amounts() -> String:
 	return text
 
 
-func get_illegal_fences() -> String:
-	var illegal_fences: PackedInt32Array = game.board.GetIllegalFences()
-	var text: String = ""
-
-	for i: int in range(illegal_fences.size()):
-		var fence: int = illegal_fences[i]
-		var fence_string: String = "X" if fence == -1 else str(fence)
-		text += " [%s]" % [fence_string]
-		if (i + 1) % (game.board.BoardSize - 1) == 0:
-			text += "\n"
-	return text
-
-
 func get_shortest_path(player: int) -> String:
 	if !game:
 		return "Game not started"
@@ -90,16 +80,6 @@ func get_shortest_path(player: int) -> String:
 		text += " %s " % path[i]
 
 	return text
-
-
-func get_next_move(is_maximising: bool = true, depth: int = 1) -> String:
-	if !game:
-		return "Game not started"
-
-	MiniMaxAlgorithm.max_depth = depth
-	var move: String = MiniMaxAlgorithm.GetMove(game.board, game.current_player, is_maximising, false)
-
-	return "Best Move: %s" % [move]
 
 
 func print_fences() -> String:

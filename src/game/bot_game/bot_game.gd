@@ -30,8 +30,8 @@ func set_current_player(val: int) -> void:
 
 
 func play_turn() -> void:
-	MiniMaxAlgorithm.SetMaxDepth(board)
-	move_code = Global.chosen_algorithms[current_player].GetMove(board, current_player, true, debug_minimax_button.is_pressed())
+	AlgorithmManager.minimax.SetMaxDepth(board)
+	move_code = AlgorithmManager.run(board, current_player, true, debug_minimax_button.is_pressed())
 	_on_confirm_pressed()
 
 

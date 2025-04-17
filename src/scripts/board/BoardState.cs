@@ -37,21 +37,6 @@ public partial class BoardState : Control
 
 	public int[] GetTileConnections(int tileIndex) => Tiles[tileIndex].GetConnections();
 
-	public void PrintAllMoves(int currentPlayer)
-	{
-		// GetTileAdjacentFences(currentPlayer);
-		// GD.Print(string.Join(",", PawnPositions));
-		// Store the rows each pawn position is in
-		// foreach (int pawnPosition in PawnPositions)
-		// {
-		// 	int row = pawnPosition / Helper.BoardSize;
-		// 	GD.Print($"Pawn {pawnPosition} is in row {row}");
-		// }
-		// Sum up the number of fences in each row
-		// Sum up the number of fences in each row
-		GD.Print($"State Key: {GetStateKey()}");
-	}
-
 	#endregion
 
 	#region Getters ---

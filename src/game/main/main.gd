@@ -56,7 +56,6 @@ extends Control
 @export_category("Game Settings")
 @export var board_dimensions: float = 800
 var algorithm_names: Array[String] = ["Minimax", "MCTS"]
-var algorithms: Array = [MiniMaxAlgorithm, MCTS]
 
 var menu_stack: Array = []
 var game_type: String
@@ -145,12 +144,12 @@ func set_game_data() -> void:
 		"Singleplayer":
 			selected_colour = bot_two_colours.selected
 			selected_name = "Bot"
-			Global.chosen_algorithms[1] = algorithms[bot_two_algorithms.selected]
+			AlgorithmManager.set_chosen_algorithm(1, bot_two_algorithms.selected)
 		"BotVBot":
 			Global.players[0]["name"] = "Bot One"
 			Global.players[0]["color"] = Global.COLORS[bot_one_colours.selected]
-			Global.chosen_algorithms[0] = algorithms[bot_one_algorithms.selected]
-			Global.chosen_algorithms[1] = algorithms[bot_two_algorithms.selected]
+			AlgorithmManager.set_chosen_algorithm(0, bot_one_algorithms.selected)
+			AlgorithmManager.set_chosen_algorithm(1, bot_two_algorithms.selected)
 
 			selected_colour = bot_two_colours.selected
 			selected_name = "Bot Two"
