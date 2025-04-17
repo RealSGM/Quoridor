@@ -1,5 +1,4 @@
 using Godot;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -12,23 +11,20 @@ public partial class IllegalFenceCheck : Node
 		// Ignore if player has no more fences
 		if (board.GetFenceCount(currentPlayer) == Helper.MaxFences) return;
 
-		// Reset all fences to legal, incase pawn shift occurs
-		foreach (Fence fence in board.GetFences())
-		{
-			fence.SetIllegal(0, false);
-			fence.SetIllegal(1, false);
-		}
+		string lastMove = board.GetLastMove();
+		var (player, moveType, _, _, _) = Helper.GetMoveCodeAsTuple(lastMove);
 
-		List<string> possibleFences = [.. board.GetPlacedFences()
-			.SelectMany(board.GetAllSurroundingFences)
-			.Where(fence => fence != "")
-			.Distinct()];
+		List<string> possibleFences = moveType == "m"
+			? board.GetTileAdjacentFences(player)
+			: [.. board.GetPlacedFences()
+				.SelectMany(board.GetAllSurroundingFences)
+				.Where(fence => fence != "")
+				.Distinct()];
 
 		Parallel.ForEach(possibleFences, fence =>
 		{
 			int index = int.Parse(fence[1..]);
 			int direction = fence[0] == '+' ? 0 : 1;
-
 			board.GetFences()[index].SetIllegal(direction, false);
 
 			if (!board.IsFenceEnabled(index, direction)) return;

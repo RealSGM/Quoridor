@@ -39,7 +39,7 @@ public partial class BoardState : Control
 
 	public void PrintAllMoves(int currentPlayer)
 	{
-		GetTileAdjacentFences(currentPlayer);
+		// GetTileAdjacentFences(currentPlayer);
 	}
 
 	#endregion
@@ -342,10 +342,9 @@ public partial class BoardState : Control
 		return allMoves;
 	}
 
+
 	public List<string> GetTileAdjacentFences(int player)
 	{
-
-
 		int playerPawnPosition = PawnPositions[player];
 		int[] connections = Tiles[playerPawnPosition].GetConnections();
 
@@ -359,8 +358,7 @@ public partial class BoardState : Control
 		List<string> allMoves = [.. fenceCorners
 			.Where(index => index != -1)
 			.SelectMany(index => Helper.Bits
-				.Where(direction => IsFenceEnabled(index, direction))
-				.Select(direction => Helper.GetMappedIndex(index, direction)))];
+			.Select(direction => Helper.GetMappedIndex(index, direction)))];
 
 		return allMoves;
 	}
@@ -390,6 +388,8 @@ public partial class BoardState : Control
 
 		// Add fences that surround the enemy
 		surroundingFences.AddRange(GetTileAdjacentFences(1 - currentPlayer));
+		surroundingFences = [.. surroundingFences.Where(fenceIndex => IsFenceEnabled(int.Parse(fenceIndex[1..]), fenceIndex[0].ToString() == "+" ? 0 : 1))];
+
 
 		foreach (string fenceIndex in surroundingFences)
 		{
