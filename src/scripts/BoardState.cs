@@ -40,6 +40,8 @@ public partial class BoardState : Control
 	public void PrintAllMoves(int currentPlayer)
 	{
 		// GetTileAdjacentFences(currentPlayer);
+		// GD.Print(string.Join(",", PawnPositions));
+		GD.Print(GetStateKey());
 	}
 
 	#endregion
@@ -60,6 +62,14 @@ public partial class BoardState : Control
 
 	/// Returns all placed fences
 	public int[] GetPlacedFences() => [.. Fences.Select((fence, index) => fence.IsPlaced() ? index : -1).Where(index => index != -1)];
+
+	public string GetStateKey()
+	{
+		return string.Concat(
+			string.Join("", PawnPositions.Select(p => $"p{p}")),
+			string.Join("", GetPlacedFences().Select(f => $"f{(Fences[f].GetDirection() == 0 ? "+" : "-")}{f}"))
+		);
+	}
 
 	#endregion
 
@@ -341,7 +351,6 @@ public partial class BoardState : Control
 
 		return allMoves;
 	}
-
 
 	public List<string> GetTileAdjacentFences(int player)
 	{
