@@ -63,21 +63,21 @@ public partial class QLearning : Node
         return allMoves.OrderByDescending(action => GetQValue(stateKey, action)).First();
     }
 
-    /// Get the Q-value for a given state-action pair
-    /// <param name="stateKey">The state key representing the current state</param>
-    /// <param name="action">The action taken in the current state</param>
-    /// <returns>The Q-value for the given state-action pair</returns>
     public float GetQValue(string stateKey, string action) => qTable.TryGetValue((stateKey, action), out float qValue) ? qValue : 0;
 
-        public float GetMaxQValue(string stateKey)
+    public float GetMaxQValue(string stateKey, BoardState board, int currentPlayer)
     {
-        return 0;
+        string[] allMoves = board.GetAllMoves(currentPlayer);
+
+        if (allMoves.Length == 0) return 0f;
+
+        return allMoves.Max(action => GetQValue(stateKey, action));
     }
 
-
-    public float GetReward(BoardState board, int currentPlayer)
+    public static float GetReward(BoardState board, int currentPlayer)
     {
-        return 0;
-    }
+        if (board.IsGameOver()) return board.IsWinner(currentPlayer) ? 100f : -100f;
 
+        return 0f; // Neutral reward for non-terminal states
+    }
 }
