@@ -3,8 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-
-
 // TODO EvaluateBoard
 // TODO Cleanup Helper
 // TODO Remove Tile.cs
@@ -16,6 +14,7 @@ using System.Linq;
 public partial class Board: Control
 {
 	private FenceBB[] Fences;
+    private FenceBB[] IllegalFences;
     private Pawn[] Pawns = new Pawn[2];
 
     #region Initialization ---
@@ -23,13 +22,16 @@ public partial class Board: Control
     public Board Clone() => new()
     {
         Fences = [Fences[0].Clone(), Fences[1].Clone()],
-        Pawns = [Pawns[0].Clone(), Pawns[1].Clone()]
+        Pawns = [Pawns[0].Clone(), Pawns[1].Clone()],
+        IllegalFences = [IllegalFences[0].Clone(), IllegalFences[1].Clone()]
     };
 
     public void Initialise()
     {
         Pawns[0] = new Pawn((byte)(Helper.BoardSize >> 1));
         Pawns[1] = new Pawn((byte)(Helper.BoardSize * (Helper.BoardSize - 1) + (Helper.BoardSize >> 1)));
+        Fences = [new FenceBB(), new FenceBB()];
+        IllegalFences = [new FenceBB(), new FenceBB()];
     }
 
     #endregion
@@ -136,7 +138,7 @@ public partial class Board: Control
 
     public bool IsFenceEnabled(int dir, int index)
     {
-        if (GetFencePlaced(dir, index) || Fences[dir].IsIllegal(index)) return false;
+        if (GetFencePlaced(dir, index) || IllegalFences[dir].IsPlaced(index)) return false;
 
         return Helper.Bits.All(bit =>
         {
@@ -149,14 +151,12 @@ public partial class Board: Control
 
     # region Get Moves ---
 
-    /// Returns all the fences that are surrounding the given index
-    public ulong[] GetAllSurroundingFences(int index)
+    /// Returns all the fences that are surrounding the given index and direction
+    public ulong[] GetSurroundingFences(int index, int dir)
     {
         // Store surrounding fences [Horizontal, Vertical]
         ulong[] surrFences = [0, 0];
         int[] adjFences = Helper.InitialiseConnections(index, Helper.BoardSize - 1);
-        
-        int dir = GetPlacedDirection(index);
         int oppDir = 1 - dir;
 
         foreach (int bit in Helper.Bits)
@@ -169,7 +169,7 @@ public partial class Board: Control
             // Get the leaped adjacent fence
 			int leapedAdjFence = Helper.AdjacentFunctions[adjIndex](adjFence, Helper.BoardSize - 1);
 			if (leapedAdjFence == -1) continue;
-			if (!IsFenceEnabled(leapedAdjFence, dir)) continue;
+			if (!IsFenceEnabled(dir, leapedAdjFence)) continue;
 
             surrFences[dir] |= 1UL << leapedAdjFence;
         }
@@ -188,11 +188,27 @@ public partial class Board: Control
 
         foreach (int cornerFence in cornerFences)
         {
-            if (!IsFenceEnabled(cornerFence, oppDir)) continue;
+            if (!IsFenceEnabled(oppDir, cornerFence)) continue;
             surrFences[dir] |= 1UL << cornerFence;
         }
 
         return surrFences;
+    }
+
+    public ulong[] GetAllSurroundingFences()
+    {
+        ulong[] fences = [0, 0];
+
+        foreach (int bit in Helper.Bits)
+        {
+            foreach (int i in Helper.GetOnesInBitBoard(Fences[bit].Fences))
+            {
+                ulong[] surrFences = GetSurroundingFences(i, bit);
+                fences[0] |= surrFences[0];
+                fences[1] |= surrFences[1];
+            }
+        }
+        return fences;
     }
 
     public int[] GetReachableTilesSmart(int player)
@@ -213,89 +229,97 @@ public partial class Board: Control
             .ToArray()];
     }
 
-    // TODO GetFenceMovesWeighted
-
     public ulong[] GetFencesSmart(int player)
     {
         ulong[] fences = [0, 0];
 
         if (!HasFences(player)) return fences;
 
-        // Get all placed fences
+        // Get all surrounding fences
+        ulong[] surroundingFences = GetAllSurroundingFences();
+        fences[0] |= surroundingFences[0];
+        fences[1] |= surroundingFences[1];
+
+        // Get all fences behind the player
+
+        int goalRow = Helper.GetGoalTiles(player)[0] / Helper.BoardSize;
+        int playerRow = GetPawnPosition(player) / Helper.BoardSize;
+        int numRowsToFill = playerRow - goalRow;
+
+        // Retrieve all fences behind the player
+        ulong fencesBehind = player == 0 
+            ? (1UL << (8 * numRowsToFill)) - 1 
+            : ~((1UL << (8 * numRowsToFill)) - 1);
         
-        
+        fences[0] |= fencesBehind;
+
+        // Add fences that surround the enemy
+        int enemyTile = Pawns[1 - player].Index;
+
+        int[] enemySurrFences = [.. Helper.GetFenceCorners(enemyTile).Where(fence => fence != -1)];
+
+        // Loop through all fences
+        foreach (int direction in Helper.Bits)
+        {
+            fences[direction] |= enemySurrFences.Aggregate(0UL, (acc, fenceIndex) => acc | (1UL << fenceIndex));
+        }
+
+        // Filter out fenaces that are not enabled
+        foreach (int direction in Helper.Bits)
+        {
+            for (int i = 0; i < (Helper.BoardSize - 1) * (Helper.BoardSize - 1); i++)
+            {   
+                if (!IsFenceEnabled(direction, i)) continue;
+                fences[direction] &= ~(1UL << i);
+            }
+        }
 
         return fences;
     }
 
-	// public Dictionary<string, float> GetFenceMovesWeighted(int currentPlayer)
-	// {
-	// 	// Stores all possible moves with their weights
-	// 	Dictionary<string, float> allMoves = [];
+    public ulong[] GetAllFences(int player)
+    {
+        if (!HasFences(player)) return [0, 0];
+        return [.. Helper.Bits.Select(dir =>
+            Enumerable.Range(0, (Helper.BoardSize - 1) * (Helper.BoardSize - 1))
+            .Where(i => IsFenceEnabled(dir, i))
+            .Aggregate(0UL, (acc, i) => acc | (1UL << i))
+        )];
+    }
 
-	// 	if (GetFenceCount(currentPlayer) >= Helper.MaxFences) return allMoves;
+    public string[] GetAllMoves(int player)
+    {
+        List<string> moves = [];
 
-	// 	// Get all surrounding fences as a string mappedIndexes
-	// 	List<string> surroundingFences = [.. GetPlacedFences()
-	// 		.SelectMany(GetAllSurroundingFences)
-	// 		.Where(fence => fence != "")];
+        // Add all tiles
+        moves.AddRange(GetReachableTiles(player)
+            .Select(tile => Helper.GetMoveCodeAsString(player, "m", 0, tile)));
 
-	// 	// Add horizontal fences which are behind the player
-	// 	foreach (int direction in Helper.Bits)
-	// 	{
-	// 		surroundingFences.AddRange(
-	// 			Enumerable.Range(0, (Helper.BoardSize - 1) * (Helper.BoardSize - 1))
-	// 				.Where(i => IsFenceEnabled(i, direction))
-	// 				.Select(i => Helper.GetMappedIndex(i, direction))
-	// 				.Where(mappedIndex => !surroundingFences.Contains(mappedIndex))
-	// 		);
-	// 	}
+        ulong[] fences = GetAllFences(player);
 
-	// 	// Add fences that surround the enemy
-	// 	surroundingFences.AddRange(GetTileAdjacentFences(1 - currentPlayer));
-	// 	surroundingFences = [.. surroundingFences.Where(fenceIndex => IsFenceEnabled(int.Parse(fenceIndex[1..]), fenceIndex[0].ToString() == "+" ? 0 : 1))];
+        moves.AddRange(Helper.Bits.SelectMany(dir => Helper.GetOnesInBitBoard(fences[dir])
+            .Select(i => Helper.GetMoveCodeAsString(player, "f", dir, i))
+        ));
 
+        return [.. moves];
+    }
 
-	// 	foreach (string fenceIndex in surroundingFences)
-	// 	{
-	// 		int direction = fenceIndex[0].ToString() == "+" ? 0 : 1;
-	// 		int index = int.Parse(fenceIndex[1..]);
+    public string[] GetAllMovesSmart(int player)
+    {
+        List<string> moves = [];
 
-	// 		if (!IsFenceEnabled(index, direction)) continue;
+        // Add all tiles
+        moves.AddRange(GetReachableTilesSmart(player)
+            .Select(tile => Helper.GetMoveCodeAsString(player, "m", 0, tile)));
 
-	// 		float relativePlayerIndex = PawnPositions[currentPlayer] / Helper.BoardSize + 0.5f;
-	// 		float relativeFenceIndex = index / (Helper.BoardSize - 1) + 1;
+        ulong[] fences = GetAllFences(player);
 
-	// 		if (currentPlayer == 0 && relativeFenceIndex < relativePlayerIndex) continue;
-	// 		if (currentPlayer == 1 && relativeFenceIndex > relativePlayerIndex) continue;
+        moves.AddRange(Helper.Bits.SelectMany(dir => Helper.GetOnesInBitBoard(fences[dir])
+            .Select(i => Helper.GetMoveCodeAsString(player, "f", dir, i))
+        ));
 
-	// 		string moveCode = Helper.GetMoveCodeAsString(currentPlayer, "f", direction, index);
-
-	// 		// If the key already exists, we don't add it again, preventing duplicate keys
-	// 		if (allMoves.ContainsKey(moveCode)) continue;
-
-	// 		// Add the fence to the dictionary
-	// 		allMoves[moveCode] = 5;
-	// 	}
-
-	// 	// Loop through all fence moves and make sure the fence is placeable
-	// 	allMoves = allMoves
-	// 		.Where(pair =>
-	// 		{
-	// 			string moveCode = pair.Key;
-	// 			int index = int.Parse(moveCode[3..]);
-	// 			int direction = moveCode[2] == '-' ? 1 : 0;
-	// 			return IsFenceEnabled(index, direction);
-	// 		})
-	// 		.ToDictionary(pair => pair.Key, pair => pair.Value);
-
-	// 	return allMoves;
-	// }
-
-    // TODO GetAllMovesWeighted
-    // TODO GetAllFences
-    // TODO GetAllMoves
-    // TODO GetAllMovesSmart
+        return [.. moves];
+    }
 
 
     #endregion

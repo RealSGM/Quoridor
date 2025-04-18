@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Formats.Asn1;
 using System.Linq;
+using System.Numerics;
 using Godot;
 
 [GlobalClass]
@@ -135,4 +136,14 @@ public partial class Helper : Node
 			TileToFence(tile, 0, -1),  // BottomRight
 			TileToFence(tile, 0, 0)   // BottomLeft
 		];
+
+	public static IEnumerable<int> GetOnesInBitBoard(ulong bitboard)
+	{
+		while (bitboard != 0)
+		{
+			int index = BitOperations.TrailingZeroCount(bitboard);
+			yield return index;
+			bitboard &= bitboard - 1;
+		}
+	}
 }
