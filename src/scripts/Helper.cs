@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Formats.Asn1;
 using System.Linq;
 using Godot;
 
@@ -110,4 +111,28 @@ public partial class Helper : Node
 		int col = tile % BoardSize;
 		return (row + offset) * (BoardSize - 1) + col + (cornerIndex % 2 == 0 ? -1 : 0);
 	}
+
+	/// Returns the direction of the fence between two tiles
+	/// 0 = Horizontal, 1 = Vertical
+	public static int GetDirection(int index1, int index2)
+	{
+		if (Math.Abs(index1 - index2) == 1) return 0; // Tiles are horizontally apart
+		return 1; // Tiles are vertically apart
+	}
+
+	public static int TileToFence(int tile, int verticalOffset, int horizontalOffset)
+	{
+		int row = tile / BoardSize + verticalOffset;
+		int col = tile % BoardSize + horizontalOffset;
+		return (row >= BoardSize - 1 || col >= BoardSize - 1) ? -1 : row * (BoardSize - 1) + col;
+	}
+	
+	/// Returns the fence buttons that surround a tile
+	public static int[] GetFenceCorners(int tile) =>
+		[
+			TileToFence(tile, -1, -1),  // TopLeft
+			TileToFence(tile, -1, 0),  // TopRight
+			TileToFence(tile, 0, -1),  // BottomRight
+			TileToFence(tile, 0, 0)   // BottomLeft
+		];
 }

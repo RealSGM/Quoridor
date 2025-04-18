@@ -242,6 +242,8 @@ func _on_confirm_pressed() -> void:
 		# Complete IFS before switching player
 		AlgorithmManager.illegal_fence_check.GetIllegalFences(board, 1 - current_player)
 		current_player = 1 - current_player
+	
+	board.Test()
 
 
 func _on_undo_button_pressed() -> void:

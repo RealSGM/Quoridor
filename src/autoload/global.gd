@@ -22,6 +22,12 @@ var game: BaseGame
 var algorithms: AlgorithmManager
 
 
+func _ready() -> void:
+	var foo: Board = Board.new()
+	foo.Initialise()
+	
+	foo.GetAdjacentTiles(53)
+
 func help() -> String:
 	Console.show_help()
 	return " "

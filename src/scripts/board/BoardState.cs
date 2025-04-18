@@ -37,6 +37,10 @@ public partial class BoardState : Control
 
 	public int[] GetTileConnections(int tileIndex) => Tiles[tileIndex].GetConnections();
 
+	public void Test()
+	{
+	}
+
 	#endregion
 
 	#region Getters ---
