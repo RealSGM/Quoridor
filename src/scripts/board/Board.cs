@@ -3,12 +3,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-// TODO EvaluateBoard
 // TODO Cleanup Helper
 // TODO Remove Tile.cs
 // TODO Override BoardState.cs
 // TODO Override Fence.cs
-
 
 [GlobalClass]
 public partial class Board: Control
@@ -321,7 +319,6 @@ public partial class Board: Control
         return [.. moves];
     }
 
-
     #endregion
 
     #region Evaluation ---
@@ -337,6 +334,21 @@ public partial class Board: Control
 		return 0;
 	}
 
-    #endregion
+    public int EvaluateBoard(int maximisingPlayer)
+    {
+        int minimisingPlayer = 1 - maximisingPlayer;
 
+		int maximisingPlayerPath = Algorithms.GetPathToGoal(this, maximisingPlayer).Length;
+		int minimisingPlayerPath = Algorithms.GetPathToGoal(this, minimisingPlayer).Length;
+		int pathDifference = minimisingPlayerPath - maximisingPlayerPath;
+		int fenceScore = Pawns[minimisingPlayer].FencesRemaining - Pawns[maximisingPlayer].FencesRemaining;
+
+		int evaluation = 0;
+
+		evaluation += pathDifference * Helper.PATH_WEIGHT;
+		evaluation += fenceScore * Helper.FENCE_WEIGHT;
+
+		return evaluation;
+    }
+    #endregion
 }
