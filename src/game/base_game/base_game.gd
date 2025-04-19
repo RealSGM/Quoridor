@@ -27,7 +27,7 @@ var move_history: String = ""
 			
 			match move_code[1]:
 				"f":
-					if !board.IsFencePlaced(index):
+					if !(board.GetFencePlaced(0, index) or board.GetFencePlaced(1, index)):
 						fence_buttons[index].clear_fences()
 				"m":
 					tile_buttons[index].clear_pawns()

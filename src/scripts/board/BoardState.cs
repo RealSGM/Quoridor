@@ -32,8 +32,6 @@ public partial class BoardState: Control
 
     #region Godot Helper Methods ---
 
-    public bool IsFencePlaced(int index) => Helper.Bits.Any(dir => Fences[dir].IsPlaced(index));
-
     public int[] GetFencesAsArray(int dir)
     {
         ulong bitBoard = Fences[dir].Fences;
@@ -80,10 +78,7 @@ public partial class BoardState: Control
 
 	#region Getters ---
 
-	// public FenceData[] GetFences() => Fences;
-	// public FenceData GetFencesInDirection(int direction) => Fences[direction];
     public bool GetFencePlaced(int direction, int index) => Fences[direction].IsPlaced(index);
-    // public int GetPlacedDirection(int index) => Array.FindIndex(Fences, fence => fence.IsPlaced(index));
     public int GetPawnTile(int player) => Pawns[player].Index;
     public ulong GetIllegalFences(int dir) => IllegalFences[dir].Fences;
     public string GetLastMove() => LastMove?.GetMoveCodeAsString() ?? string.Empty;
