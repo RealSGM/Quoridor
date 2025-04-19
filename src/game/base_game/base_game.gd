@@ -11,12 +11,14 @@ class_name BaseGame extends Control
 
 var tile_buttons: Array[TileButton] = []
 var fence_buttons: Array[FenceButton] = []
+var move_history: String = ""
 
 ## Update board when the player is changed
 @onready var current_player: int:
 	set(val):
 		current_player = val
 		set_current_player(val)
+
 
 @onready var move_code: String = "":
 	set(val):
@@ -44,7 +46,7 @@ func _ready() -> void:
 
 func set_current_player(val: int) -> void:
 	reset_board()
-	set_tiles(board.GetPawnPosition(current_player))
+	set_tiles(board.GetPawnTile(current_player))
 	update_fence_buttons()
 	user_interface.update_turn(val)
 
@@ -61,11 +63,11 @@ func reset_board() -> void:
 
 ## Setup the board with the selected size
 func setup_board() -> void:
-	board.InitialiseBoard()
+	board.Initialise()
 
 	# Update both players fence counts in UI
 	for player: int in Global.BITS:
-		user_interface.update_fence_counts(player, Global.MAX_FENCES - board.GetFenceCount(player))
+		user_interface.update_fence_counts(player, board.GetFencesRemaining(player))
 
 	instance_tile_buttons()
 	instance_fence_buttons()
@@ -83,6 +85,7 @@ func instance_fence_buttons() -> void:
 
 	for i: int in range(total_fences):
 		var fence_button: FenceButton = fence_button_resource.instantiate()
+		fence_button.name = str(i)
 		fence_button.id = i
 		fence_button_container.add_child(fence_button, true)
 		fence_buttons.append(fence_button)
@@ -96,9 +99,31 @@ func instance_tile_buttons() -> void:
 	# Instance board state tiles
 	for i: int in range(Global.BOARD_SIZE * Global.BOARD_SIZE):
 		var tile_button: TileButton = tile_resource.instantiate()
+		tile_button.name = str(i)
 		tile_button.id = i
 		tile_container.add_child(tile_button, true)
 		tile_buttons.append(tile_button)
+
+
+func undo_move() -> String:
+	# Split move history into an array
+	var split_history: PackedStringArray = move_history.split(";")
+
+	# Get the last move and remove it from the history
+	var last_move: String = split_history[split_history.size() - 1]
+	split_history.remove_at(split_history.size() - 1)
+	
+	# Undo the last move on the board
+	board.UndoMove(last_move)
+
+	# Update the last move on the board
+	var new_last_move: String = "" if split_history.size() == 0 else split_history[split_history.size() - 1]
+	board.SetLastMove(new_last_move)
+
+	# Update the move history
+	move_history = ";" .join(split_history)
+
+	return last_move
 
 
 #region Fences
@@ -108,14 +133,14 @@ func instance_tile_buttons() -> void:
 func update_fence_buttons() -> void:
 	for fence: int in range((Global.BOARD_SIZE - 1) * (Global.BOARD_SIZE - 1)):
 		var fence_button: FenceButton = fence_buttons[fence]
-		fence_button.disabled = not board.IsFenceEnabled(fence, Global.fence_direction) if board.GetFenceCount(current_player) < Global.MAX_FENCES else true
+		fence_button.disabled = not board.IsFenceEnabled(Global.fence_direction, fence) if board.GetFencesRemaining(current_player) else true
 		# Disable mouse filter if the button is disabled
 		fence_button.mouse_filter = Control.MOUSE_FILTER_IGNORE if fence_button.disabled else Control.MOUSE_FILTER_STOP
 
 
 func confirm_place_fence(fence: int, direction: int) -> void:
 	user_interface.add_message("Place: " + Helper.GetMoveCodeAsString(current_player, "f", direction, abs(fence), -1), current_player)
-	user_interface.update_fence_counts(current_player, Global.MAX_FENCES - board.GetFenceCount(current_player) - 1)
+	user_interface.update_fence_counts(current_player, board.GetFencesRemaining(current_player) - 1)
 
 
 func update_fence_direction() -> void:
@@ -154,8 +179,8 @@ func spawn_pawns() -> void:
 		tile_button.pawns[0] = spawn_pawn(Global.players[0]["color"], tile_button.id)
 		tile_button.pawns[1] = spawn_pawn(Global.players[1]["color"], tile_button.id)
 
-	tile_buttons[board.PawnPositions[0]].pawns[0].show()
-	tile_buttons[board.PawnPositions[1]].pawns[1].show()
+	tile_buttons[board.GetPawnTile(0)].pawns[0].show()
+	tile_buttons[board.GetPawnTile(1)].pawns[1].show()
 
 
 func spawn_pawn(color: Color, tile: int) -> Panel:
@@ -168,7 +193,7 @@ func spawn_pawn(color: Color, tile: int) -> Panel:
 
 func confirm_move_pawn(tile: int) -> void:
 	# Hide current pawn
-	var current_position: int = board.PawnPositions[current_player]
+	var current_position: int = board.GetPawnTile(current_player)
 	tile_buttons[current_position].pawns[current_player].hide()
 
 	# Set the modulate of the selected pawn to one
@@ -203,13 +228,8 @@ func _on_fence_button_pressed(fence: int, direction: int = Global.fence_directio
 	fence_button.v_fence.modulate = Global.players[current_player]["color"]
 
 
-# Format: 0a1_2
-# 0: Player, 
-# a: Move Type, 
-# 1: Tile To, 
-# 2: Tile From, 
 func _on_tile_pressed(tile: int) -> void:
-	move_code = Helper.GetMoveCodeAsString(current_player, "m", 0, tile, board.GetPawnPosition(current_player))
+	move_code = Helper.GetMoveCodeAsString(current_player, "m", 0, tile, board.GetPawnTile(current_player))
 	var pawn: Panel = tile_buttons[tile].pawns[current_player]
 	pawn.modulate.a = 0.5
 	pawn.show()
@@ -224,12 +244,16 @@ func _on_confirm_pressed() -> void:
 	var index: int = move_code.split("_")[0].substr(2).to_int()
 	var direction: int = 1 if index < 0 else 0
 	index = abs(index)
-
+	
 	match move_code[1]:
 		"f":
 			confirm_place_fence(index, direction)
 		"m":
 			confirm_move_pawn(index)
+
+	if !move_history.is_empty():
+		move_history += ";"
+	move_history += move_code
 
 	board.AddMove(move_code)
 	move_code = ""
@@ -242,8 +266,6 @@ func _on_confirm_pressed() -> void:
 		# Complete IFS before switching player
 		AlgorithmManager.illegal_fence_check.GetIllegalFences(board, 1 - current_player)
 		current_player = 1 - current_player
-	
-	board.Test()
 
 
 func _on_undo_button_pressed() -> void:
@@ -252,18 +274,18 @@ func _on_undo_button_pressed() -> void:
 
 	current_player = 1 - current_player
 	
-	if board.GetMoveHistory() == "":
+	if move_history.is_empty():
 		user_interface.undo_button.disabled = true
 
 
 func undo_board_ui() -> void:
-	var last_move: String = board.UndoMove()
+	var last_move: String = undo_move()
 	var player: int = abs(last_move[0].to_int())
 
 	match last_move[1]:
 		"f":
 			fence_buttons[abs(last_move.substr(3).to_int())].clear_fences()
-			user_interface.fence_count_labels[player].text = str(board.GetFenceCount(player))
+			user_interface.fence_count_labels[player].text = str(board.GetFencesRemaining(player))
 			user_interface.add_message("Undo Place: " + last_move, 2)
 		"m":
 			var moves_filtered: String = last_move.split("m")[1]
@@ -275,10 +297,10 @@ func undo_board_ui() -> void:
 
 func finish_undo_board() -> void:
 	for player: int in Global.BITS:
-		user_interface.update_fence_counts(player, Global.MAX_FENCES - board.GetFenceCount(player))
+		user_interface.update_fence_counts(player, board.GetFencesRemaining(player) - 1)
 
 	AlgorithmManager.illegal_fence_check.GetIllegalFences(board, current_player)
 	move_code = ""
 
-	if board.GetMoveHistory().is_empty():
+	if move_history.is_empty():
 		user_interface.undo_button.disabled = true

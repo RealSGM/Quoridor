@@ -8,19 +8,12 @@ using Godot;
 [GlobalClass]
 public partial class Helper : Node
 {
+	public static readonly int[] Bits = [0, 1];
 	public static readonly Random Random = new();
 	public const int PATH_WEIGHT = 20;
 	public const int FENCE_WEIGHT = 10;
 	public const int MaxFences = 10;
 	public const int BoardSize = 9;
-
-	public static readonly int[] Bits = [0, 1];
-
-	public static readonly int[][][] DefaultTileGridConnections =
-	[
-		[[0, 2], [1, 3]],
-		[[0, 1], [2, 3]]
-	];
 
 	public static readonly List<Func<int, int, int>> AdjacentFunctions =
 	[
@@ -65,6 +58,8 @@ public partial class Helper : Node
 
 	#endregion
 
+	#region Index Mapping ---
+
 	public static int GetNorthAdjacent(int index, int size) => index >= size ? index - size : -1;
 
 	public static int GetEastAdjacent(int index, int size) => (index + 1) % size != 0 ? index + 1 : -1;
@@ -90,20 +85,9 @@ public partial class Helper : Node
 		GetWestAdjacent(index, size)
 	];
 
-	public static int[] GetTileGrid(int index, int boardSize)
-	{
-		int topLeft = index;
-		int topRight = GetEastAdjacent(index, boardSize);
-		int bottomLeft = GetSouthAdjacent(index, boardSize);
-		int bottomRight = GetSouthAdjacent(topRight, boardSize);
-		return [topLeft, topRight, bottomLeft, bottomRight];
-	}
+	#endregion
 
-	public static int[] GetGoalTiles(int player)
-	{
-		int startRow = player * (BoardSize - 1) * BoardSize;
-		return [.. Enumerable.Range(startRow, BoardSize)];
-	}
+	#region Tile Mapping ---
 
 	public static int GetFenceCorner(int tile, int offset, int cornerIndex)
 	{
@@ -113,21 +97,13 @@ public partial class Helper : Node
 		return (row + offset) * (BoardSize - 1) + col + (cornerIndex % 2 == 0 ? -1 : 0);
 	}
 
-	/// Returns the direction of the fence between two tiles
-	/// 0 = Horizontal, 1 = Vertical
-	public static int GetDirection(int index1, int index2)
-	{
-		if (Math.Abs(index1 - index2) == 1) return 0; // Tiles are horizontally apart
-		return 1; // Tiles are vertically apart
-	}
-
 	public static int TileToFence(int tile, int verticalOffset, int horizontalOffset)
 	{
 		int row = tile / BoardSize + verticalOffset;
 		int col = tile % BoardSize + horizontalOffset;
 		return (row >= BoardSize - 1 || col >= BoardSize - 1) ? -1 : row * (BoardSize - 1) + col;
 	}
-	
+
 	/// Returns the fence buttons that surround a tile
 	public static int[] GetFenceCorners(int tile) =>
 		[
@@ -136,7 +112,11 @@ public partial class Helper : Node
 			TileToFence(tile, 0, -1),  // BottomRight
 			TileToFence(tile, 0, 0)   // BottomLeft
 		];
+	
+	#endregion 
 
+	#region BitBoard Functions ---
+	
 	public static IEnumerable<int> GetOnesInBitBoard(ulong bitboard)
 	{
 		while (bitboard != 0)
@@ -146,4 +126,56 @@ public partial class Helper : Node
 			bitboard &= bitboard - 1;
 		}
 	}
+	
+	public static ulong[] GetFencesSurroundingTile(int index)
+    {
+        return [.. Bits.Select(dir =>
+			GetFenceCorners(index)
+                .Where(fence => fence != -1)
+                .Aggregate(0UL, (acc, fenceIndex) => acc | (1UL << fenceIndex))
+        )];
+    }
+
+	public static ulong[] GetSurroundingFences(int index, int dir)
+    {
+        // Store surrounding fences [Horizontal, Vertical]
+        ulong[] surrFences = [0, 0];
+        int[] adjFences = InitialiseConnections(index, BoardSize - 1);
+        int oppDir = 1 - dir;
+
+        foreach (int bit in Bits)
+        {
+            // Get the adjacent fence
+			int adjIndex = (2 * bit) + oppDir;
+            int adjFence = adjFences[adjIndex];
+            if (adjFence == -1) continue;
+
+            // Get the leaped adjacent fence
+			int leapedAdjFence = AdjacentFunctions[adjIndex](adjFence, BoardSize - 1);
+			if (leapedAdjFence == -1) continue;
+
+            surrFences[dir] |= 1UL << leapedAdjFence;
+        }
+
+		// Add perpendicular adjacent fences
+		surrFences[oppDir] |= adjFences
+			.Where(adjFence => adjFence != -1)
+			.Aggregate(0UL, (acc, adjFence) => acc | (1UL << adjFence));
+
+		// Perpendicular corner fences
+		surrFences[dir] |= InitialiseCornerConnections(index, BoardSize - 1)
+			.Where(fence => fence >= 0)
+			.Aggregate(0UL, (acc, cornerFence) => acc | (1UL << cornerFence));
+
+        return surrFences;
+    }
+
+	#endregion
+
+	public static int[] GetGoalTiles(int player)
+	{
+		int startRow = player * (BoardSize - 1) * BoardSize;
+		return [.. Enumerable.Range(startRow, BoardSize)];
+	}
+
 }

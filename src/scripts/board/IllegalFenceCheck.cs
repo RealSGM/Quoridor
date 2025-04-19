@@ -9,30 +9,34 @@ public partial class IllegalFenceCheck : Node
 	public void GetIllegalFences(BoardState board, int currentPlayer)
 	{
 		// Ignore if player has no more fences
-		if (board.GetFenceCount(currentPlayer) == Helper.MaxFences) return;
+		if (board.HasFences(currentPlayer)) return;
 
-		string lastMove = board.GetLastMove();
-		var (player, moveType, _, _, _) = Helper.GetMoveCodeAsTuple(lastMove);
+		// Get the last move type
+		char moveType = board.LastMove.MoveType;
+		
+		ulong[] possibleFences = board.GetEnabledFences();
 
-		List<string> possibleFences = moveType == "m"
-			? board.GetTileAdjacentFences(player)
-			: [.. board.GetPlacedFences()
-				.SelectMany(board.GetAllSurroundingFences)
-				.Where(fence => fence != "")
-				.Distinct()];
+		ulong[] surroundingFences = moveType == 'm'
+			? Helper.GetFencesSurroundingTile(board.LastMove.Index)
+			: board.GetAllSurroundingFences();
 
-		Parallel.ForEach(possibleFences, fence =>
+		// Ensure possible fences are enabled
+		foreach (int direction in Helper.Bits)
 		{
-			int index = int.Parse(fence[1..]);
-			int direction = fence[0] == '+' ? 0 : 1;
-			board.GetFences()[index].SetIllegal(direction, false);
+			possibleFences[direction] &= surroundingFences[direction];
+		}
 
-			if (!board.IsFenceEnabled(index, direction)) return;
-
-			Parallel.ForEach(Helper.Bits, player =>
+		// FIXME - Parallel not done for each fence as its using a generator
+		Parallel.ForEach(Helper.Bits, dir =>
+		{
+			Parallel.ForEach(Helper.GetOnesInBitBoard(possibleFences[dir]), index =>
 			{
-				if (!IsFenceIllegal(board, index, direction, player)) return;
-				board.GetFences()[index].SetIllegal(direction, true);
+				board.GetIllegalFences()[dir].UndoSetPlaced(index);
+
+				if (IsFenceIllegal(board, index, dir, currentPlayer))
+				{
+					board.GetIllegalFences()[dir].SetPlaced(index);
+				}
 			});
 		});
 	}
@@ -43,10 +47,10 @@ public partial class IllegalFenceCheck : Node
 
 		boardClone.PlaceFence(direction, fence, player);
 
-		int start = boardClone.GetPawnPosition(player);
+		int start = boardClone.GetPawnTile(player);
 
 		HashSet<int> goalTiles = [.. Helper.GetGoalTiles(player)];
 
-		return Algorithms.RecursiveDFS(boardClone, start, goalTiles, [], player);
+		return Algorithms.IsValidPath(boardClone, start, goalTiles);
 	}
 }

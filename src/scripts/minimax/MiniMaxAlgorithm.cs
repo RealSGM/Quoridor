@@ -15,72 +15,74 @@ public partial class MiniMaxAlgorithm : Node
 
 	public string GetMove(BoardState board, int currentPlayer, bool isMaximising = true, bool isDebugging = false)
 	{
-		// Setup console
-		Console = GetNode<Window>("/root/Console");
-		Console.Call("add_entry", "Creating Game Tree...", 0);
-		ulong startTime = Time.GetTicksMsec();
-		debugging = isDebugging;
-		nodesVisited = 1;
+		// // Setup console
+		// Console = GetNode<Window>("/root/Console");
+		// Console.Call("add_entry", "Creating Game Tree...", 0);
+		// ulong startTime = Time.GetTicksMsec();
+		// debugging = isDebugging;
+		// nodesVisited = 1;
 
-		ValueTuple<int, string> bestMoveTuple = MiniMax(board, START_DEPTH, currentPlayer, currentPlayer, int.MinValue, int.MaxValue);
-		string bestMove = bestMoveTuple.Item2;
-		int bestValue = bestMoveTuple.Item1;
+		// ValueTuple<int, string> bestMoveTuple = MiniMax(board, START_DEPTH, currentPlayer, currentPlayer, int.MinValue, int.MaxValue);
+		// string bestMove = bestMoveTuple.Item2;
+		// int bestValue = bestMoveTuple.Item1;
 
-		Console.Call("add_entry", "Found Best Move in " + (Time.GetTicksMsec() - startTime) + " ms", 0);
-		Console.Call("add_entry", $"Best Value: {bestValue}, Best Move: {bestMove}, Nodes visited: {nodesVisited}", 0);
+		// Console.Call("add_entry", "Found Best Move in " + (Time.GetTicksMsec() - startTime) + " ms", 0);
+		// Console.Call("add_entry", $"Best Value: {bestValue}, Best Move: {bestMove}, Nodes visited: {nodesVisited}", 0);
 
-		return bestMove;
+		// return bestMove;
+		return "";
 	}
+
 
 	public void SetMaxDepth(BoardState board)
 	{
-		// Set first move depth to 1, as first move is super time consuming
-		string moveHistory = board.GetMoveHistory();
-		string[] moves = moveHistory.ToString().Split([';'], StringSplitOptions.RemoveEmptyEntries);
-		START_DEPTH = moves.Length <= 2 ? 1 : 3;
+		// // Set first move depth to 1, as first move is super time consuming
+		// string moveHistory = board.GetMoveHistory();
+		// string[] moves = moveHistory.ToString().Split([';'], StringSplitOptions.RemoveEmptyEntries);
+		// START_DEPTH = moves.Length <= 2 ? 1 : 3;
 	}
 
-	private (int v, string m) MiniMax(BoardState board, int depth, int currentPlayer, int maximisingPlayer, int alpha, int beta)
-	{
-		nodesVisited++;
+	// private (int v, string m) MiniMax(BoardState board, int depth, int currentPlayer, int maximisingPlayer, int alpha, int beta)
+	// {
+	// 	nodesVisited++;
 
-		// Check for winner before evaluating, and before expanding further
-		if (board.IsWinner(1 - currentPlayer)) return (int.MaxValue, board.GetLastMove());
-		if (board.IsWinner(currentPlayer)) return (int.MinValue, board.GetLastMove());
-		if (depth == 0) return (board.EvaluateBoard(maximisingPlayer), board.GetLastMove());
+	// 	// Check for winner before evaluating, and before expanding further
+	// 	if (board.IsWinner(1 - currentPlayer)) return (int.MaxValue, board.GetLastMove());
+	// 	if (board.IsWinner(currentPlayer)) return (int.MinValue, board.GetLastMove());
+	// 	if (depth == 0) return (board.EvaluateBoard(maximisingPlayer), board.GetLastMove());
 
-		string[] moves = [.. board.GetAllMovesWeighted(currentPlayer).Keys];
-		// string[] moves = board.GetAllMoves(currentPlayer);
+	// 	string[] moves = [.. board.GetAllMovesWeighted(currentPlayer).Keys];
+	// 	// string[] moves = board.GetAllMoves(currentPlayer);
 
-		bool isMaximising = currentPlayer == maximisingPlayer;
-		int bestValue = isMaximising ? int.MinValue : int.MaxValue;
+	// 	bool isMaximising = currentPlayer == maximisingPlayer;
+	// 	int bestValue = isMaximising ? int.MinValue : int.MaxValue;
 
-		Dictionary<string, int> moveScores = [];
+	// 	Dictionary<string, int> moveScores = [];
 
-		// Recursively call MiniMax for each move for the current player
-		foreach (string move in moves)
-		{
-			BoardState newBoard = board.Clone();
-			newBoard.AddMove(move);
+	// 	// Recursively call MiniMax for each move for the current player
+	// 	foreach (string move in moves)
+	// 	{
+	// 		BoardState newBoard = board.Clone();
+	// 		newBoard.AddMove(move);
 
-			int value = MiniMax(newBoard, depth - 1, 1 - currentPlayer, maximisingPlayer, alpha, beta).v;
-			newBoard.Free();
+	// 		int value = MiniMax(newBoard, depth - 1, 1 - currentPlayer, maximisingPlayer, alpha, beta).v;
+	// 		newBoard.Free();
 
-			moveScores[move] = value;
+	// 		moveScores[move] = value;
 
-			// Update best value
-			bestValue = isMaximising ? Math.Max(bestValue, value) : Math.Min(bestValue, value);
+	// 		// Update best value
+	// 		bestValue = isMaximising ? Math.Max(bestValue, value) : Math.Min(bestValue, value);
 
-			// Alpha-beta pruning
-			if (isMaximising) alpha = Math.Max(alpha, value);
-			else beta = Math.Min(beta, value);
+	// 		// Alpha-beta pruning
+	// 		if (isMaximising) alpha = Math.Max(alpha, value);
+	// 		else beta = Math.Min(beta, value);
 
-			if (beta <= alpha) break;
-		}
+	// 		if (beta <= alpha) break;
+	// 	}
 
-		// Filter dictionary to only include moves with the best value
-		moveScores = moveScores.Where(x => x.Value == bestValue).ToDictionary(x => x.Key, x => x.Value);
+	// 	// Filter dictionary to only include moves with the best value
+	// 	moveScores = moveScores.Where(x => x.Value == bestValue).ToDictionary(x => x.Key, x => x.Value);
 
-		return (bestValue, moveScores.Keys.ElementAt(Helper.Random.Next(0, moveScores.Count)));
-	}
+	// 	return (bestValue, moveScores.Keys.ElementAt(Helper.Random.Next(0, moveScores.Count)));
+	// }
 }

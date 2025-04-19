@@ -11,24 +11,25 @@ public partial class MCTSAlgorithm : Node
 
 	public string GetMove(BoardState board, int currentPlayer, bool _isMaximising = false, bool _isDebugging = false)
 	{
-		Console = GetNode<Window>("/root/Console");
-		Console.Call("add_entry", "Creating Game Tree...", 0);
-		ulong startTime = Time.GetTicksMsec();
+		// Console = GetNode<Window>("/root/Console");
+		// Console.Call("add_entry", "Creating Game Tree...", 0);
+		// ulong startTime = Time.GetTicksMsec();
 
-		MCTSNode root = new(null, board, currentPlayer);
+		// MCTSNode root = new(null, board, currentPlayer);
 
-		for (int i = 0; i < SIMULATIONS; i++)
-		{
-			MCTSNode selectedNode = root.SelectChild(EXPLORATION_CONSTANT);
-			MCTSNode expandedNode = selectedNode.Expand();
-			int simulationResult = expandedNode.Simulate(currentPlayer);
-			expandedNode.Backpropagate(simulationResult);
-		}
+		// for (int i = 0; i < SIMULATIONS; i++)
+		// {
+		// 	MCTSNode selectedNode = root.SelectChild(EXPLORATION_CONSTANT);
+		// 	MCTSNode expandedNode = selectedNode.Expand();
+		// 	int simulationResult = expandedNode.Simulate(currentPlayer);
+		// 	expandedNode.Backpropagate(simulationResult);
+		// }
 
-		MCTSNode bestChild = root.Children.OrderByDescending(c => c.Visits).First();
+		// MCTSNode bestChild = root.Children.OrderByDescending(c => c.Visits).First();
 
-		Console.Call("add_entry", "Found Best Move in " + (Time.GetTicksMsec() - startTime) + " ms", 0);
-		Console.Call("add_entry", $"Best Move: {bestChild.State.GetLastMove()}, Wins: {bestChild.Wins}, Visits: {bestChild.Visits}", 0);
-		return bestChild.State.GetLastMove().Split('_')[0];
+		// Console.Call("add_entry", "Found Best Move in " + (Time.GetTicksMsec() - startTime) + " ms", 0);
+		// Console.Call("add_entry", $"Best Move: {bestChild.State.GetLastMove()}, Wins: {bestChild.Wins}, Visits: {bestChild.Visits}", 0);
+		// return bestChild.State.GetLastMove().Split('_')[0];
+        return "";
 	}
 }
