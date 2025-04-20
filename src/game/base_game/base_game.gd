@@ -299,7 +299,7 @@ func finish_undo_board() -> void:
 	for player: int in Global.BITS:
 		user_interface.update_fence_counts(player, board.GetFencesRemaining(player) - 1)
 
-	AlgorithmManager.illegal_fence_check.GetIllegalFences(board, current_player)
+	IllegalFenceCheck.GetIllegalFences(board, current_player)
 	move_code = ""
 
 	if move_history.is_empty():
