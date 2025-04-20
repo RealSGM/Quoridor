@@ -15,8 +15,9 @@ func set_current_player(val: int) -> void:
 	# Bot's Turn
 	if val == 1:
 		await RenderingServer.frame_post_draw
-		AlgorithmManager.minimax.SetMaxDepth(board)
-		move_code = AlgorithmManager.run(board, current_player, true, false)
+		var turns_played: int = move_history.split(";").size()
+		AlgorithmManager.minimax.SetMaxDepth(turns_played)
+		move_code = AlgorithmManager.run(board, current_player)
 		_on_confirm_pressed()
 
 

@@ -1,7 +1,6 @@
 class_name BotGame extends BaseGame
 
 @export var next_move_button: Button
-@export var debug_minimax_button: Button
 @export var autoplay_button: Button
 
 var turn_ready: bool = false
@@ -11,7 +10,6 @@ func _ready() -> void:
 	super._ready()
 	user_interface.is_bots = true
 	turn_ready = true
-	_on_print_minimax_toggled(false)
 
 
 func set_current_player(val: int) -> void:
@@ -30,8 +28,9 @@ func set_current_player(val: int) -> void:
 
 
 func play_turn() -> void:
-	AlgorithmManager.minimax.SetMaxDepth(board)
-	move_code = AlgorithmManager.run(board, current_player, true, debug_minimax_button.is_pressed())
+	var turns_played: int = move_history.split(";").size()
+	AlgorithmManager.minimax.SetMaxDepth(turns_played)
+	move_code = AlgorithmManager.run(board, current_player)
 	_on_confirm_pressed()
 
 
@@ -55,10 +54,6 @@ func _on_next_move_pressed() -> void:
 	if not turn_ready:
 		return
 	play_turn()
-
-
-func _on_print_minimax_toggled(toggled_on: bool) -> void:
-	debug_minimax_button.text = "Debug: %s" % ["On" if toggled_on else "Off"]
 
 
 func _on_autoplay_button_toggled(toggled_on: bool) -> void:
