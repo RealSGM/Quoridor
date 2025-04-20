@@ -15,9 +15,10 @@ public partial class BoardState: Control
     
     public BoardState Clone() => new()
     {
-        Fences = [Fences[0].Clone(), Fences[1].Clone()],
+        Fences = [Fences[0], Fences[1]],
         Pawns = [Pawns[0].Clone(), Pawns[1].Clone()],
-        IllegalFences = [IllegalFences[0].Clone(), IllegalFences[1].Clone()]
+        IllegalFences = [IllegalFences[0], IllegalFences[1]],
+        LastMove = LastMove?.Clone()
     };
 
     public void Initialise()
@@ -32,24 +33,10 @@ public partial class BoardState: Control
 
     #region Godot Helper Methods ---
 
-    public int[] GetFencesAsArray(int dir)
-    {
-        ulong bitBoard = Fences[dir].Fences;
-        List<int> bits = [];
-        
-        for (int i = 0; i < (Helper.BoardSize - 1) * (Helper.BoardSize - 1); i++)
-        {
-            // Get bit from bitboard
-            int bit = (int)((bitBoard >> i) & 1);
-            bits.Add(bit);
-        }
-
-        return [.. bits];
-    }
+    public int[] GetFencesAsArray(int dir) => Helper.BitboardToArray(Fences[dir].Fences);
 
     public int[] GetEnabledFencesAsArray(int dir)
     {
-        ulong bitBoard = Fences[dir].Fences;
         List<int> bits = [];
         
         for (int i = 0; i < (Helper.BoardSize - 1) * (Helper.BoardSize - 1); i++)
@@ -83,10 +70,11 @@ public partial class BoardState: Control
     public ulong GetIllegalFences(int dir) => IllegalFences[dir].Fences;
     public string GetLastMove() => LastMove?.GetMoveCodeAsString() ?? string.Empty;
     public int GetFencesRemaining(int player) => Pawns[player].FencesRemaining;
+    public ulong[] GetFences() => [.. Helper.Bits.Select(dir => Fences[dir].Fences)];
 
-    public ulong[] GetEnabledFences() => [.. Helper.Bits.Select(dir => Enumerable
+    public ulong[] GetEnabledFences(bool checkIllegal = true) => [.. Helper.Bits.Select(dir => Enumerable
         .Range(0, (Helper.BoardSize - 1) * (Helper.BoardSize - 1))
-        .Where(i => IsFenceEnabled(dir, i))
+        .Where(i => IsFenceEnabled(dir, i, checkIllegal))
         .Aggregate(0UL, (acc, i) => acc | (1UL << i))
     )];
 
@@ -133,16 +121,15 @@ public partial class BoardState: Control
     {
         int[] cons = Helper.InitialiseConnections(index, Helper.BoardSize);
         int[] corners = Helper.GetFenceCorners(index);
-        int dir = 0;
+        int dir = 1;
 
         // Loop through each connection
         for (int i = 0; i < cons.Length; i++)
         {
+            dir = 1 - dir;
             if (cons[i] == -1) continue;
             if (GetFencePlaced(dir, corners[i])) cons[i] = -1;
             if (GetFencePlaced(dir, corners[(i + 1) % cons.Length])) cons[i] = -1;
-            
-            dir = 1 - dir;
         }
 
         return cons;
@@ -183,11 +170,11 @@ public partial class BoardState: Control
 
     public bool HasFences(int player) => Pawns[player].FencesRemaining > 0;
 
-    public bool IsFenceEnabled(int dir, int index)
+    public bool IsFenceEnabled(int dir, int index, bool checkIllegal = true)
     {
-        if (GetFencePlaced(dir, index) || IllegalFences[dir].IsPlaced(index)) return false;
-
+        if (GetFencePlaced(dir, index)) return false;
         if (GetFencePlaced(1 - dir, index)) return false;
+        if (checkIllegal && IllegalFences[dir].IsPlaced(index)) return false;
 
         return Helper.Bits.All(bit =>
         {
@@ -218,11 +205,11 @@ public partial class BoardState: Control
     {
         ulong[] fences = [0, 0];
 
-        foreach (int bit in Helper.Bits)
+        foreach (int dir in Helper.Bits)
         {
-            foreach (int i in Helper.GetOnesInBitBoard(Fences[bit].Fences))
+            foreach (int i in Helper.GetOnesInBitBoard(Fences[dir].Fences))
             {
-                ulong[] surrFences = Helper.GetSurroundingFences(i, bit);
+                ulong[] surrFences = Helper.GetSurroundingFences(i, dir);
                 fences[0] |= surrFences[0];
                 fences[1] |= surrFences[1];
             }

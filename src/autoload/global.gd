@@ -31,7 +31,7 @@ func clear() -> String:
 	return ""
 
 
-func get_fences(direction: int) -> String:
+func get_fences(direction: int = 0) -> String:
 	var fence_bitboard = game.board.GetFencesAsArray(direction)
 	var bb_string: String = ""
 
@@ -41,9 +41,9 @@ func get_fences(direction: int) -> String:
 		bb_string += " " + str(fence_bitboard[i]) + " "
 
 	return bb_string
+	
 
-
-func get_enabled_fences(direction: int) -> String:
+func get_enabled_fences(direction: int = 0) -> String:
 	var fence_bitboard = game.board.GetEnabledFencesAsArray(direction)
 	var bb_string: String = ""
 
@@ -53,3 +53,25 @@ func get_enabled_fences(direction: int) -> String:
 		bb_string += " " + str(fence_bitboard[i]) + " "
 
 	return bb_string
+
+
+func get_shortest_path(player: int = 0) -> String:
+	var path = Algorithms.GetPathToGoal(game.board, player)
+
+	var msg: String = "[ Start -> "
+
+	for i: int in range(path.size()):
+		msg += str(path[i]) + " -> "
+	return msg + " End]"
+
+
+func is_fence_legal(player: int = 0, dir: int = 0, index: int = 0) -> String:
+	var is_legal = IllegalFenceCheck.IsFenceIllegal(game.board, player, dir, index)
+	var text = "Player " + str(player) + " fence at " + str(index) + " is "
+
+	if is_legal:
+		text += "legal"
+	else:
+		text += "illegal"
+
+	return text

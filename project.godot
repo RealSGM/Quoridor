@@ -21,7 +21,7 @@ Resources="*res://src/autoload/resources.tscn"
 SignalManager="*res://src/autoload/signal_manager.gd"
 Global="*res://src/autoload/global.gd"
 Console="*res://src/autoload/console/console.tscn"
-AlgorithmManager="*res://src/autoload/algorithms.tscn"
+AlgorithmManager="*res://src/autoload/algorithm_manager/algorithms.tscn"
 
 [debug]
 

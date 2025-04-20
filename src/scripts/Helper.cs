@@ -109,10 +109,16 @@ public partial class Helper : Node
 		[
 			TileToFence(tile, -1, -1),  // TopLeft
 			TileToFence(tile, -1, 0),  // TopRight
-			TileToFence(tile, 0, -1),  // BottomRight
-			TileToFence(tile, 0, 0)   // BottomLeft
+			TileToFence(tile, 0, 0),   // BottomLeft
+			TileToFence(tile, 0, -1)  // BottomRight
 		];
 	
+	public static int[] OrderConnections(int[] tiles, int player)
+	{
+		int[] order = player == 0 ? [0, 1, 3, 2] : [2, 1, 3, 0];
+		return [.. order.Select(i => tiles[i])];
+	}
+
 	#endregion 
 
 	#region BitBoard Functions ---
@@ -128,13 +134,12 @@ public partial class Helper : Node
 	}
 	
 	public static ulong[] GetFencesSurroundingTile(int index)
-    {
-        return [.. Bits.Select(dir =>
-			GetFenceCorners(index)
-                .Where(fence => fence != -1)
-                .Aggregate(0UL, (acc, fenceIndex) => acc | (1UL << fenceIndex))
-        )];
-    }
+	{
+		ulong mask = GetFenceCorners(index)
+			.Where(corner => corner != -1)
+			.Aggregate(0UL, (acc, corner) => acc | (1UL << corner));
+		return [mask, mask];
+	}
 
 	public static ulong[] GetSurroundingFences(int index, int dir)
     {
@@ -161,14 +166,26 @@ public partial class Helper : Node
 		surrFences[oppDir] |= adjFences
 			.Where(adjFence => adjFence != -1)
 			.Aggregate(0UL, (acc, adjFence) => acc | (1UL << adjFence));
-
-		// Perpendicular corner fences
-		surrFences[dir] |= InitialiseCornerConnections(index, BoardSize - 1)
-			.Where(fence => fence >= 0)
-			.Aggregate(0UL, (acc, cornerFence) => acc | (1UL << cornerFence));
+		
+		surrFences[oppDir] |= InitialiseCornerConnections(index, BoardSize - 1)
+			.Where(connection => connection != -1)
+			.Aggregate(0UL, (acc, connection) => acc | (1UL << connection));
 
         return surrFences;
     }
+
+	public static int[] BitboardToArray(ulong bitBoard) => [.. Enumerable.Range(0, (BoardSize - 1) * (BoardSize - 1)).Select(i => (int)((bitBoard >> i) & 1))];
+
+	public static void PrintBitBoard(ulong bitboard)
+	{
+		int[] arr = BitboardToArray(bitboard);
+		for (int i = 0; i < BoardSize - 1; i++)
+		{
+			string row = string.Join("  ", arr.Skip(i * (BoardSize - 1)).Take(BoardSize - 1));
+			GD.Print(row);
+		}
+		GD.Print("----------");
+	}
 
 	#endregion
 
