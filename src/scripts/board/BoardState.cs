@@ -48,6 +48,25 @@ public partial class BoardState: Control
         return [.. bits];
     }
 
+    public void Test(int player)
+    {
+        ulong[] fences = [0, 0];
+
+        ulong[] enabledFences = GetEnabledFences();
+        ulong[] surroundingFences = GetAllSurroundingFences();
+        ulong[] fencesBehind = GetFencesBehindPlayer(player);
+        ulong[] enemySurrFences = Helper.GetFencesSurroundingTile(Pawns[1 - player].Index);
+
+        // Loop through both directions
+        foreach (int direction in Helper.Bits)
+        {
+            fences[direction] |= surroundingFences[direction];
+            fences[direction] |= enemySurrFences[direction];
+            fences[direction] |= fencesBehind[direction];
+            fences[direction] &= enabledFences[direction];
+        }
+    }
+
     #endregion
 
     #region Setters ---
@@ -194,8 +213,8 @@ public partial class BoardState: Control
         int numRowsToFill = playerRow - goalRow;
 
         ulong fencesBehind = (1UL << (8 * numRowsToFill)) - 1;
-        
-        if (player == 1) fencesBehind = ~fencesBehind;
+
+        if (player == 0) fencesBehind = ~fencesBehind;
 
         return [fencesBehind, fencesBehind];
     }
@@ -241,7 +260,7 @@ public partial class BoardState: Control
 
         if (!HasFences(player)) return fences;
 
-        fences = GetEnabledFences();
+        ulong[] enabledFences = GetEnabledFences();
         ulong[] surroundingFences = GetAllSurroundingFences();
         ulong[] fencesBehind = GetFencesBehindPlayer(player);
         ulong[] enemySurrFences = Helper.GetFencesSurroundingTile(Pawns[1 - player].Index);
@@ -249,9 +268,10 @@ public partial class BoardState: Control
         // Loop through both directions
         foreach (int direction in Helper.Bits)
         {
-            fences[direction] &= surroundingFences[direction];
-            fences[direction] &= enemySurrFences[direction];
-            fences[direction] &= fencesBehind[direction];
+            fences[direction] |= surroundingFences[direction];
+            fences[direction] |= enemySurrFences[direction];
+            fences[direction] |= fencesBehind[direction];
+            fences[direction] &= enabledFences[direction];
         }
 
         return fences;
@@ -265,7 +285,7 @@ public partial class BoardState: Control
         moves.AddRange(GetReachableTilesSmart(player)
             .Select(tile => Helper.GetMoveCodeAsString(player, "m", 0, tile)));
 
-        ulong[] fences = GetAllFences(player);
+        ulong[] fences = GetFencesSmart(player);
 
         moves.AddRange(Helper.Bits.SelectMany(dir => Helper.GetOnesInBitBoard(fences[dir])
             .Select(i => Helper.GetMoveCodeAsString(player, "f", dir, i))

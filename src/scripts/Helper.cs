@@ -136,7 +136,7 @@ public partial class Helper : Node
 	public static ulong[] GetFencesSurroundingTile(int index)
 	{
 		ulong mask = GetFenceCorners(index)
-			.Where(corner => corner != -1)
+			.Where(corner => corner >= 0)
 			.Aggregate(0UL, (acc, corner) => acc | (1UL << corner));
 		return [mask, mask];
 	}
