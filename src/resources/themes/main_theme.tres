@@ -1,4 +1,4 @@
-[gd_resource type="Theme" load_steps=9 format=3 uid="uid://gl4viqpfcsgn"]
+[gd_resource type="Theme" load_steps=11 format=3 uid="uid://gl4viqpfcsgn"]
 
 [ext_resource type="FontFile" uid="uid://bqs1impjgngsx" path="res://assets/fonts/OpenSans-Regular.ttf" id="1_ncqm2"]
 
@@ -17,6 +17,19 @@ bg_color = Color(0.180392, 0.180392, 0.180392, 1)
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ceue7"]
 bg_color = Color(0.101961, 0.101961, 0.101961, 1)
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_qtffb"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_llrdn"]
+bg_color = Color(0.180392, 0.180392, 0.180392, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+expand_margin_left = 1.0
+expand_margin_top = 8.0
+expand_margin_right = 1.0
+expand_margin_bottom = 8.0
+
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_fgkes"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_qnscp"]
@@ -30,6 +43,8 @@ Button/styles/focus = SubResource("StyleBoxFlat_hb4nq")
 Button/styles/hover = SubResource("StyleBoxFlat_toy7k")
 Button/styles/normal = SubResource("StyleBoxFlat_d1377")
 Button/styles/pressed = SubResource("StyleBoxFlat_ceue7")
+HSlider/styles/grabber_area = SubResource("StyleBoxFlat_qtffb")
+HSlider/styles/slider = SubResource("StyleBoxFlat_llrdn")
 Label/font_sizes/font_size = 48
 Label/fonts/font = ExtResource("1_ncqm2")
 LineEdit/font_sizes/font_size = 48

@@ -2,6 +2,7 @@ class_name QLearningTraining extends BaseGame
 
 @export var run_single_button: Button
 @export var run_multiple_button: Button
+@export var speeds: Array[float] = [0.05, 0.2, 0.5]
 
 var num_agents: int = 2
 
@@ -77,5 +78,10 @@ func _on_move_selected(move: String) -> void:
 
 func _on_training_finished() -> void:
 	print("Finished")
+	print(run_multiple_button.disabled)
 	run_multiple_button.disabled = false
+	print(run_multiple_button.disabled)
 	
+
+func _on_h_slider_value_changed(value: float) -> void:
+	AlgorithmManager.qlearning.simulationDelay = speeds[value]

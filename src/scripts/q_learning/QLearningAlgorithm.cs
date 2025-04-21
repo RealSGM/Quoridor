@@ -10,7 +10,10 @@ using System.Text.Json;
 public partial class QLearningAlgorithm : Node
 {
     private Node SignalManager;
+    public float simulationDelay = 0.1f;
+
     private string defaultSavePath = "data/q_table.json";
+
     private Dictionary<StateKey, Dictionary<string, float>> QTable = [];
 
     private float epsilon = 1.0f;
@@ -57,7 +60,7 @@ public partial class QLearningAlgorithm : Node
             if (simulate) 
             {
                 SignalManager.EmitSignal("move_selected", action);
-                await ToSignal(GetTree().CreateTimer(0.1f), "timeout");
+                await ToSignal(GetTree().CreateTimer(simulationDelay), "timeout");
             }
 
             BoardState newBoard = board.Clone();
