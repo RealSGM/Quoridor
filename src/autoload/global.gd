@@ -91,3 +91,13 @@ func get_fence_corners(tile: int = 0) -> String:
 		msg += str(corners[i]) + " "
 
 	return msg
+
+
+func get_adjacent_tiles(tile: int = 0) -> String:
+	var adjacent_tiles = game.board.GetAdjacentTiles(tile)
+	var msg: String = ""
+
+	for i: int in range(adjacent_tiles.size()):
+		msg += str(adjacent_tiles[i]) + " "
+
+	return msg

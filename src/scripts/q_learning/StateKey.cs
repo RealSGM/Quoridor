@@ -11,10 +11,22 @@ public struct StateKey : IEquatable<StateKey>
     public static bool operator ==(StateKey left, StateKey right) => left.Equals(right);
     public static bool operator !=(StateKey left, StateKey right) => !(left == right);
     public override readonly bool Equals(object obj) => obj is StateKey other && Equals(other);
-    public override readonly string ToString() => $"Player0: {Player0}, Player1: {Player1}, HorizontalFences: {HorizontalFences}, VerticalFences: {VerticalFences}";
+    public override readonly string ToString() => $"{Player0}|{Player1}|{HorizontalFences}|{VerticalFences}";
     public readonly bool Equals(StateKey other) =>
         Player0 == other.Player0 &&
         Player1 == other.Player1 &&
         HorizontalFences == other.HorizontalFences &&
         VerticalFences == other.VerticalFences;
+
+    public static StateKey ParseFromFile(string text)
+    {
+        var parts = text.Split('|');
+        return new StateKey
+        {
+            Player0 = byte.Parse(parts[0]),
+            Player1 = byte.Parse(parts[1]),
+            HorizontalFences = ulong.Parse(parts[2]),
+            VerticalFences = ulong.Parse(parts[3])
+        };
+    }
 }

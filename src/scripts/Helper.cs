@@ -30,17 +30,25 @@ public partial class Helper : Node
 	/// Template: 0m12_13, 1m1_2, 1f5, 1f-5, 0f24, 0f-24
 	public static (int player, string moveType, int direction, int index, int previousIndex) GetMoveCodeAsTuple(string moveCode)
 	{
-		// Separate previousIndex from moveCode
-		string[] parts = moveCode.Split('_');
-		int previousIndex = parts.Length > 1 ? int.Parse(parts[1]) : -1;
-		moveCode = parts[0];
+		try
+		{
+			// Separate previousIndex from moveCode
+			string[] parts = moveCode.Split('_');
+			int previousIndex = parts.Length > 1 ? int.Parse(parts[1]) : -1;
+			moveCode = parts[0];
 
-		int player = int.Parse(moveCode[0].ToString());
-		string moveType = moveCode[1].ToString();
-		int direction = moveCode[2] == '-' ? 1 : 0;
-		int index = int.Parse(moveCode[3..]);
+			int player = int.Parse(moveCode[0].ToString());
+			string moveType = moveCode[1].ToString();
+			int direction = moveCode[2] == '-' ? 1 : 0;
+			int index = int.Parse(moveCode[3..]);
 
-		return (player, moveType, direction, index, previousIndex);
+			return (player, moveType, direction, index, previousIndex);
+		}
+		catch (Exception e)
+		{
+			GD.PrintErr($"Error parsing move code: {moveCode}, Exception: {e}");
+			return (-1, "", -1, -1, -1);
+		}
 	}
 
 	/// Returns the move code as a string

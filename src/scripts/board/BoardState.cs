@@ -2,6 +2,7 @@ using Godot;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 [GlobalClass]
 public partial class BoardState: Control
@@ -50,14 +51,6 @@ public partial class BoardState: Control
 
     public void Test(int player)
     {
-        ulong[] fenceMoves = [.. GetFenceMovesSmart(player)];
-        var mappedFenceMoves = Helper.Bits
-            .SelectMany(bit => Helper.BitboardToArray(fenceMoves[bit])
-            .Select((value, index) => (value, index))
-            .Where(pair => pair.value == 1)
-            .Select(pair => Helper.GetMoveCodeAsString(player, "f", bit, pair.index)))
-            .ToList();
-        GD.Print($"Player {player} fence moves: {string.Join(", ", mappedFenceMoves)}");
     }
 
     #endregion
@@ -70,7 +63,7 @@ public partial class BoardState: Control
     {
         if (code == string.Empty) return;
         var (player, moveType, dir, index, previousIndex) = Helper.GetMoveCodeAsTuple(code);
-        LastMove = new((byte) player, moveType[0], (char)dir, (sbyte)index, (sbyte)previousIndex);
+        LastMove = new((sbyte)player, moveType[0], (char)dir, (sbyte)index, (sbyte)previousIndex);
     }
 
     #endregion
@@ -80,7 +73,7 @@ public partial class BoardState: Control
     public bool GetFencePlaced(int direction, int index) => Fences[direction].IsPlaced(index);
     public int GetPawnTile(int player) => Pawns[player].Index;
     public ulong GetIllegalFences(int dir) => IllegalFences[dir].Fences;
-    public string GetLastMove() => LastMove?.GetMoveCodeAsString() ?? string.Empty;
+    public string GetLastMove() => LastMove?.ToString() ?? string.Empty;
     public int GetFencesRemaining(int player) => Pawns[player].FencesRemaining;
     public ulong[] GetFences() => [.. Helper.Bits.Select(dir => Fences[dir].Fences)];
 
@@ -113,8 +106,14 @@ public partial class BoardState: Control
         var (player, moveType, dir, index, _) = Helper.GetMoveCodeAsTuple(code);
         if (moveType == "m") ShiftPawn(player, index);
         if (moveType == "f") PlaceFence(player, dir, index);
+        LastMove = new((sbyte)player, moveType[0], (char)dir, (sbyte)index);
+    }
 
-        LastMove = new((byte) player, moveType[0], (char)dir, (sbyte)index);;
+    public void AddMove(ParsedMove move)
+    {
+        if (move.MoveType == 'm') ShiftPawn(move.Player, move.Index);
+        if (move.MoveType == 'f') PlaceFence(move.Player, move.Direction, move.Index);
+        LastMove = move.Clone();
     }
 
     public void UndoMove(string code)
