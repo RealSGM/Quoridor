@@ -45,6 +45,15 @@ project/assembly_name="Quoridor"
 
 enabled=PackedStringArray("res://addons/wakatime/plugin.cfg")
 
+[file_customization]
+
+folder_colors={
+"res://src/autoload/": "red",
+"res://src/game/": "orange",
+"res://src/resources/": "yellow",
+"res://src/scripts/": "green"
+}
+
 [input]
 
 test={

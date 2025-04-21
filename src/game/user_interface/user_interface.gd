@@ -4,6 +4,7 @@ class_name UserInterface extends Control
 @export var toggle_direction_button: Button
 @export var confirm_button: Button
 @export var undo_button: Button
+@export var reset_button: Button
 
 @export_category("Other")
 @export var turn_label: Label
@@ -39,11 +40,12 @@ func _input(event: InputEvent) -> void:
 func _ready() -> void:
 	win_exit_button.pressed.connect(SignalManager.exit_pressed.emit)
 	pause_exit.pressed.connect(SignalManager.exit_pressed.emit)
-	pause_return.pressed.connect(func(): pause_menu.hide())
 	toggle_direction_button.pressed.connect(SignalManager.direction_toggled.emit)
 	confirm_button.pressed.connect(SignalManager.confirm_pressed.emit)
 	undo_button.pressed.connect(SignalManager.undo_pressed.emit)
+	reset_button.pressed.connect(_on_reset_button_pressed)
 	hide_button.pressed.connect(func(): win_menu.hide())
+	pause_return.pressed.connect(func(): pause_menu.hide())
 
 	undo_button.disabled = true
 	pause_menu.hide()
@@ -81,3 +83,8 @@ func set_confirm_button(move_code: String) -> void:
 
 func update_direction() -> void:
 	toggle_direction_button.text = "Horizontal" if Global.fence_direction == 0 else "Vertical"
+
+
+func _on_reset_button_pressed() -> void:
+	SignalManager.reset_board_requested.emit()
+	chat_container.get_children().map(func(x: Control): x.queue_free())

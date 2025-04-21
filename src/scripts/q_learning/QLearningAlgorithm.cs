@@ -1,6 +1,5 @@
 using Godot;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -10,8 +9,9 @@ using System.Text.Json;
 [GlobalClass]
 public partial class QLearningAlgorithm : Node
 {
+    private Node SignalManager;
     private string defaultSavePath = "data/q_table.json";
-    private Dictionary<StateKey, Dictionary<string, float>> QTable = new();
+    private Dictionary<StateKey, Dictionary<string, float>> QTable = [];
 
     private float epsilon = 1.0f;
     private float minEpsilon = 0.05f;
@@ -20,39 +20,29 @@ public partial class QLearningAlgorithm : Node
     private float learningRate = 0.5f;   // 10% weight on new information
     private float discountFactor = 0.9f; // Discount factor for future rewards
 
-    private float pruneThreshold = 0; // Threshold for pruning Q-table entries
-    private int pruneInterval = 100; // Interval for pruning Q-table entries
-    private int pruneCounter = 0; // Counter for pruning Q-table entries
+    public override void _Ready() => SignalManager = GetNode("/root/SignalManager");
 
 	public void TrainQAgent(int episodes)
 	{
         // Load the Q-table from the default path if QTable is empty
         if (QTable.Count == 0) LoadQTable(defaultSavePath);
 
-        GD.Print($"Starting training with {episodes} episodes...");
-        epsilon = 1.0f; // Reset epsilon for training
-
 		for (int episode = 0; episode < episodes; episode++)
 		{
             epsilon = Math.Max(minEpsilon, epsilon * epsilonDecay);
-            TrainSingleEpisode();
+            TrainSingleEpisode(false);
 		}
 
-        SaveQTable(defaultSavePath);
+        epsilon = 1.0f;
+        GD.Print("Wagwan");
+        SignalManager.EmitSignal("training_finished");
 	}
 
-    private void TrainSingleEpisode()
+    public async void TrainSingleEpisode(bool simulate)
     {
         BoardState board = new();
         board.Initialise();
         int currentPlayer = 0;
-        pruneCounter++;
-
-        if (pruneCounter >= pruneInterval)
-        {
-            PruneQTable(pruneThreshold);
-            pruneCounter = 0;
-        }
 
         while (!board.IsGameOver())
         {
@@ -61,17 +51,13 @@ public partial class QLearningAlgorithm : Node
 
             if (action == "")
             {
-                GD.Print("No valid moves available.");
-                GD.Print($"StateKey: {stateKey}");
-                GD.Print($"Current Player: {currentPlayer}");
-                GD.Print($"Player 0 Position: {board.GetPawnTile(0)}");
-                GD.Print($"Player 1 Position: {board.GetPawnTile(1)}");
-                Helper.PrintBitBoard(board.GetFences()[0]);
-                Helper.PrintBitBoard(board.GetFences()[1]);
-
-                int[] adjacentTiles = board.GetAdjacentTiles(board.GetPawnTile(currentPlayer));
-                GD.Print($"Adjacent Tiles: {string.Join(", ", adjacentTiles)}");
                 break;
+            }
+
+            if (simulate) 
+            {
+                SignalManager.EmitSignal("move_selected", action);
+                await ToSignal(GetTree().CreateTimer(0.1f), "timeout");
             }
 
             BoardState newBoard = board.Clone();
@@ -94,6 +80,7 @@ public partial class QLearningAlgorithm : Node
             
             IllegalFenceCheck.GetIllegalFences(board, currentPlayer);
         }
+    
     }
 
     #region Training ---
@@ -140,13 +127,13 @@ public partial class QLearningAlgorithm : Node
         return reward;
     }
 
-
     #endregion Training ---
 
     #region QTable Management ---
 
     public void SaveQTable(string filePath)
     {
+        if (string.IsNullOrEmpty(filePath)) filePath = defaultSavePath;
         var saveData = new Dictionary<string, Dictionary<string, float>>();
 
         foreach (var (state, actionDict) in QTable)
@@ -166,9 +153,11 @@ public partial class QLearningAlgorithm : Node
         File.WriteAllText(filePath, json);
     }
 
-
     public void LoadQTable(string filePath)
     {
+        if (QTable.Count > 0) return;
+
+        if (string.IsNullOrEmpty(filePath)) filePath = defaultSavePath;
         if (!File.Exists(filePath)) return;
 
         string json = File.ReadAllText(filePath);

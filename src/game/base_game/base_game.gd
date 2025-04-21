@@ -36,23 +36,22 @@ var move_history: String = ""
 
 
 func _ready() -> void:
+	SignalManager.reset_board_requested.connect(reset_board)
 	SignalManager.confirm_pressed.connect(_on_confirm_pressed)
 	SignalManager.direction_toggled.connect(_on_directional_button_pressed)
 	SignalManager.undo_pressed.connect(_on_undo_button_pressed)
-	update_fence_direction()
-	current_player = 0
-	board.show()
-
+	reset_board()
+	
 
 func set_current_player(val: int) -> void:
-	reset_board()
+	reset_board_tiles()
 	set_tiles(board.GetPawnTile(current_player))
 	update_fence_buttons()
 	user_interface.update_turn(val)
 
 
 ## Disable all tiles, and reset their modulate
-func reset_board() -> void:
+func reset_board_tiles() -> void:
 	tile_buttons.map(
 		func(tile: TileButton):
 			tile.disabled = true
@@ -61,14 +60,31 @@ func reset_board() -> void:
 	)
 
 
-## Setup the board with the selected size
-func setup_board() -> void:
+func reset_board() -> void:
 	board.Initialise()
+	current_player = 0
+	
+	user_interface.update_turn(current_player)
 
-	# Update both players fence counts in UI
+	for index: int in range(tile_buttons.size()):
+		tile_buttons[index].clear_pawns()
+	
+	for index: int in range(fence_buttons.size()):
+		fence_buttons[index].clear_fences()
+	
 	for player: int in Global.BITS:
 		user_interface.update_fence_counts(player, board.GetFencesRemaining(player))
 
+	tile_buttons[board.GetPawnTile(0)].pawns[0].show()
+	tile_buttons[board.GetPawnTile(1)].pawns[1].show()
+	
+	update_fence_direction()
+	
+	board.show()
+
+
+## Setup the board with the selected size
+func setup_board() -> void:
 	instance_tile_buttons()
 	instance_fence_buttons()
 	spawn_pawns()
@@ -179,9 +195,6 @@ func spawn_pawns() -> void:
 		tile_button.pawns[0] = spawn_pawn(Global.players[0]["color"], tile_button.id)
 		tile_button.pawns[1] = spawn_pawn(Global.players[1]["color"], tile_button.id)
 
-	tile_buttons[board.GetPawnTile(0)].pawns[0].show()
-	tile_buttons[board.GetPawnTile(1)].pawns[1].show()
-
 
 func spawn_pawn(color: Color, tile: int) -> Panel:
 	var pawn: Panel = Resources.get_resource("pawn").instantiate()
@@ -236,7 +249,7 @@ func _on_tile_pressed(tile: int) -> void:
 
 
 func _on_confirm_pressed() -> void:
-	reset_board()
+	reset_board_tiles()
 	
 	user_interface.confirm_button.disabled = true
 	user_interface.undo_button.disabled = false
