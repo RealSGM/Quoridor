@@ -2,14 +2,14 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-public class MCTSNode(MCTSNode parent, BoardState state, int player)
+public class MCTSNode(MCTSNode parent, BoardState state, int currentplayer)
 {
 	public MCTSNode Parent = parent;
 	public BoardState State = state;
 	public List<MCTSNode> Children = [];
 	public int Wins = 0;
 	public int Visits = 0;
-	public int CurrentPlayer = player;
+	public int CurrentPlayer = currentplayer;
 
     public bool IsLeaf() => Children.Count == 0;
 
@@ -30,12 +30,12 @@ public class MCTSNode(MCTSNode parent, BoardState state, int player)
         HashSet<BoardState> exploredStates = [.. Children.Select(c => c.State)];
 
         int[] pawnMoves = [.. State.GetReachableTilesSmart(CurrentPlayer)];
-        ulong[] fencesMoves = State.GetFenceMovesSmart(player);
+        ulong[] fencesMoves = State.GetFenceMovesSmart(CurrentPlayer);
 
         List<string> mappedPawnMoves = [.. pawnMoves.Select(tile => Helper.GetMoveCodeAsString(CurrentPlayer, "m", 0, tile))];
         List<string> mappedFenceMoves = [.. fencesMoves
             .SelectMany((fence, index) => Helper.GetOnesInBitBoard(fence)
-            .Select(i => Helper.GetMoveCodeAsString(player, "f", index, i)))];
+            .Select(i => Helper.GetMoveCodeAsString(CurrentPlayer, "f", index, i)))];
 
         List<string> biasedMoves = Helper.Random.NextDouble() < 0.5
             ? [.. mappedPawnMoves, .. mappedFenceMoves]
@@ -73,9 +73,9 @@ public class MCTSNode(MCTSNode parent, BoardState state, int player)
             List<string> moves = random.NextDouble() <= 0.5
                 ? [.. State.GetReachableTilesSmart(CurrentPlayer)
                     .Select(tile => Helper.GetMoveCodeAsString(CurrentPlayer, "m", 0, tile))]
-                : [.. State.GetFenceMovesSmart(player)
+                : [.. State.GetFenceMovesSmart(CurrentPlayer)
                     .SelectMany((fence, index) => Helper.GetOnesInBitBoard(fence)
-                    .Select(i => Helper.GetMoveCodeAsString(player, "f", index, i)))];
+                    .Select(i => Helper.GetMoveCodeAsString(CurrentPlayer, "f", index, i)))];
             
             if (moves.Count == 0) break;
 
