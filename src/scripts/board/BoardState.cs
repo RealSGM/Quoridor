@@ -23,7 +23,7 @@ public partial class BoardState: Control
 
     public void Initialise()
     {
-        Pawns[0] = new Pawn(Helper.BoardSize * (Helper.BoardSize - 1) + (Helper.BoardSize >> 1));
+        Pawns[0] = new Pawn(Helper.BoardSize * Helper.BitBoardSize + (Helper.BoardSize >> 1));
         Pawns[1] = new Pawn(Helper.BoardSize >> 1);
         Fences = [new FenceData(), new FenceData()];
         IllegalFences = [new FenceData(), new FenceData()];
@@ -39,7 +39,7 @@ public partial class BoardState: Control
     {
         List<int> bits = [];
         
-        for (int i = 0; i < (Helper.BoardSize - 1) * (Helper.BoardSize - 1); i++)
+        for (int i = 0; i < Helper.BitBoardSize * Helper.BitBoardSize; i++)
         {
             if (IsFenceEnabled(dir, i)) bits.Add(1);
             else bits.Add(0);
@@ -50,21 +50,14 @@ public partial class BoardState: Control
 
     public void Test(int player)
     {
-        ulong[] fences = [0, 0];
-
-        ulong[] enabledFences = GetEnabledFences();
-        ulong[] surroundingFences = GetAllSurroundingFences();
-        ulong[] fencesBehind = GetFencesBehindPlayer(player);
-        ulong[] enemySurrFences = Helper.GetFencesSurroundingTile(Pawns[1 - player].Index);
-
-        // Loop through both directions
-        foreach (int direction in Helper.Bits)
-        {
-            fences[direction] |= surroundingFences[direction];
-            fences[direction] |= enemySurrFences[direction];
-            fences[direction] |= fencesBehind[direction];
-            fences[direction] &= enabledFences[direction];
-        }
+        ulong[] fenceMoves = [.. GetFenceMovesSmart(player)];
+        var mappedFenceMoves = Helper.Bits
+            .SelectMany(bit => Helper.BitboardToArray(fenceMoves[bit])
+            .Select((value, index) => (value, index))
+            .Where(pair => pair.value == 1)
+            .Select(pair => Helper.GetMoveCodeAsString(player, "f", bit, pair.index)))
+            .ToList();
+        GD.Print($"Player {player} fence moves: {string.Join(", ", mappedFenceMoves)}");
     }
 
     #endregion
@@ -92,7 +85,7 @@ public partial class BoardState: Control
     public ulong[] GetFences() => [.. Helper.Bits.Select(dir => Fences[dir].Fences)];
 
     public ulong[] GetEnabledFences(bool checkIllegal = true) => [.. Helper.Bits.Select(dir => Enumerable
-        .Range(0, (Helper.BoardSize - 1) * (Helper.BoardSize - 1))
+        .Range(0, Helper.BitBoardSize * Helper.BitBoardSize)
         .Where(i => IsFenceEnabled(dir, i, checkIllegal))
         .Aggregate(0UL, (acc, i) => acc | (1UL << i))
     )];
@@ -197,7 +190,7 @@ public partial class BoardState: Control
 
         return Helper.Bits.All(bit =>
         {
-            int adjFence = Helper.AdjacentFunctions[2 * bit + (1 - dir)](index, Helper.BoardSize - 1);
+            int adjFence = Helper.AdjacentFunctions[2 * bit + (1 - dir)](index, Helper.BitBoardSize);
             return adjFence == -1 || !Fences[dir].IsPlaced(adjFence);
         });
     }
@@ -254,7 +247,7 @@ public partial class BoardState: Control
             .ToArray()];
     }
 
-    public ulong[] GetFencesSmart(int player)
+    public ulong[] GetFenceMovesSmart(int player)
     {
         ulong[] fences = [0, 0];
 
@@ -285,7 +278,7 @@ public partial class BoardState: Control
         moves.AddRange(GetReachableTilesSmart(player)
             .Select(tile => Helper.GetMoveCodeAsString(player, "m", 0, tile)));
 
-        ulong[] fences = GetFencesSmart(player);
+        ulong[] fences = GetFenceMovesSmart(player);
 
         moves.AddRange(Helper.Bits.SelectMany(dir => Helper.GetOnesInBitBoard(fences[dir])
             .Select(i => Helper.GetMoveCodeAsString(player, "f", dir, i))

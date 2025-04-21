@@ -14,6 +14,7 @@ public partial class Helper : Node
 	public const int FENCE_WEIGHT = 10;
 	public const int MaxFences = 10;
 	public const int BoardSize = 9;
+	public const int BitBoardSize = 8;
 
 	public static readonly List<Func<int, int, int>> AdjacentFunctions =
 	[
@@ -94,14 +95,14 @@ public partial class Helper : Node
 		if (tile == -1) return -1;
 		int row = tile / BoardSize;
 		int col = tile % BoardSize;
-		return (row + offset) * (BoardSize - 1) + col + (cornerIndex % 2 == 0 ? -1 : 0);
+		return (row + offset) * BitBoardSize + col + (cornerIndex % 2 == 0 ? -1 : 0);
 	}
 
 	public static int TileToFence(int tile, int verticalOffset, int horizontalOffset)
 	{
 		int row = tile / BoardSize + verticalOffset;
 		int col = tile % BoardSize + horizontalOffset;
-		return (row >= BoardSize - 1 || col >= BoardSize - 1) ? -1 : row * (BoardSize - 1) + col;
+		return (row >= BitBoardSize || col >= BitBoardSize) ? -1 : row * BitBoardSize + col;
 	}
 
 	/// Returns the fence buttons that surround a tile
@@ -145,7 +146,7 @@ public partial class Helper : Node
     {
         // Store surrounding fences [Horizontal, Vertical]
         ulong[] surrFences = [0, 0];
-        int[] adjFences = InitialiseConnections(index, BoardSize - 1);
+        int[] adjFences = InitialiseConnections(index, BitBoardSize);
         int oppDir = 1 - dir;
 
         foreach (int bit in Bits)
@@ -156,7 +157,7 @@ public partial class Helper : Node
             if (adjFence == -1) continue;
 
             // Get the leaped adjacent fence
-			int leapedAdjFence = AdjacentFunctions[adjIndex](adjFence, BoardSize - 1);
+			int leapedAdjFence = AdjacentFunctions[adjIndex](adjFence, BitBoardSize);
 			if (leapedAdjFence == -1) continue;
 
             surrFences[dir] |= 1UL << leapedAdjFence;
@@ -167,21 +168,21 @@ public partial class Helper : Node
 			.Where(adjFence => adjFence != -1)
 			.Aggregate(0UL, (acc, adjFence) => acc | (1UL << adjFence));
 		
-		surrFences[oppDir] |= InitialiseCornerConnections(index, BoardSize - 1)
+		surrFences[oppDir] |= InitialiseCornerConnections(index, BitBoardSize)
 			.Where(connection => connection != -1)
 			.Aggregate(0UL, (acc, connection) => acc | (1UL << connection));
 
         return surrFences;
     }
 
-	public static int[] BitboardToArray(ulong bitBoard) => [.. Enumerable.Range(0, (BoardSize - 1) * (BoardSize - 1)).Select(i => (int)((bitBoard >> i) & 1))];
+	public static int[] BitboardToArray(ulong bitBoard) => [.. Enumerable.Range(0, BitBoardSize * BitBoardSize).Select(i => (int)((bitBoard >> i) & 1))];
 
 	public static void PrintBitBoard(ulong bitboard)
 	{
 		int[] arr = BitboardToArray(bitboard);
-		for (int i = 0; i < BoardSize - 1; i++)
+		for (int i = 0; i < BitBoardSize; i++)
 		{
-			string row = string.Join("  ", arr.Skip(i * (BoardSize - 1)).Take(BoardSize - 1));
+			string row = string.Join("  ", arr.Skip(i * BitBoardSize).Take(BitBoardSize));
 			GD.Print(row);
 		}
 		GD.Print("----------");
@@ -191,7 +192,7 @@ public partial class Helper : Node
 
 	public static int[] GetGoalTiles(int player)
 	{
-		int startRow = player * (BoardSize - 1) * BoardSize;
+		int startRow = player * BitBoardSize * BoardSize;
 		return [.. Enumerable.Range(startRow, BoardSize)];
 	}
 

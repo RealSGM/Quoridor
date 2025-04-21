@@ -75,3 +75,18 @@ func is_fence_legal(player: int = 0, dir: int = 0, index: int = 0) -> String:
 		text += "illegal"
 
 	return text
+
+
+func test(player: int = 0) -> String:
+	game.board.Test(player)
+	return ""
+
+
+func get_fence_corners(tile: int = 0) -> String:
+	var corners = Helper.GetFenceCorners(tile)
+	var msg: String = ""
+
+	for i: int in range(corners.size()):
+		msg += str(corners[i]) + " "
+
+	return msg
