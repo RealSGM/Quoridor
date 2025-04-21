@@ -70,7 +70,7 @@ public partial class BoardState: Control
     {
         if (code == string.Empty) return;
         var (player, moveType, dir, index, previousIndex) = Helper.GetMoveCodeAsTuple(code);
-        LastMove = new((byte) player, moveType[0], (char)dir, (byte)index, (sbyte)previousIndex);
+        LastMove = new((byte) player, moveType[0], (char)dir, (sbyte)index, (sbyte)previousIndex);
     }
 
     #endregion
@@ -114,7 +114,7 @@ public partial class BoardState: Control
         if (moveType == "m") ShiftPawn(player, index);
         if (moveType == "f") PlaceFence(player, dir, index);
 
-        LastMove = new((byte) player, moveType[0], (char)dir, (byte)index);;
+        LastMove = new((byte) player, moveType[0], (char)dir, (sbyte)index);;
     }
 
     public void UndoMove(string code)
@@ -341,5 +341,14 @@ public partial class BoardState: Control
 
 		return evaluation;
     }
+    
+    public StateKey GetStateKey() => new()
+    {
+        Player0 = Pawns[0].Index,
+        Player1 = Pawns[1].Index,
+        HorizontalFences = Fences[0].Fences,
+        VerticalFences = Fences[1].Fences
+    };
+
     #endregion
 }

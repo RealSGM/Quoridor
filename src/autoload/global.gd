@@ -21,9 +21,10 @@ var players: Array[Dictionary] = [{}, {}, {"color": Color.GHOST_WHITE}]
 var game: BaseGame
 var algorithms: AlgorithmManager
 
+
 func help() -> String:
 	Console.show_help()
-	return " "
+	return ""
 
 
 func clear() -> String:
