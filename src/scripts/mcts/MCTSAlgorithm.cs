@@ -4,7 +4,7 @@ using System.Linq;
 [GlobalClass]
 public partial class MCTSAlgorithm : Node
 {
-	private const int SIMULATIONS = 5000;  // Increased simulations for better decision-making
+	private const int SIMULATIONS = 1000;  // Increased simulations for better decision-making
 	private const double EXPLORATION_CONSTANT = 1.41; // sqrt(2), UCB1 exploration factor
 
 	Window Console;

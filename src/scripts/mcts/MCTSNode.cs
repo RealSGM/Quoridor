@@ -83,6 +83,7 @@ public class MCTSNode(MCTSNode parent, BoardState state, int currentplayer)
 
 			tempState.AddMove(selectedMove);
             CurrentPlayer = 1 - CurrentPlayer;
+            IllegalFenceCheck.GetIllegalFences(tempState, CurrentPlayer);
             depth++;
         }
 

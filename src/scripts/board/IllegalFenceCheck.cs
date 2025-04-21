@@ -13,7 +13,7 @@ public partial class IllegalFenceCheck : Node
 
 		ulong[] possibleFences = board.GetEnabledFences(false);
 
-		ulong[] surroundingFences = board.LastMove.MoveType == 'm'
+		ulong[] surroundingFences = board.LastMove != null && board.LastMove.MoveType == 'm'
 			? Helper.GetFencesSurroundingTile(board.LastMove.Index)
 			: board.GetAllSurroundingFences();
 
@@ -24,14 +24,13 @@ public partial class IllegalFenceCheck : Node
 		{
 			Parallel.ForEach(Helper.GetOnesInBitBoard(possibleFences[dir]), index =>
 			{
-				Parallel.For(0, Helper.Bits.Length, player =>
+				foreach (int player in Helper.Bits)
 				{
 					board.GetIllegalFences()[dir].UndoSetPlaced(index);
-					if (IsFenceIllegal(board, player, dir, index))
-					{
-						board.GetIllegalFences()[dir].SetPlaced(index);
-					}
-				});
+					if (!IsFenceIllegal(board, player, dir, index)) continue;
+					board.GetIllegalFences()[dir].SetPlaced(index);
+					break;
+				}
 			});
 		});
 	}

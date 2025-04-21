@@ -48,13 +48,8 @@ public partial class MiniMaxAlgorithm : Node
 		if (board.IsWinner(currentPlayer)) return (int.MinValue, board.GetLastMove());
 		if (depth == 0) return (board.EvaluateBoard(maximisingPlayer), board.GetLastMove());
 
+		IllegalFenceCheck.GetIllegalFences(board, currentPlayer);
 		string[] moves = [.. board.GetAllMovesSmart(currentPlayer)];
-
-		if (depth == START_DEPTH)
-		{
-			Console.Call("add_entry", $"Depth: {depth}, Moves: {moves.Length}", 0);
-			Console.Call("add_entry", $"Moves: {string.Join(", ", moves)}", 0);
-		}
 
 		bool isMaximising = currentPlayer == maximisingPlayer;
 		int bestValue = isMaximising ? int.MinValue : int.MaxValue;
