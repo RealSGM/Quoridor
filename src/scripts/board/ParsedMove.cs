@@ -21,16 +21,4 @@ public partial class ParsedMove(byte player, char moveType, char direction, sbyt
 
         return moveCode;
     }
-
-    #region Godot Methods
-
-    // Static method for Godot to create an instance
-    public static ParsedMove Create(int player, string moveType, string direction, int index, int previousIndex = -1) => new((byte)player, moveType[0], direction[0], (sbyte)index, (sbyte)previousIndex);
-    public void SetPlayer(int player) => Player = (byte)player;
-    public void SetMoveType(string moveType) => MoveType = moveType[0];
-    public void SetDirection(string direction) => Direction = direction[0];
-    public void SetIndex(int index) => Index = (sbyte)index;
-    public void SetPreviousIndex(int previousIndex) => PreviousIndex = (sbyte)previousIndex;
-    
-    #endregion
 }
