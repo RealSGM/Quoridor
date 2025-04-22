@@ -21,7 +21,7 @@ Resources="*res://src/autoload/resources.tscn"
 SignalManager="*res://src/autoload/signal_manager.gd"
 Global="*res://src/autoload/global.gd"
 Console="*res://src/autoload/console/console.tscn"
-AlgorithmManager="*res://src/autoload/algorithms.tscn"
+AlgorithmManager="*res://src/autoload/algorithm_manager/algorithm_manager.tscn"
 
 [debug]
 
@@ -44,6 +44,15 @@ project/assembly_name="Quoridor"
 [editor_plugins]
 
 enabled=PackedStringArray("res://addons/wakatime/plugin.cfg")
+
+[file_customization]
+
+folder_colors={
+"res://src/autoload/": "red",
+"res://src/game/": "orange",
+"res://src/resources/": "yellow",
+"res://src/scripts/": "green"
+}
 
 [input]
 

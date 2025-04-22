@@ -1,6 +1,5 @@
 using Godot;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -10,9 +9,12 @@ using System.Text.Json;
 [GlobalClass]
 public partial class QLearningAlgorithm : Node
 {
+    private Node SignalManager;
+    public float simulationDelay = 0.1f;
+
     private string defaultSavePath = "data/q_table.json";
-	private ConcurrentDictionary<(string state, string action), float> qTable = [];
-    private IllegalFenceCheck illegalFenceChecker = new();
+
+    private Dictionary<StateKey, Dictionary<string, float>> QTable = [];
 
     private float epsilon = 1.0f;
     private float minEpsilon = 0.05f;
@@ -21,54 +23,49 @@ public partial class QLearningAlgorithm : Node
     private float learningRate = 0.5f;   // 10% weight on new information
     private float discountFactor = 0.9f; // Discount factor for future rewards
 
-    private float pruneThreshold = 0; // Threshold for pruning Q-table entries
-    private int pruneInterval = 100; // Interval for pruning Q-table entries
-    private int pruneCounter = 0; // Counter for pruning Q-table entries
+    public override void _Ready() => SignalManager = GetNode("/root/SignalManager");
 
 	public void TrainQAgent(int episodes)
 	{
-        // Load the Q-table from the default path if qTable is empty
-        if (qTable.IsEmpty)
-        {
-            GD.Print($"Loading Q-table from {defaultSavePath}...");
-            LoadQTable(defaultSavePath);
-        } 
-
-        GD.Print($"Starting training with {episodes} episodes...");
-
-        epsilon = 1.0f; // Reset epsilon for training
+        // Load the Q-table from the default path if QTable is empty
+        if (QTable.Count == 0) LoadQTable(defaultSavePath);
 
 		for (int episode = 0; episode < episodes; episode++)
 		{
             epsilon = Math.Max(minEpsilon, epsilon * epsilonDecay);
-            TrainSingleEpisode();
+            TrainSingleEpisode(false);
 		}
 
-        GD.Print("Training completed.");
-        SaveQTable(defaultSavePath);
+        epsilon = 1.0f;
+        GD.Print("Wagwan");
+        SignalManager.EmitSignal("training_finished");
 	}
 
-    private void TrainSingleEpisode()
+    public async void TrainSingleEpisode(bool simulate)
     {
         BoardState board = new();
-        board.InitialiseBoard();
+        board.Initialise();
         int currentPlayer = 0;
-        pruneCounter++;
-
-        if (pruneCounter >= pruneInterval)
-        {
-            PruneQTable(pruneThreshold);
-            pruneCounter = 0;
-        }
 
         while (!board.IsGameOver())
         {
-            string stateKey = board.GetStateKey();
+            StateKey stateKey = board.GetStateKey();
             string action = ChooseAction(stateKey, currentPlayer, board);
+
+            if (action == "")
+            {
+                break;
+            }
+
+            if (simulate) 
+            {
+                SignalManager.EmitSignal("move_selected", action);
+                await ToSignal(GetTree().CreateTimer(simulationDelay), "timeout");
+            }
 
             BoardState newBoard = board.Clone();
             newBoard.AddMove(action);
-            string nextStateKey = newBoard.GetStateKey();
+            StateKey nextStateKey = newBoard.GetStateKey();
 
             float reward = GetReward(currentPlayer, newBoard, board);
             float maxFutureQ = GetMaxQValue(nextStateKey, board, 1 - currentPlayer);
@@ -77,20 +74,23 @@ public partial class QLearningAlgorithm : Node
             float newQ = oldQ + learningRate * (reward + discountFactor * maxFutureQ - oldQ);
 
             // Safely update Q-value
-            qTable.AddOrUpdate((stateKey, action), newQ, (key, existing) => newQ);
+            if (!QTable.ContainsKey(stateKey))
+                QTable[stateKey] = [];
+            QTable[stateKey][action] = newQ;
 
             board = newBoard;
             currentPlayer = 1 - currentPlayer;
             
-            illegalFenceChecker.GetIllegalFences(board, currentPlayer);
+            IllegalFenceCheck.GetIllegalFences(board, currentPlayer);
         }
+    
     }
 
     #region Training ---
 
-    public string ChooseAction(string stateKey, int currentPlayer, BoardState board)
+    public string ChooseAction(StateKey stateKey, int currentPlayer, BoardState board)
     {
-        string[] allMoves = board.GetAllMovesSmart(currentPlayer);
+        string[] allMoves = board.GetAllMoves(currentPlayer);
 
         if (allMoves.Length == 0) return "";
 
@@ -102,31 +102,33 @@ public partial class QLearningAlgorithm : Node
         return bestMoves[Helper.Random.Next(bestMoves.Length)];
     }
 
-    public float GetQValue(string stateKey, string action) => qTable.TryGetValue((stateKey, action), out float qValue) ? qValue : 0;
+    public float GetQValue(StateKey stateKey, string action) => 
+        QTable.TryGetValue(stateKey, out var actionDict) && 
+        actionDict.TryGetValue(action, out var qVal) 
+            ? qVal 
+            : 0f;
 
-    public float GetMaxQValue(string stateKey, BoardState board, int currentPlayer)
+    public float GetMaxQValue(StateKey stateKey, BoardState board, int currentPlayer)
     {
         string[] allMoves = board.GetAllMoves(currentPlayer);
-
         if (allMoves.Length == 0) return 0f;
 
         return allMoves.Max(action => GetQValue(stateKey, action));
     }
 
-    public float GetReward(int currentPlayer, BoardState board, BoardState prevBoard)
+    public static float GetReward(int currentPlayer, BoardState board, BoardState prevBoard)
     {
         if (board.IsGameOver())
             return board.IsWinner(currentPlayer) ? 100f : -100f;
 
         float reward = 0f;
 
-        int[] oldOpponentPath = Algorithms.GetShortestPath(1 - currentPlayer, prevBoard);
-        int[] newOpponentPath = Algorithms.GetShortestPath(1 - currentPlayer, board);
+        int[] oldOpponentPath = Algorithms.GetPathToGoal(prevBoard, 1 - currentPlayer);
+        int[] newOpponentPath = Algorithms.GetPathToGoal(board, 1 - currentPlayer);
         reward += (newOpponentPath.Length - oldOpponentPath.Length) * 0.5f;
 
         return reward;
     }
-
 
     #endregion Training ---
 
@@ -134,58 +136,57 @@ public partial class QLearningAlgorithm : Node
 
     public void SaveQTable(string filePath)
     {
-        var saveData = new Dictionary<string, float>();
-        foreach (var kvp in qTable)
+        if (string.IsNullOrEmpty(filePath)) filePath = defaultSavePath;
+        var saveData = new Dictionary<string, Dictionary<string, float>>();
+
+        foreach (var (state, actionDict) in QTable)
         {
-            string key = $"{kvp.Key.state};{kvp.Key.action}";
-            saveData[key] = kvp.Value;
+            string stateKey = state.ToString();
+            saveData[stateKey] = new Dictionary<string, float>(actionDict);
         }
 
         var saveOptions = new JsonSerializerOptions
         {
-            WriteIndented = true, 
+            WriteIndented = true,
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
             Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
         };
-        
+
         string json = JsonSerializer.Serialize(saveData, saveOptions);
         File.WriteAllText(filePath, json);
     }
 
     public void LoadQTable(string filePath)
     {
+        if (QTable.Count > 0) return;
+
+        if (string.IsNullOrEmpty(filePath)) filePath = defaultSavePath;
         if (!File.Exists(filePath)) return;
 
         string json = File.ReadAllText(filePath);
 
-        if (string.IsNullOrWhiteSpace(json)) return;
+        if (string.IsNullOrEmpty(json)) return;
 
-        GD.Print($"Loading Q-table from {filePath}...");
+        var loadedData = JsonSerializer.Deserialize<Dictionary<string, Dictionary<string, float>>>(File.ReadAllText(filePath));
 
-        var loadedData = JsonSerializer.Deserialize<Dictionary<string, float>>(json);
-
-        qTable = new ConcurrentDictionary<(string state, string action), float>(
-            loadedData.ToDictionary(
-                kvp => (kvp.Key.Split(';')[0], kvp.Key.Split(';')[1]),
-                kvp => kvp.Value
-            )
+        QTable = loadedData.ToDictionary(
+            entry => StateKey.ParseFromFile(entry.Key),
+            entry => entry.Value
         );
     }
 
     public void PruneQTable(float threshold)
     {
         GD.Print($"Pruning Q-table with threshold: {threshold}");
-        
-        if (qTable.IsEmpty) return;
-        
-        var keysToRemove = qTable
-            .Where(kvp => kvp.Value <= threshold)
-            .Select(kvp => kvp.Key)
-            .ToList();
 
-        foreach (var key in keysToRemove)
+        foreach (var state in QTable.Keys.ToList())
         {
-            qTable.TryRemove(key, out _);
+            QTable[state] = QTable[state]
+                .Where(pair => pair.Value > threshold)
+                .ToDictionary(pair => pair.Key, pair => pair.Value);
+
+            if (QTable[state].Count == 0)
+                QTable.Remove(state);
         }
     }
 

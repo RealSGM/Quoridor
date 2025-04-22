@@ -7,7 +7,6 @@ extends Control
 @export var board_options_menu: PanelContainer
 @export var foreground: ColorRect
 @export var start_game_button: Button
-@export var q_learning_menu: PanelContainer
 
 @export_category("Main Menu Buttons")
 @export var play_button: Button
@@ -19,6 +18,7 @@ extends Control
 @export var multiplayer_button: Button
 @export var play_back_button: Button
 @export var bot_v_bot_button: Button
+@export var qlearning_button: Button
 
 @export_category("Multiplayer Buttons")
 @export var local_button: Button
@@ -50,9 +50,6 @@ extends Control
 @export var bot_two_algorithms: OptionButton
 @export var bot_two_colours: OptionButton
 
-@export_category("Q Learning")
-@export var q_learning_return: Button
-
 @export_category("Game Settings")
 @export var board_dimensions: float = 800
 var algorithm_names: Array[String] = ["Minimax", "MCTS"]
@@ -60,9 +57,14 @@ var algorithm_names: Array[String] = ["Minimax", "MCTS"]
 var menu_stack: Array = []
 var game_type: String
 
-@onready var menus: Array[PanelContainer] = [main_menu, play_menu, multiplayer_menu, board_options_menu, q_learning_menu]
+@onready var menus: Array[PanelContainer] = [main_menu, play_menu, multiplayer_menu, board_options_menu]
 @onready var global_options: Array[BoxContainer] = [board_container]
-@onready var game_type_dict: Dictionary = {"Singleplayer": [player_one_container, bot_two_container], "Local": [player_one_container, player_two_container], "BotVBot": [bot_one_container, bot_two_container]}
+@onready var game_type_dict: Dictionary = {
+	"Singleplayer": [player_one_container, bot_two_container], 
+	"Local": [player_one_container, player_two_container], 
+	"BotVBot": [bot_one_container, bot_two_container],
+	"QLearning": []
+	}
 
 
 func _input(event: InputEvent) -> void:
@@ -78,16 +80,15 @@ func _ready() -> void:
 ## Setup the menus, ensure all panels are hidden on launch
 ## Connect all buttons to appropriate signals
 func setup_menus() -> void:
-	menus.map(func(menu: PanelContainer): menu.hide())
 	show_main_menu()
 
 	play_button.pressed.connect(_on_menu_button_pressed.bind(play_menu))
-	q_learning_button.pressed.connect(_on_menu_button_pressed.bind(q_learning_menu))
 	exit_button.pressed.connect(get_tree().quit)
 
 	singleplayer_button.pressed.connect(_on_menu_button_pressed.bind(board_options_menu, singleplayer_button))
 	multiplayer_button.pressed.connect(_on_menu_button_pressed.bind(multiplayer_menu))
 	bot_v_bot_button.pressed.connect(_on_menu_button_pressed.bind(board_options_menu, bot_v_bot_button))
+	qlearning_button.pressed.connect(_on_qlearning_game_pressed)
 	play_back_button.pressed.connect(_on_back_button_pressed)
 
 	#online_button.pressed
@@ -107,8 +108,6 @@ func setup_menus() -> void:
 	bot_one_colours.select(2)
 	bot_two_colours.select(3)
 	
-	q_learning_return.pressed.connect(_on_back_button_pressed)
-
 	setup_algorithm_names()
 
 	fence_coloured_button.set_pressed(true)
@@ -125,6 +124,7 @@ func setup_algorithm_names() -> void:
 
 
 func show_main_menu() -> void:
+	menus.map(func(menu: PanelContainer): menu.hide())
 	menu_stack.clear()
 	main_menu.show()
 	menu_stack.append(main_menu)
@@ -150,6 +150,9 @@ func set_game_data() -> void:
 			Global.players[0]["color"] = Global.COLORS[bot_one_colours.selected]
 			AlgorithmManager.set_chosen_algorithm(0, bot_one_algorithms.selected)
 			AlgorithmManager.set_chosen_algorithm(1, bot_two_algorithms.selected)
+		"Q_Learning":
+			Global.players[0]["color"] = Global.COLORS[0]
+			Global.players[1]["color"] = Global.COLORS[1]
 
 			selected_colour = bot_two_colours.selected
 			selected_name = "Bot Two"
@@ -183,6 +186,11 @@ func _on_back_button_pressed() -> void:
 	menu_stack.back().show()
 
 
+func _on_qlearning_game_pressed() -> void:
+	game_type = "Q_Learning"
+	_on_start_game_pressed()
+
+
 ## Generate the board
 func _on_start_game_pressed() -> void:
 	board_options_menu.hide()
@@ -211,10 +219,6 @@ func _on_colour_selected(index: int, prev_index: int, other_button: OptionButton
 	other_button.set_item_disabled(index, true)
 	# Re-enable the previously selected colour in the other option button
 	other_button.set_item_disabled(prev_index, false)
-
-
-func _on_bot_button_pressed() -> void:
-	pass
 
 
 func _on_colour_toggle_toggled(toggled_on: bool) -> void:

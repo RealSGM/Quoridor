@@ -1,0 +1,106 @@
+[gd_scene load_steps=3 format=3 uid="uid://bin521tqoc128"]
+
+[ext_resource type="PackedScene" uid="uid://g12um5raoqio" path="res://src/game/base_game/base_game.tscn" id="1_yqknx"]
+[ext_resource type="Script" uid="uid://orctkr0ua3vl" path="res://src/game/q_learning/q_learning.gd" id="2_vx24j"]
+
+[node name="QLearningTraining" node_paths=PackedStringArray("run_single_button", "run_multiple_button") instance=ExtResource("1_yqknx")]
+script = ExtResource("2_vx24j")
+run_single_button = NodePath("UserInterface/ActionInterface/InterfaceVBC/QLearningVBC/SimulationVBC/RunSimulationButton")
+run_multiple_button = NodePath("UserInterface/ActionInterface/InterfaceVBC/QLearningVBC/MultipleRunVBC/RunMultipleButton")
+speeds = Array[float]([0.05, 0.2, 0.5])
+
+[node name="BotCover" type="Control" parent="." index="1"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBC" parent="UserInterface/ActionInterface/InterfaceVBC/FenceCountVBC/PlayerOneFences" index="0"]
+alignment = 1
+
+[node name="VBC" parent="UserInterface/ActionInterface/InterfaceVBC/FenceCountVBC/PlayerTwo" index="0"]
+alignment = 1
+
+[node name="TogglePanel" parent="UserInterface/ActionInterface/InterfaceVBC/ActionsVBC" index="0"]
+visible = false
+
+[node name="ConfirmButton" parent="UserInterface/ActionInterface/InterfaceVBC/ActionsVBC" index="1"]
+visible = false
+
+[node name="UndoButton" parent="UserInterface/ActionInterface/InterfaceVBC/ActionsVBC" index="2"]
+visible = false
+
+[node name="QLearningVBC" type="VBoxContainer" parent="UserInterface/ActionInterface/InterfaceVBC" index="2"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="QTableVBC" type="VBoxContainer" parent="UserInterface/ActionInterface/InterfaceVBC/QLearningVBC" index="0"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="SaveQTable" type="Button" parent="UserInterface/ActionInterface/InterfaceVBC/QLearningVBC/QTableVBC" index="0"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Save Q Table"
+
+[node name="PruneButton" type="Button" parent="UserInterface/ActionInterface/InterfaceVBC/QLearningVBC/QTableVBC" index="1"]
+layout_mode = 2
+text = "Prune Q Table"
+
+[node name="MultipleRunVBC" type="HBoxContainer" parent="UserInterface/ActionInterface/InterfaceVBC/QLearningVBC" index="1"]
+layout_mode = 2
+
+[node name="SpinBox" type="SpinBox" parent="UserInterface/ActionInterface/InterfaceVBC/QLearningVBC/MultipleRunVBC" index="0"]
+layout_mode = 2
+min_value = 2.0
+max_value = 1000.0
+value = 2.0
+rounded = true
+alignment = 1
+
+[node name="RunMultipleButton" type="Button" parent="UserInterface/ActionInterface/InterfaceVBC/QLearningVBC/MultipleRunVBC" index="1"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Run"
+
+[node name="SimulationVBC" type="VBoxContainer" parent="UserInterface/ActionInterface/InterfaceVBC/QLearningVBC" index="2"]
+layout_mode = 2
+
+[node name="SpeedHBC" type="HBoxContainer" parent="UserInterface/ActionInterface/InterfaceVBC/QLearningVBC/SimulationVBC" index="0"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="Label" type="Label" parent="UserInterface/ActionInterface/InterfaceVBC/QLearningVBC/SimulationVBC/SpeedHBC" index="0"]
+layout_mode = 2
+text = "Speed"
+horizontal_alignment = 1
+
+[node name="Control" type="Control" parent="UserInterface/ActionInterface/InterfaceVBC/QLearningVBC/SimulationVBC/SpeedHBC" index="1"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="HSlider" type="HSlider" parent="UserInterface/ActionInterface/InterfaceVBC/QLearningVBC/SimulationVBC/SpeedHBC/Control" index="0"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+max_value = 2.0
+scrollable = false
+
+[node name="RunSimulationButton" type="Button" parent="UserInterface/ActionInterface/InterfaceVBC/QLearningVBC/SimulationVBC" index="1"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Run Simulation"
+
+[connection signal="pressed" from="UserInterface/ActionInterface/InterfaceVBC/QLearningVBC/QTableVBC/SaveQTable" to="." method="_on_save_q_table_pressed"]
+[connection signal="pressed" from="UserInterface/ActionInterface/InterfaceVBC/QLearningVBC/QTableVBC/PruneButton" to="." method="_on_prune_button_pressed"]
+[connection signal="value_changed" from="UserInterface/ActionInterface/InterfaceVBC/QLearningVBC/MultipleRunVBC/SpinBox" to="." method="_on_spin_box_value_changed"]
+[connection signal="pressed" from="UserInterface/ActionInterface/InterfaceVBC/QLearningVBC/MultipleRunVBC/RunMultipleButton" to="." method="_on_run_multiple_button_pressed"]
+[connection signal="value_changed" from="UserInterface/ActionInterface/InterfaceVBC/QLearningVBC/SimulationVBC/SpeedHBC/Control/HSlider" to="." method="_on_h_slider_value_changed"]
+[connection signal="pressed" from="UserInterface/ActionInterface/InterfaceVBC/QLearningVBC/SimulationVBC/RunSimulationButton" to="." method="_on_run_simulation_button_pressed"]
+
+[editable path="UserInterface"]

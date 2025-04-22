@@ -24,7 +24,7 @@ var algorithms: AlgorithmManager
 
 func help() -> String:
 	Console.show_help()
-	return " "
+	return ""
 
 
 func clear() -> String:
@@ -32,108 +32,72 @@ func clear() -> String:
 	return ""
 
 
-func evaluate_board(is_maximising: bool) -> String:
-	if !game:
-		return "Game not started"
-		
-	var evaluation: int = game.board.EvaluateBoard(is_maximising)
-	var last_move: String = game.board.GetLastMove()
-	return "Evaluation: %s, Last Move: %s" % [evaluation, last_move]
+func get_fences(direction: int = 0) -> String:
+	var fence_bitboard = game.board.GetFencesAsArray(direction)
+	var bb_string: String = ""
+
+	for i: int in range(fence_bitboard.size()):
+		if i % 8 == 0 and i != 0:
+			bb_string += "\n"
+		bb_string += " " + str(fence_bitboard[i]) + " "
+
+	return bb_string
+	
+
+func get_enabled_fences(direction: int = 0) -> String:
+	var fence_bitboard = game.board.GetEnabledFencesAsArray(direction)
+	var bb_string: String = ""
+
+	for i: int in range(fence_bitboard.size()):
+		if i % 8 == 0 and i != 0:
+			bb_string += "\n"
+		bb_string += " " + str(fence_bitboard[i]) + " "
+
+	return bb_string
 
 
-func get_move_history() -> String:
-	return game.board.GetMoveHistory()
+func get_shortest_path(player: int = 0) -> String:
+	var path = Algorithms.GetPathToGoal(game.board, player)
 
-
-func get_goal_tiles() -> String:
-	if !game:
-		return "Game not started"
-
-	var text: String = ""
-
-	for player: int in Global.BITS:
-		text += "Player %s: %s\n" % [player, game.board.GetGoalTiles(player)]
-
-	return text
-
-
-func get_fence_amounts() -> String:
-	if !game:
-		return "Game not started"
-
-	var text: String = ""
-
-	for player: int in Global.BITS:
-		text += "Player %s: %s\n" % [player, game.board.GetFenceCount(player)]
-
-	return text
-
-
-func get_shortest_path(player: int) -> String:
-	if !game:
-		return "Game not started"
-
-	var text: String = ""
-	var path: PackedInt32Array = game.board.GetShortestPath(player)
+	var msg: String = "[ Start -> "
 
 	for i: int in range(path.size()):
-		text += " %s " % path[i]
+		msg += str(path[i]) + " -> "
+	return msg + " End]"
+
+
+func is_fence_legal(player: int = 0, dir: int = 0, index: int = 0) -> String:
+	var is_legal = IllegalFenceCheck.IsFenceIllegal(game.board, player, dir, index)
+	var text = "Player " + str(player) + " fence at " + str(index) + " is "
+
+	if is_legal:
+		text += "legal"
+	else:
+		text += "illegal"
 
 	return text
 
 
-func print_fences() -> String:
-	if !game:
-		return "Game not started"
-
-	var text: String = ""
-
-	var amount: int = (Global.BOARD_SIZE - 1) * (Global.BOARD_SIZE - 1)
-
-	for index: int in range(amount):
-		var fence_string: String = ""
-		match game.board.IsFencePlaced(index):
-			0:
-				fence_string = "-"
-			1:
-				fence_string = "│"
-			-1:
-				fence_string = "•"
-
-		text += " [%s] " % [fence_string]
-		if (index + 1) % (game.board.BoardSize - 1) == 0:
-			text += "\n"
-
-	return text
+func test(player: int = 0) -> String:
+	game.board.Test(player)
+	return ""
 
 
-func print_tiles() -> String:
-	if !game:
-		return "Game not started"
+func get_fence_corners(tile: int = 0) -> String:
+	var corners = Helper.GetFenceCorners(tile)
+	var msg: String = ""
 
-	var text: String = ""
+	for i: int in range(corners.size()):
+		msg += str(corners[i]) + " "
 
-	for index: int in range(BOARD_SIZE * BOARD_SIZE):
-		var tile: PackedInt32Array = game.board.GetTileConnections(index)
-		var connections_string: String = ""
-
-		for connection in tile:
-			connections_string += " %s " % connection
-
-		text += "Tile %s:  [ %s ] \n" % [index, connections_string]
-	return text
+	return msg
 
 
-func evaluate_all_moves() -> String:
-	if !game:
-		return "Game not started"
+func get_adjacent_tiles(tile: int = 0) -> String:
+	var adjacent_tiles = game.board.GetAdjacentTiles(tile)
+	var msg: String = ""
 
-	var text: String = ""
+	for i: int in range(adjacent_tiles.size()):
+		msg += str(adjacent_tiles[i]) + " "
 
-	for move: String in game.board.GetAllMoves(game.current_player):
-		var temp_state: BoardState = game.board.Clone()
-		temp_state.AddMove(move)
-		var evaluation: int = temp_state.EvaluateBoard(game.current_player)
-		text += "Move %s: %s\n" % [move, evaluation]
-
-	return text
+	return msg

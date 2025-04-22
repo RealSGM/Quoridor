@@ -1,68 +1,63 @@
 using Godot;
 using System.Collections.Generic;
+using System.Linq;
 
 [GlobalClass]
 public partial class Algorithms: Node
 {
-	public static bool RecursiveDFS(BoardState board, int current, HashSet<int> goalTiles, HashSet<int> visited, int player)
+	public static bool IsValidPath(BoardState board, int startTile, HashSet<int> goalTiles, int player)
 	{
-		if (goalTiles.Contains(current)) return false;
-
-		if (visited.Contains(current)) return true;
-
-		visited.Add(current);
-
-		Tile tile = board.GetTile(current);
-		int[] connections = tile.GetOrderedConnections(player);
-
-		foreach (int connectedTile in connections)
+		HashSet<int> visited = [startTile];
+		Stack<int> stack = new();
+		stack.Push(startTile);
+		while (stack.Count > 0)
 		{
-			if (visited.Contains(connectedTile) || connectedTile == -1) continue;
-			if (!RecursiveDFS(board, connectedTile, goalTiles, visited, player)) return false;
-		}
+			int currentTile = stack.Pop();
 
-		return true;
+			if (goalTiles.Contains(currentTile)) return true;
+
+			int[] adjTiles = board.GetAdjacentTiles(currentTile);
+
+			foreach (int connectedTile in Helper.OrderConnections(adjTiles, player))
+			{
+				if (visited.Contains(connectedTile) || connectedTile == -1) continue;
+
+				stack.Push(connectedTile);
+				visited.Add(connectedTile);
+			}
+		}
+		return false;
 	}
 
-	public static int[] GetShortestPath(int player, BoardState board)
+	public static int[] GetPathToGoal(BoardState board, int player)
 	{
-		Queue<int> queue = new();
-		Dictionary<int, int> previous = [];
-		HashSet<int> visited = [];
 		HashSet<int> goalTiles = [.. Helper.GetGoalTiles(player)];
-
-		queue.Enqueue(board.GetPawnPosition(player));
+		int startTile = board.GetPawnTile(player);
+		HashSet<int> visited = [startTile];
+		Queue<int> queue = new([startTile]);
+		
+		int[] path = [.. Enumerable.Repeat(-1, 81)];
 
 		while (queue.Count > 0)
 		{
-			int current = queue.Dequeue();
+			int currentTile = queue.Dequeue();
 
-			if (goalTiles.Contains(current))
+			// Check if the current tile is a goal tile
+			if (goalTiles.Contains(currentTile))
 			{
-				List<int> path = [current];
-
-				while (previous.ContainsKey(current))
-				{
-					current = previous[current];
-					path.Add(current);
-				}
-
-				path.Reverse();
-				return [.. path];
+				// Reconstruct the path from the goal tile to the start tile
+				List<int> resultPath = [];
+				for (int tile = currentTile; tile != -1; tile = path[tile]) resultPath.Add(tile);
+				resultPath.Reverse();
+				return [.. resultPath];
 			}
 
-			if (visited.Contains(current)) continue;
-
-			visited.Add(current);
-
-			Tile tile = board.GetTile(current);
-			int[] connections = tile.GetOrderedConnections(player);
-
-			foreach (int connectedTile in connections)
+			foreach (int connectedTile in board.GetAdjacentTiles(currentTile))
 			{
 				if (visited.Contains(connectedTile) || connectedTile == -1) continue;
 				queue.Enqueue(connectedTile);
-				previous[connectedTile] = current;
+				visited.Add(connectedTile);
+				path[connectedTile] = currentTile;
 			}
 		}
 

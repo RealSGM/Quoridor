@@ -9,7 +9,7 @@ public partial class MCTSAlgorithm : Node
 
 	Window Console;
 
-	public string GetMove(BoardState board, int currentPlayer, bool _isMaximising = false, bool _isDebugging = false)
+	public string GetMove(BoardState board, int currentPlayer)
 	{
 		Console = GetNode<Window>("/root/Console");
 		Console.Call("add_entry", "Creating Game Tree...", 0);

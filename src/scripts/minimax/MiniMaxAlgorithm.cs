@@ -1,6 +1,7 @@
 using Godot;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
 [GlobalClass]
@@ -13,31 +14,29 @@ public partial class MiniMaxAlgorithm : Node
 
 	Window Console;
 
-	public string GetMove(BoardState board, int currentPlayer, bool isMaximising = true, bool isDebugging = false)
+	public void SetMaxDepth(int turns_played) => START_DEPTH = turns_played <= 2 ? 1 : 3;
+
+	public string GetMove(BoardState board, int currentPlayer)
 	{
-		// Setup console
+		// Debugging ---
 		Console = GetNode<Window>("/root/Console");
 		Console.Call("add_entry", "Creating Game Tree...", 0);
-		ulong startTime = Time.GetTicksMsec();
-		debugging = isDebugging;
 		nodesVisited = 1;
-
+		Stopwatch stopwatch = new();
+		stopwatch.Start();
+		// Debugging ---
+		
 		ValueTuple<int, string> bestMoveTuple = MiniMax(board, START_DEPTH, currentPlayer, currentPlayer, int.MinValue, int.MaxValue);
 		string bestMove = bestMoveTuple.Item2;
-		int bestValue = bestMoveTuple.Item1;
-
-		Console.Call("add_entry", "Found Best Move in " + (Time.GetTicksMsec() - startTime) + " ms", 0);
-		Console.Call("add_entry", $"Best Value: {bestValue}, Best Move: {bestMove}, Nodes visited: {nodesVisited}", 0);
+		
+		// Debugging ---
+		stopwatch.Stop();
+		long milliseconds = (long)(stopwatch.ElapsedTicks * (1_000.0 / Stopwatch.Frequency));
+		Console.Call("add_entry", $"Best Move: {bestMove}, Value: {bestMoveTuple.Item1}", 0);
+		Console.Call("add_entry", $"Nodes Visited: {nodesVisited}, Time: {milliseconds}ms", 0);
+		// Debugging ---
 
 		return bestMove;
-	}
-
-	public void SetMaxDepth(BoardState board)
-	{
-		// Set first move depth to 1, as first move is super time consuming
-		string moveHistory = board.GetMoveHistory();
-		string[] moves = moveHistory.ToString().Split([';'], StringSplitOptions.RemoveEmptyEntries);
-		START_DEPTH = moves.Length <= 2 ? 1 : 3;
 	}
 
 	private (int v, string m) MiniMax(BoardState board, int depth, int currentPlayer, int maximisingPlayer, int alpha, int beta)
@@ -49,8 +48,8 @@ public partial class MiniMaxAlgorithm : Node
 		if (board.IsWinner(currentPlayer)) return (int.MinValue, board.GetLastMove());
 		if (depth == 0) return (board.EvaluateBoard(maximisingPlayer), board.GetLastMove());
 
-		string[] moves = [.. board.GetAllMovesWeighted(currentPlayer).Keys];
-		// string[] moves = board.GetAllMoves(currentPlayer);
+		IllegalFenceCheck.GetIllegalFences(board, currentPlayer);
+		string[] moves = [.. board.GetAllMovesSmart(currentPlayer)];
 
 		bool isMaximising = currentPlayer == maximisingPlayer;
 		int bestValue = isMaximising ? int.MinValue : int.MaxValue;

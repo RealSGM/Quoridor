@@ -1,7 +1,7 @@
 using System;
 
 [Serializable]
-public class QEntry
+public struct QEntry
 {
     public string State;
     public string Action;
