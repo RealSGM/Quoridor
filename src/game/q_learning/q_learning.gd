@@ -1,24 +1,25 @@
 class_name QLearningTraining extends BaseGame
 
-@export var run_single_button: Button
-@export var run_multiple_button: Button
-@export var speeds: Array[float] = [0.05, 0.1, 0.2, 0.5, 1]
+@export var run_simulation_button: Button
+@export var speeds: Array[float] = [0, 0.01, 0.05, 0.1, 0.2] #, 0.5]
 
-var num_agents: int = 2
+var is_running: bool = false
 
 func _ready() -> void:
 	SignalManager.training_finished.connect(_on_training_finished)
 	SignalManager.move_selected.connect(_on_move_selected)
+	AlgorithmManager.qlearning.LoadQTable("")
+	_on_h_slider_value_changed(0)
 	super._ready()
 
 
 func _on_confirm_pressed() -> void:
 	reset_board_tiles()
-	
+
 	var index: int = move_code.split("_")[0].substr(2).to_int()
 	var direction: int = 1 if index < 0 else 0
 	index = abs(index)
-	
+
 	match move_code[1]:
 		"f":
 			confirm_place_fence(index, direction)
@@ -27,7 +28,7 @@ func _on_confirm_pressed() -> void:
 
 	board.AddMove(move_code)
 	move_code = ""
-	
+
 	IllegalFenceCheck.GetIllegalFences(board, 1 - current_player)
 	current_player = 1 - current_player
 
@@ -35,29 +36,26 @@ func _on_confirm_pressed() -> void:
 #region Signals
 #endregion
 
-func _on_spin_box_value_changed(value: float) -> void:
-	num_agents = int(value)
-
 
 func _on_run_simulation_button_pressed() -> void:
-	user_interface._on_reset_button_pressed()
-	Console.add_entry("Running simulation of one episode", 0)
-	AlgorithmManager.qlearning.LoadQTable("")
-	AlgorithmManager.qlearning.TrainSingleEpisode(true)
+	is_running = !is_running
 
+	run_simulation_button.text = "Run Simulation" if !is_running else "Stop Simulation"
+	Console.add_entry("Running QLearning Training " if is_running else "Paused QLearning Training", 0)
 
-func _on_run_multiple_button_pressed() -> void:
-	run_multiple_button.disabled = true
-	Console.add_entry("Running %s episodes" % [num_agents], 0)
-	AlgorithmManager.qlearning.TrainQAgent(num_agents)
+	if is_running && !AlgorithmManager.qlearning.isRunning:
+		user_interface._on_reset_button_pressed()
+		AlgorithmManager.qlearning.TrainSingleEpisode(board)
+		
 
 
 func _on_save_q_table_pressed() -> void:
 	Console.add_entry("Force saving QTable", 0)
 	AlgorithmManager.qlearning.SaveQTable("")
-	
+
 
 func _on_prune_button_pressed() -> void:
+	Console.add_entry("Force pruning QTable", 0)
 	AlgorithmManager.qlearning.PruneQTable(0)
 
 
@@ -76,9 +74,19 @@ func _on_move_selected(move: String) -> void:
 	_on_confirm_pressed()
 
 
-func _on_training_finished() -> void:
-	run_multiple_button.disabled = false
-	
-
 func _on_h_slider_value_changed(value: float) -> void:
 	AlgorithmManager.qlearning.simulationDelay = speeds[value]
+
+
+func _on_training_finished(winner: int) -> void:
+	if winner in Global.BITS:
+		user_interface.update_win(winner)
+	else:
+		user_interface.win_label.text = "Error / Draw"
+		is_running = false # NOTE This is for debugging
+	if is_running:
+		await get_tree().create_timer(0.25).timeout
+		user_interface._on_reset_button_pressed()
+		_on_prune_button_pressed()
+		_on_save_q_table_pressed()
+		AlgorithmManager.qlearning.TrainSingleEpisode(board)

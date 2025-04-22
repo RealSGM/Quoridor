@@ -11,6 +11,7 @@ public partial class QLearningAlgorithm : Node
 {
 	private Node SignalManager;
 	public float simulationDelay = 0.1f;
+	public bool isRunning = false;
 
 	private string defaultSavePath = "data/q_table.json";
 
@@ -25,42 +26,23 @@ public partial class QLearningAlgorithm : Node
 
 	public override void _Ready() => SignalManager = GetNode("/root/SignalManager");
 
-	public void TrainQAgent(int episodes)
+	public async void TrainSingleEpisode(BoardState boardState)
 	{
-		// Load the Q-table from the default path if QTable is empty
-		if (QTable.Count == 0) LoadQTable(defaultSavePath);
-
-		for (int episode = 0; episode < episodes; episode++)
-		{
-			epsilon = Math.Max(minEpsilon, epsilon * epsilonDecay);
-			TrainSingleEpisode(false);
-		}
-
-		epsilon = 1.0f;
-		SignalManager.EmitSignal("training_finished");
-	}
-
-	public async void TrainSingleEpisode(bool simulate)
-	{
-		BoardState board = new();
+		BoardState board = boardState.Clone();
 		board.Initialise();
 		int currentPlayer = 0;
+		
+		isRunning = true;
 
 		while (!board.IsGameOver())
 		{
 			StateKey stateKey = board.GetStateKey();
 			string action = ChooseAction(stateKey, currentPlayer, board);
 
-			if (action == "")
-			{
-				break;
-			}
+			if (action == "") break;
 
-			if (simulate) 
-			{
-				SignalManager.EmitSignal("move_selected", action);
-				await ToSignal(GetTree().CreateTimer(simulationDelay), "timeout");
-			}
+			SignalManager.EmitSignal("move_selected", action);
+			if (simulationDelay > 0) await ToSignal(GetTree().CreateTimer(simulationDelay), "timeout");
 
 			BoardState newBoard = board.Clone();
 			newBoard.AddMove(action);
@@ -82,7 +64,9 @@ public partial class QLearningAlgorithm : Node
 			
 			IllegalFenceCheck.GetIllegalFences(board, currentPlayer);
 		}
-	
+		int winner = board.IsWinner(0) ? 0 : board.IsWinner(1) ? 1 : 2;
+		SignalManager.EmitSignal("training_finished", winner);
+		isRunning = false;
 	}
 
 	#region Training ---
@@ -176,8 +160,6 @@ public partial class QLearningAlgorithm : Node
 
 	public void PruneQTable(float threshold)
 	{
-		GD.Print($"Pruning Q-table with threshold: {threshold}");
-
 		foreach (var state in QTable.Keys.ToList())
 		{
 			QTable[state] = QTable[state]

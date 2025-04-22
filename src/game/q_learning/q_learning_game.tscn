@@ -1,13 +1,36 @@
-[gd_scene load_steps=3 format=3 uid="uid://bin521tqoc128"]
+[gd_scene load_steps=5 format=3 uid="uid://bin521tqoc128"]
 
 [ext_resource type="PackedScene" uid="uid://g12um5raoqio" path="res://src/game/base_game/base_game.tscn" id="1_yqknx"]
 [ext_resource type="Script" uid="uid://orctkr0ua3vl" path="res://src/game/q_learning/q_learning.gd" id="2_vx24j"]
 
-[node name="QLearningTraining" node_paths=PackedStringArray("run_single_button", "run_multiple_button") instance=ExtResource("1_yqknx")]
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_nwl8f"]
+bg_color = Color(0.109804, 0.109804, 0.117647, 1)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(0.164706, 0.164706, 0.180392, 1)
+expand_margin_left = 4.0
+expand_margin_top = 4.0
+expand_margin_right = 4.0
+expand_margin_bottom = 4.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_xvkmv"]
+bg_color = Color(0.109804, 0.109804, 0.117647, 1)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(0.164706, 0.164706, 0.180392, 1)
+expand_margin_left = 4.0
+expand_margin_top = 4.0
+expand_margin_right = 4.0
+expand_margin_bottom = 4.0
+
+[node name="QLearningTraining" node_paths=PackedStringArray("run_simulation_button") instance=ExtResource("1_yqknx")]
 script = ExtResource("2_vx24j")
-run_single_button = NodePath("UserInterface/ActionInterface/InterfaceVBC/QLearningVBC/SimulationVBC/RunSimulationButton")
-run_multiple_button = NodePath("UserInterface/ActionInterface/InterfaceVBC/QLearningVBC/MultipleRunVBC/RunMultipleButton")
-speeds = Array[float]([0.05, 0.1, 0.2, 0.5, 1.0])
+run_simulation_button = NodePath("UserInterface/ActionInterface/InterfaceVBC/QLearningVBC/TrainingContainer/VBC/RunSimulationButton")
+speeds = Array[float]([0.0, 0.01, 0.05, 0.1, 0.2])
 
 [node name="BotCover" type="Control" parent="." index="1"]
 layout_mode = 1
@@ -36,71 +59,78 @@ visible = false
 layout_mode = 2
 theme_override_constants/separation = 16
 
-[node name="QTableVBC" type="VBoxContainer" parent="UserInterface/ActionInterface/InterfaceVBC/QLearningVBC" index="0"]
+[node name="QTableContainer" type="PanelContainer" parent="UserInterface/ActionInterface/InterfaceVBC/QLearningVBC" index="0"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_nwl8f")
+
+[node name="VBC" type="VBoxContainer" parent="UserInterface/ActionInterface/InterfaceVBC/QLearningVBC/QTableContainer" index="0"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="UserInterface/ActionInterface/InterfaceVBC/QLearningVBC/QTableContainer/VBC" index="0"]
+layout_mode = 2
+text = "Q Table"
+horizontal_alignment = 1
+
+[node name="HBC" type="HBoxContainer" parent="UserInterface/ActionInterface/InterfaceVBC/QLearningVBC/QTableContainer/VBC" index="1"]
 layout_mode = 2
 theme_override_constants/separation = 8
 
-[node name="SaveQTable" type="Button" parent="UserInterface/ActionInterface/InterfaceVBC/QLearningVBC/QTableVBC" index="0"]
+[node name="SaveQTable" type="Button" parent="UserInterface/ActionInterface/InterfaceVBC/QLearningVBC/QTableContainer/VBC/HBC" index="0"]
 layout_mode = 2
 size_flags_horizontal = 3
-text = "Save Q Table"
+text = "Save"
 
-[node name="PruneButton" type="Button" parent="UserInterface/ActionInterface/InterfaceVBC/QLearningVBC/QTableVBC" index="1"]
-layout_mode = 2
-text = "Prune Q Table"
-
-[node name="MultipleRunVBC" type="HBoxContainer" parent="UserInterface/ActionInterface/InterfaceVBC/QLearningVBC" index="1"]
-layout_mode = 2
-
-[node name="SpinBox" type="SpinBox" parent="UserInterface/ActionInterface/InterfaceVBC/QLearningVBC/MultipleRunVBC" index="0"]
-layout_mode = 2
-min_value = 2.0
-max_value = 1000.0
-value = 2.0
-rounded = true
-alignment = 1
-
-[node name="RunMultipleButton" type="Button" parent="UserInterface/ActionInterface/InterfaceVBC/QLearningVBC/MultipleRunVBC" index="1"]
+[node name="PruneButton" type="Button" parent="UserInterface/ActionInterface/InterfaceVBC/QLearningVBC/QTableContainer/VBC/HBC" index="1"]
 layout_mode = 2
 size_flags_horizontal = 3
-text = "Run"
+text = "Prune"
 
-[node name="SimulationVBC" type="VBoxContainer" parent="UserInterface/ActionInterface/InterfaceVBC/QLearningVBC" index="2"]
+[node name="TrainingContainer" type="PanelContainer" parent="UserInterface/ActionInterface/InterfaceVBC/QLearningVBC" index="1"]
 layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_xvkmv")
 
-[node name="SpeedHBC" type="HBoxContainer" parent="UserInterface/ActionInterface/InterfaceVBC/QLearningVBC/SimulationVBC" index="0"]
+[node name="VBC" type="VBoxContainer" parent="UserInterface/ActionInterface/InterfaceVBC/QLearningVBC/TrainingContainer" index="0"]
 layout_mode = 2
-theme_override_constants/separation = 16
+theme_override_constants/separation = 8
 
-[node name="Label" type="Label" parent="UserInterface/ActionInterface/InterfaceVBC/QLearningVBC/SimulationVBC/SpeedHBC" index="0"]
+[node name="SpeedHBC" type="HBoxContainer" parent="UserInterface/ActionInterface/InterfaceVBC/QLearningVBC/TrainingContainer/VBC" index="0"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Label" type="Label" parent="UserInterface/ActionInterface/InterfaceVBC/QLearningVBC/TrainingContainer/VBC/SpeedHBC" index="0"]
 layout_mode = 2
 text = "Speed"
 horizontal_alignment = 1
 
-[node name="Control" type="Control" parent="UserInterface/ActionInterface/InterfaceVBC/QLearningVBC/SimulationVBC/SpeedHBC" index="1"]
+[node name="SpeedAnchor" type="Control" parent="UserInterface/ActionInterface/InterfaceVBC/QLearningVBC/TrainingContainer/VBC/SpeedHBC" index="1"]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="HSlider" type="HSlider" parent="UserInterface/ActionInterface/InterfaceVBC/QLearningVBC/SimulationVBC/SpeedHBC/Control" index="0"]
+[node name="HSlider" type="HSlider" parent="UserInterface/ActionInterface/InterfaceVBC/QLearningVBC/TrainingContainer/VBC/SpeedHBC/SpeedAnchor" index="0"]
+custom_minimum_size = Vector2(200, 67)
 layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -100.0
+offset_top = -33.5
+offset_right = 100.0
+offset_bottom = 33.5
 grow_horizontal = 2
 grow_vertical = 2
 max_value = 4.0
 scrollable = false
 
-[node name="RunSimulationButton" type="Button" parent="UserInterface/ActionInterface/InterfaceVBC/QLearningVBC/SimulationVBC" index="1"]
+[node name="RunSimulationButton" type="Button" parent="UserInterface/ActionInterface/InterfaceVBC/QLearningVBC/TrainingContainer/VBC" index="1"]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Run Simulation"
 
-[connection signal="pressed" from="UserInterface/ActionInterface/InterfaceVBC/QLearningVBC/QTableVBC/SaveQTable" to="." method="_on_save_q_table_pressed"]
-[connection signal="pressed" from="UserInterface/ActionInterface/InterfaceVBC/QLearningVBC/QTableVBC/PruneButton" to="." method="_on_prune_button_pressed"]
-[connection signal="value_changed" from="UserInterface/ActionInterface/InterfaceVBC/QLearningVBC/MultipleRunVBC/SpinBox" to="." method="_on_spin_box_value_changed"]
-[connection signal="pressed" from="UserInterface/ActionInterface/InterfaceVBC/QLearningVBC/MultipleRunVBC/RunMultipleButton" to="." method="_on_run_multiple_button_pressed"]
-[connection signal="value_changed" from="UserInterface/ActionInterface/InterfaceVBC/QLearningVBC/SimulationVBC/SpeedHBC/Control/HSlider" to="." method="_on_h_slider_value_changed"]
-[connection signal="pressed" from="UserInterface/ActionInterface/InterfaceVBC/QLearningVBC/SimulationVBC/RunSimulationButton" to="." method="_on_run_simulation_button_pressed"]
+[connection signal="pressed" from="UserInterface/ActionInterface/InterfaceVBC/QLearningVBC/QTableContainer/VBC/HBC/SaveQTable" to="." method="_on_save_q_table_pressed"]
+[connection signal="pressed" from="UserInterface/ActionInterface/InterfaceVBC/QLearningVBC/QTableContainer/VBC/HBC/PruneButton" to="." method="_on_prune_button_pressed"]
+[connection signal="value_changed" from="UserInterface/ActionInterface/InterfaceVBC/QLearningVBC/TrainingContainer/VBC/SpeedHBC/SpeedAnchor/HSlider" to="." method="_on_h_slider_value_changed"]
+[connection signal="pressed" from="UserInterface/ActionInterface/InterfaceVBC/QLearningVBC/TrainingContainer/VBC/RunSimulationButton" to="." method="_on_run_simulation_button_pressed"]
 
 [editable path="UserInterface"]
