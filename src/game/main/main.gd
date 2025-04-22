@@ -1,16 +1,15 @@
 extends Control
 
 @export_category("Menus")
-@export var main_menu: PanelContainer
-@export var play_menu: PanelContainer
-@export var multiplayer_menu: PanelContainer
-@export var board_options_menu: PanelContainer
-@export var foreground: ColorRect
+@export var main_menu: Control
+@export var play_menu: Control
+@export var multiplayer_menu: Control
+@export var board_options_menu: Control
 @export var start_game_button: Button
+@export var background: ColorRect
 
 @export_category("Main Menu Buttons")
 @export var play_button: Button
-@export var q_learning_button: Button
 @export var exit_button: Button
 
 @export_category("Play Menu Buttons")
@@ -52,14 +51,16 @@ extends Control
 
 @export_category("Game Settings")
 @export var board_dimensions: float = 800
-var algorithm_names: Array[String] = ["Minimax", "MCTS"]
+@export var algorithm_names: Array[String] = ["Minimax", "MCTS"]
+
+@export var global_options: Array[BoxContainer] = [board_container]
+@export var player_containers: Array[VBoxContainer] = [player_one_container, player_two_container, bot_one_container, bot_two_container]
+@export var menus: Array[Control] = [main_menu, play_menu, multiplayer_menu, board_options_menu]
 
 var menu_stack: Array = []
 var game_type: String
 
-@onready var menus: Array[PanelContainer] = [main_menu, play_menu, multiplayer_menu, board_options_menu]
-@onready var global_options: Array[BoxContainer] = [board_container]
-@onready var game_type_dict: Dictionary = {
+@onready var game_type_dict: Dictionary[String, Array] = {
 	"Singleplayer": [player_one_container, bot_two_container], 
 	"Local": [player_one_container, player_two_container], 
 	"BotVBot": [bot_one_container, bot_two_container],
@@ -124,7 +125,7 @@ func setup_algorithm_names() -> void:
 
 
 func show_main_menu() -> void:
-	menus.map(func(menu: PanelContainer): menu.hide())
+	menus.map(func(menu: Control): menu.hide())
 	menu_stack.clear()
 	main_menu.show()
 	menu_stack.append(main_menu)
@@ -161,13 +162,13 @@ func set_game_data() -> void:
 
 
 func setup_board_options() -> void:
-	board_vbc.get_children().map(func(x: Control): x.hide())
+	player_containers.map(func(x: VBoxContainer): x.hide())
 	global_options.map(func(x: Control): x.show())
 	game_type_dict[game_type].map(func(x: Control): x.show())
 
 
 ## Hide previous menu, add new panel to stack
-func _on_menu_button_pressed(menu: PanelContainer, prev_button: Button = null) -> void:
+func _on_menu_button_pressed(menu: Control, prev_button: Button = null) -> void:
 	menu_stack.back().hide()
 	menu_stack.append(menu)
 	menu.show()
@@ -200,7 +201,7 @@ func _on_start_game_pressed() -> void:
 	Global.coloured_fences = fence_coloured_button.is_pressed()
 	game.setup_board()
 
-	foreground.add_child(game, true)
+	background.add_child(game, true)
 	game.board.scale = Vector2.ONE * float(board_dimensions) / float(game.board_container.size.x)
 
 

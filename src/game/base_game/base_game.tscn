@@ -6,7 +6,12 @@
 [ext_resource type="PackedScene" uid="uid://c6fyma6opa8b1" path="res://src/game/user_interface/user_interface.tscn" id="4_d4stq"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_pufkf"]
-bg_color = Color(0.105882, 0.105882, 0.109804, 1)
+bg_color = Color(0.109804, 0.109804, 0.117647, 1)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(0.164706, 0.164706, 0.180392, 1)
 expand_margin_left = 32.0
 expand_margin_top = 32.0
 expand_margin_right = 32.0
@@ -40,7 +45,7 @@ script = ExtResource("3_kvsy8")
 
 [node name="BoardContainer" type="PanelContainer" parent="Board"]
 layout_mode = 1
-anchors_preset = 8
+anchors_preset = -1
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
@@ -67,7 +72,7 @@ grow_vertical = 2
 mouse_filter = 2
 theme_override_constants/h_separation = 80
 theme_override_constants/v_separation = 80
-columns = 9
+columns = 8
 
 [node name="UserInterface" parent="." instance=ExtResource("4_d4stq")]
 layout_mode = 1

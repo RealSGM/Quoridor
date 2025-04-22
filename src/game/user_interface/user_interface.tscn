@@ -1,34 +1,44 @@
-[gd_scene load_steps=10 format=3 uid="uid://c6fyma6opa8b1"]
+[gd_scene load_steps=8 format=3 uid="uid://c6fyma6opa8b1"]
 
 [ext_resource type="Script" uid="uid://btfpaj2g2rw83" path="res://src/game/user_interface/user_interface.gd" id="1_j6xwu"]
 [ext_resource type="Theme" uid="uid://gl4viqpfcsgn" path="res://src/resources/themes/main_theme.tres" id="1_vpc43"]
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_d1llx"]
-bg_color = Color(0.129412, 0.129412, 0.129412, 1)
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_tyn17"]
+bg_color = Color(0.109804, 0.109804, 0.117647, 1)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(0.164706, 0.164706, 0.180392, 1)
+expand_margin_left = 96.0
+expand_margin_right = 96.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_0ekel"]
+bg_color = Color(0.109804, 0.109804, 0.117647, 1)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(0.164706, 0.164706, 0.180392, 1)
 expand_margin_left = 8.0
 expand_margin_top = 8.0
 expand_margin_right = 8.0
 expand_margin_bottom = 8.0
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_dms26"]
-bg_color = Color(0.105882, 0.105882, 0.109804, 1)
+bg_color = Color(0.164706, 0.164706, 0.180392, 1)
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_khpxh"]
-bg_color = Color(0.129412, 0.129412, 0.129412, 1)
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_tyn17"]
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ndgeo"]
-bg_color = Color(0.150803, 0.150803, 0.155786, 1)
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_f650v"]
+bg_color = Color(0.109804, 0.109804, 0.117647, 1)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(0.164706, 0.164706, 0.180392, 1)
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bjlgr"]
-bg_color = Color(0.150803, 0.150803, 0.155786, 1)
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_2k6ku"]
-bg_color = Color(0.105882, 0.105882, 0.109804, 1)
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_50a8v"]
-bg_color = Color(0.172549, 0.184314, 0.2, 1)
-
-[node name="UserInterface" type="Control" node_paths=PackedStringArray("toggle_direction_button", "confirm_button", "undo_button", "reset_button", "turn_label", "pause_menu", "pause_exit", "pause_return", "chat", "fence_count_labels", "win_menu", "win_label", "win_exit_button", "hide_button", "chat_container")]
+[node name="UserInterface" type="Control" node_paths=PackedStringArray("toggle_direction_button", "confirm_button", "undo_button", "reset_button", "turn_label", "fence_count_labels", "win_label", "exit_button", "chat_container")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -42,30 +52,32 @@ toggle_direction_button = NodePath("ActionInterface/InterfaceVBC/ActionsVBC/Togg
 confirm_button = NodePath("ActionInterface/InterfaceVBC/ActionsVBC/ConfirmButton")
 undo_button = NodePath("ActionInterface/InterfaceVBC/ActionsVBC/UndoButton")
 reset_button = NodePath("ActionInterface/InterfaceVBC/ActionsVBC/ResetBoardButton")
-turn_label = NodePath("TurnLabel")
-pause_menu = NodePath("PauseMenu")
-pause_exit = NodePath("PauseMenu/PanelContainer/VBoxContainer/ExitButton")
-pause_return = NodePath("PauseMenu/PanelContainer/VBoxContainer/ReturnButton")
-chat = NodePath("Chat")
+turn_label = NodePath("ActionLabel/PlayerLabel")
 fence_count_labels = [NodePath("ActionInterface/InterfaceVBC/FenceCountVBC/PlayerOneFences/VBC/Player1Number"), NodePath("ActionInterface/InterfaceVBC/FenceCountVBC/PlayerTwo/VBC/Player2Number")]
-win_menu = NodePath("WinMenu")
-win_label = NodePath("WinMenu/WinPanel/VBoxContainer/PanelContainer/Label")
-win_exit_button = NodePath("WinMenu/WinPanel/VBoxContainer/ExitButton")
-hide_button = NodePath("WinMenu/WinPanel/VBoxContainer/HideButton")
+win_label = NodePath("PauseCorner/VBoxContainer/Label")
+exit_button = NodePath("PauseCorner/VBoxContainer/ExitButton")
 chat_container = NodePath("Chat/VBoxContainer/History/ScrollContainer/VBC")
+metadata/_edit_lock_ = true
 
-[node name="TurnLabel" type="Label" parent="."]
+[node name="ActionLabel" type="PanelContainer" parent="."]
 layout_mode = 1
 anchors_preset = -1
 anchor_left = 0.5
 anchor_right = 0.5
-offset_left = -150.0
+offset_left = -20.0
 offset_top = 32.0
-offset_right = 150.0
-offset_bottom = 89.0
+offset_right = 20.0
+offset_bottom = 40.0
 grow_horizontal = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_tyn17")
+
+[node name="PlayerLabel" type="Label" parent="ActionLabel"]
+custom_minimum_size = Vector2(400, 0)
+layout_mode = 2
 text = "Player 1's Turn"
 horizontal_alignment = 1
+clip_text = true
+text_overrun_behavior = 3
 
 [node name="ActionInterface" type="PanelContainer" parent="."]
 layout_mode = 1
@@ -74,7 +86,7 @@ offset_left = 40.0
 offset_top = 40.0
 offset_right = 462.0
 offset_bottom = 182.0
-theme_override_styles/panel = SubResource("StyleBoxFlat_d1llx")
+theme_override_styles/panel = SubResource("StyleBoxFlat_0ekel")
 
 [node name="InterfaceVBC" type="VBoxContainer" parent="ActionInterface"]
 layout_mode = 2
@@ -86,6 +98,7 @@ theme_override_constants/separation = 8
 
 [node name="PlayerOneFences" type="PanelContainer" parent="ActionInterface/InterfaceVBC/FenceCountVBC"]
 layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_dms26")
 
 [node name="VBC" type="HBoxContainer" parent="ActionInterface/InterfaceVBC/FenceCountVBC/PlayerOneFences"]
 layout_mode = 2
@@ -102,6 +115,7 @@ horizontal_alignment = 1
 
 [node name="PlayerTwo" type="PanelContainer" parent="ActionInterface/InterfaceVBC/FenceCountVBC"]
 layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_dms26")
 
 [node name="VBC" type="HBoxContainer" parent="ActionInterface/InterfaceVBC/FenceCountVBC/PlayerTwo"]
 layout_mode = 2
@@ -150,37 +164,28 @@ text = "Undo"
 layout_mode = 2
 text = "Reset Board"
 
-[node name="Chat" type="Panel" parent="."]
-custom_minimum_size = Vector2(398, 0)
+[node name="Chat" type="PanelContainer" parent="."]
+custom_minimum_size = Vector2(422, 0)
 layout_mode = 1
 anchors_preset = -1
 anchor_left = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
 offset_left = -438.0
-offset_top = 40.0
-offset_right = -40.0
-offset_bottom = -40.0
+offset_top = 32.0
+offset_right = -32.0
+offset_bottom = -199.0
 grow_horizontal = 0
 grow_vertical = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_khpxh")
+theme_override_styles/panel = SubResource("StyleBoxEmpty_tyn17")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="Chat"]
-layout_mode = 1
-anchors_preset = -1
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = 8.0
-offset_top = 8.0
-offset_right = -8.0
-offset_bottom = -8.0
-grow_horizontal = 2
-grow_vertical = 2
+layout_mode = 2
 theme_override_constants/separation = 8
 
 [node name="TextContainer" type="PanelContainer" parent="Chat/VBoxContainer"]
 layout_mode = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_ndgeo")
+theme_override_styles/panel = SubResource("StyleBoxFlat_f650v")
 
 [node name="Label" type="Label" parent="Chat/VBoxContainer/TextContainer"]
 layout_mode = 2
@@ -190,7 +195,7 @@ horizontal_alignment = 1
 [node name="History" type="Panel" parent="Chat/VBoxContainer"]
 layout_mode = 2
 size_flags_vertical = 3
-theme_override_styles/panel = SubResource("StyleBoxFlat_bjlgr")
+theme_override_styles/panel = SubResource("StyleBoxFlat_f650v")
 
 [node name="ScrollContainer" type="ScrollContainer" parent="Chat/VBoxContainer/History"]
 layout_mode = 1
@@ -212,96 +217,32 @@ size_flags_horizontal = 3
 theme_override_constants/separation = 4
 alignment = 1
 
-[node name="WinMenu" type="Control" parent="."]
+[node name="PauseCorner" type="PanelContainer" parent="."]
+custom_minimum_size = Vector2(422, 0)
 layout_mode = 1
-anchors_preset = 15
+anchors_preset = -1
+anchor_left = 1.0
+anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_top = 1.0
-offset_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-metadata/_edit_lock_ = true
+offset_left = -422.0
+offset_top = -150.0
+offset_right = -32.0
+offset_bottom = -32.0
+grow_horizontal = 0
+grow_vertical = 0
+theme_override_styles/panel = SubResource("StyleBoxFlat_f650v")
 
-[node name="WinPanel" type="PanelContainer" parent="WinMenu"]
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -144.5
-offset_top = -61.0
-offset_right = 144.5
-offset_bottom = 61.0
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_d1llx")
-
-[node name="VBoxContainer" type="VBoxContainer" parent="WinMenu/WinPanel"]
+[node name="VBoxContainer" type="VBoxContainer" parent="PauseCorner"]
 layout_mode = 2
 theme_override_constants/separation = 8
 
-[node name="PanelContainer" type="PanelContainer" parent="WinMenu/WinPanel/VBoxContainer"]
-layout_mode = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_2k6ku")
-
-[node name="Label" type="Label" parent="WinMenu/WinPanel/VBoxContainer/PanelContainer"]
+[node name="Label" type="Label" parent="PauseCorner/VBoxContainer"]
 custom_minimum_size = Vector2(0, 2)
 layout_mode = 2
-text = "Player 1 Wins!"
+text = "Game In Progress"
 horizontal_alignment = 1
 
-[node name="ExitButton" type="Button" parent="WinMenu/WinPanel/VBoxContainer"]
-layout_mode = 2
-text = "Exit to Menu"
-
-[node name="HideButton" type="Button" parent="WinMenu/WinPanel/VBoxContainer"]
-layout_mode = 2
-text = "Hide"
-
-[node name="PauseMenu" type="Panel" parent="."]
-visible = false
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_top = 1.0
-offset_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_50a8v")
-
-[node name="PanelContainer" type="PanelContainer" parent="PauseMenu"]
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -170.0
-offset_top = -93.5
-offset_right = 170.0
-offset_bottom = 93.5
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_d1llx")
-
-[node name="VBoxContainer" type="VBoxContainer" parent="PauseMenu/PanelContainer"]
-custom_minimum_size = Vector2(400, 0)
-layout_mode = 2
-theme_override_constants/separation = 8
-
-[node name="Label" type="Label" parent="PauseMenu/PanelContainer/VBoxContainer"]
-layout_mode = 2
-text = "Game Paused"
-horizontal_alignment = 1
-
-[node name="ReturnButton" type="Button" parent="PauseMenu/PanelContainer/VBoxContainer"]
-layout_mode = 2
-text = "Return To Game
-"
-
-[node name="ExitButton" type="Button" parent="PauseMenu/PanelContainer/VBoxContainer"]
+[node name="ExitButton" type="Button" parent="PauseCorner/VBoxContainer"]
 layout_mode = 2
 text = "Exit to Menu"

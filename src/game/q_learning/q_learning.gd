@@ -2,7 +2,7 @@ class_name QLearningTraining extends BaseGame
 
 @export var run_single_button: Button
 @export var run_multiple_button: Button
-@export var speeds: Array[float] = [0.05, 0.2, 0.5]
+@export var speeds: Array[float] = [0.05, 0.1, 0.2, 0.5, 1]
 
 var num_agents: int = 2
 
@@ -47,9 +47,9 @@ func _on_run_simulation_button_pressed() -> void:
 
 
 func _on_run_multiple_button_pressed() -> void:
+	run_multiple_button.disabled = true
 	Console.add_entry("Running %s episodes" % [num_agents], 0)
 	AlgorithmManager.qlearning.TrainQAgent(num_agents)
-	run_multiple_button.disabled = true
 
 
 func _on_save_q_table_pressed() -> void:
@@ -77,10 +77,7 @@ func _on_move_selected(move: String) -> void:
 
 
 func _on_training_finished() -> void:
-	print("Finished")
-	print(run_multiple_button.disabled)
 	run_multiple_button.disabled = false
-	print(run_multiple_button.disabled)
 	
 
 func _on_h_slider_value_changed(value: float) -> void:

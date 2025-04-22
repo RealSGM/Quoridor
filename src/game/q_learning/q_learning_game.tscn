@@ -7,7 +7,7 @@
 script = ExtResource("2_vx24j")
 run_single_button = NodePath("UserInterface/ActionInterface/InterfaceVBC/QLearningVBC/SimulationVBC/RunSimulationButton")
 run_multiple_button = NodePath("UserInterface/ActionInterface/InterfaceVBC/QLearningVBC/MultipleRunVBC/RunMultipleButton")
-speeds = Array[float]([0.05, 0.2, 0.5])
+speeds = Array[float]([0.05, 0.1, 0.2, 0.5, 1.0])
 
 [node name="BotCover" type="Control" parent="." index="1"]
 layout_mode = 1
@@ -88,7 +88,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-max_value = 2.0
+max_value = 4.0
 scrollable = false
 
 [node name="RunSimulationButton" type="Button" parent="UserInterface/ActionInterface/InterfaceVBC/QLearningVBC/SimulationVBC" index="1"]
