@@ -19,11 +19,6 @@ extends Control
 @export var bot_v_bot_button: Button
 @export var qlearning_button: Button
 
-@export_category("Multiplayer Buttons")
-@export var local_button: Button
-@export var online_button: Button
-@export var multiplayer_back_button: Button
-
 @export_category("Board Options")
 @export var board_vbc: VBoxContainer
 @export var board_options_back_button: Button
@@ -62,7 +57,7 @@ var game_type: String
 
 @onready var game_type_dict: Dictionary[String, Array] = {
 	"Singleplayer": [player_one_container, bot_two_container], 
-	"Local": [player_one_container, player_two_container], 
+	"Multiplayer": [player_one_container, player_two_container], 
 	"BotVBot": [bot_one_container, bot_two_container],
 	"QLearning": []
 	}
@@ -87,14 +82,10 @@ func setup_menus() -> void:
 	exit_button.pressed.connect(get_tree().quit)
 
 	singleplayer_button.pressed.connect(_on_menu_button_pressed.bind(board_options_menu, singleplayer_button))
-	multiplayer_button.pressed.connect(_on_menu_button_pressed.bind(multiplayer_menu))
+	multiplayer_button.pressed.connect(_on_menu_button_pressed.bind(board_options_menu, multiplayer_button))
 	bot_v_bot_button.pressed.connect(_on_menu_button_pressed.bind(board_options_menu, bot_v_bot_button))
 	qlearning_button.pressed.connect(_on_qlearning_game_pressed)
 	play_back_button.pressed.connect(_on_back_button_pressed)
-
-	#online_button.pressed
-	local_button.pressed.connect(_on_menu_button_pressed.bind(board_options_menu, local_button))
-	multiplayer_back_button.pressed.connect(_on_back_button_pressed)
 
 	start_game_button.pressed.connect(_on_start_game_pressed)
 	board_options_back_button.pressed.connect(_on_back_button_pressed)

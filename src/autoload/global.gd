@@ -1,7 +1,6 @@
 extends Node
 
 const BITS: Array[int] = [0, 1]
-const MAX_FENCES: int = 10
 const BOARD_SIZE: int = 9
 
 const COLORS: Array[Color] = [
@@ -13,13 +12,10 @@ const COLORS: Array[Color] = [
 
 ## O is horizontal, 1 is vertical
 var fence_direction: int = 0
+
 var coloured_fences: bool = false
-
-# Third Element is for Testing
 var players: Array[Dictionary] = [{}, {}, {"color": Color.GHOST_WHITE}]
-
 var game: BaseGame
-var algorithms: AlgorithmManager
 
 
 func help() -> String:

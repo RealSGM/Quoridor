@@ -7,7 +7,7 @@
 [ext_resource type="PackedScene" uid="uid://dm77attl8ovul" path="res://src/game/comment.tscn" id="1_mux7d"]
 [ext_resource type="PackedScene" uid="uid://hom0e34digvf" path="res://src/game/bot_game/bot_game.tscn" id="1_yd347"]
 [ext_resource type="PackedScene" uid="uid://b06lx81t8jb2d" path="res://src/game/pawn.tscn" id="3_e76re"]
-[ext_resource type="PackedScene" uid="uid://ifm64tbovo6x" path="res://src/game/local_game/local_game.tscn" id="4_2yahu"]
+[ext_resource type="PackedScene" uid="uid://ifm64tbovo6x" path="res://src/game/multiplayer_game/multiplayer_game.tscn" id="4_2yahu"]
 [ext_resource type="PackedScene" uid="uid://bin521tqoc128" path="res://src/game/q_learning/q_learning_game.tscn" id="8_aprgb"]
 [ext_resource type="PackedScene" uid="uid://rmjhwmm8lagg" path="res://src/game/tile_button/tile_button.tscn" id="8_bdlgi"]
 
@@ -15,4 +15,4 @@
 process_thread_group = 2
 process_thread_group_order = 0
 process_thread_messages = 0
-resources = [PackedStringArray("botvbot_game", "command", "comment", "fence_button", "game", "local_game", "pawn", "q_learning_game", "singleplayer_game", "tile_button"), [ExtResource("1_yd347"), ExtResource("1_6aasd"), ExtResource("1_mux7d"), ExtResource("1_ev0q0"), ExtResource("1_cuwpg"), ExtResource("4_2yahu"), ExtResource("3_e76re"), ExtResource("8_aprgb"), ExtResource("1_72np1"), ExtResource("8_bdlgi")]]
+resources = [PackedStringArray("botvbot_game", "command", "comment", "fence_button", "game", "multiplayer_game", "pawn", "q_learning_game", "singleplayer_game", "tile_button"), [ExtResource("1_yd347"), ExtResource("1_6aasd"), ExtResource("1_mux7d"), ExtResource("1_ev0q0"), ExtResource("1_cuwpg"), ExtResource("4_2yahu"), ExtResource("3_e76re"), ExtResource("8_aprgb"), ExtResource("1_72np1"), ExtResource("8_bdlgi")]]

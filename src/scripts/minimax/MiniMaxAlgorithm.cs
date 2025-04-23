@@ -13,10 +13,18 @@ public partial class MiniMaxAlgorithm : Node
 	private bool debugging = false;
 
 	Window Console;
+	Node SignalManager;
+
+	public override void _Ready()
+	{
+		Console = GetNode<Window>("/root/Console");
+		SignalManager = GetNode<Node>("/root/SignalManager");
+		Console.Call("add_entry", "MiniMaxAlgorithm ready", 0);
+	}
 
 	public void SetMaxDepth(int turns_played) => START_DEPTH = turns_played <= 2 ? 1 : 3;
 
-	public string GetMove(BoardState board, int currentPlayer)
+	public void GetMove(BoardState board, int currentPlayer)
 	{
 		// Debugging ---
 		Console = GetNode<Window>("/root/Console");
@@ -28,6 +36,7 @@ public partial class MiniMaxAlgorithm : Node
 		
 		ValueTuple<int, string> bestMoveTuple = MiniMax(board, START_DEPTH, currentPlayer, currentPlayer, int.MinValue, int.MaxValue);
 		string bestMove = bestMoveTuple.Item2;
+		SignalManager.EmitSignal("move_selected", bestMove);
 		
 		// Debugging ---
 		stopwatch.Stop();
@@ -36,7 +45,6 @@ public partial class MiniMaxAlgorithm : Node
 		Console.Call("add_entry", $"Nodes Visited: {nodesVisited}, Time: {milliseconds}ms", 0);
 		// Debugging ---
 
-		return bestMove;
 	}
 
 	private (int v, string m) MiniMax(BoardState board, int depth, int currentPlayer, int maximisingPlayer, int alpha, int beta)

@@ -1,7 +1,7 @@
 class_name QLearningTraining extends BaseGame
 
 @export var run_simulation_button: Button
-@export var speeds: Array[float] = [0, 0.01, 0.05, 0.1, 0.2] #, 0.5]
+@export var speeds: Array[float] = [0, 0.01, 0.05, 0.1, 0.2]
 
 var is_running: bool = false
 
