@@ -139,8 +139,8 @@ public partial class BoardState: Control
         {
             dir = 1 - dir;
             if (cons[i] == -1) continue;
-            if (GetFencePlaced(dir, corners[i])) cons[i] = -1;
-            if (GetFencePlaced(dir, corners[(i + 1) % cons.Length])) cons[i] = -1;
+            if (corners[i] > -1 && GetFencePlaced(dir, corners[i])) cons[i] = -1;
+            if (corners[(i + 1) % cons.Length] > -1 && GetFencePlaced(dir, corners[(i + 1) % cons.Length])) cons[i] = -1;
         }
 
         return cons;
