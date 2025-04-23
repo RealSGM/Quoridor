@@ -130,7 +130,7 @@ func set_game_data() -> void:
 	var selected_name: String
 
 	match game_type:
-		"Local":
+		"Multiplayer":
 			selected_colour = p_two_colours.selected
 			selected_name = player_two_name.text
 		"Singleplayer":
@@ -206,11 +206,13 @@ func _on_colour_selected(index: int, prev_index: int, other_button: OptionButton
 	# Loop through all options and enable them
 	for i in range(other_button.get_item_count()):
 		other_button.set_item_disabled(i, false)
+		
+	# Re-enable the previously selected colour in the other option button
+	other_button.set_item_disabled(prev_index, false)
 
 	# Disable the selected colour in the other option button
 	other_button.set_item_disabled(index, true)
-	# Re-enable the previously selected colour in the other option button
-	other_button.set_item_disabled(prev_index, false)
+	
 
 
 func _on_colour_toggle_toggled(toggled_on: bool) -> void:

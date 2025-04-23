@@ -181,7 +181,7 @@ func set_tiles(tile: int) -> void:
 ## Disable and darken a tile
 func set_tile_button(tile: TileButton, is_disabled: bool) -> void:
 	tile.disabled = is_disabled
-	tile.modulate = Color(0.7, 0.7, 0.7) if is_disabled else Color.WHITE
+	tile.modulate = Color(0.6, 0.6, 0.6) if is_disabled else Color.WHITE
 	tile.focus_mode = Control.FOCUS_NONE if is_disabled else Control.FOCUS_CLICK
 
 
