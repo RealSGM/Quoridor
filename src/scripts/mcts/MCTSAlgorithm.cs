@@ -4,7 +4,7 @@ using System.Linq;
 [GlobalClass]
 public partial class MCTSAlgorithm : Node
 {
-	private const int SIMULATIONS = 1000;  // Increased simulations for better decision-making
+	private const int SIMULATIONS = 100;  // Increased simulations for better decision-making
 	private const double EXPLORATION_CONSTANT = 1.41; // sqrt(2), UCB1 exploration factor
 
 	Window Console;
@@ -13,6 +13,7 @@ public partial class MCTSAlgorithm : Node
 	public override void _Ready()
 	{
 		Console = GetNode<Window>("/root/Console");
+		SignalManager = GetNode<Node>("/root/SignalManager");
 		Console.Call("add_entry", "MCTSAlgorithm ready", 0);
 	}
 
@@ -29,6 +30,7 @@ public partial class MCTSAlgorithm : Node
 			int simulationResult = expandedNode.Simulate(currentPlayer);
 			expandedNode.Backpropagate(simulationResult);
 		}
+
 		MCTSNode bestChild = root.Children.OrderByDescending(c => c.Visits).First();
 
 		Console.Call("add_entry", "Found Best Move in " + (Time.GetTicksMsec() - startTime) + " ms", 0);
