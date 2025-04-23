@@ -110,7 +110,7 @@ public partial class Helper : Node
 	{
 		int row = tile / BoardSize + verticalOffset;
 		int col = tile % BoardSize + horizontalOffset;
-		return (row >= BitBoardSize || col >= BitBoardSize) ? -1 : row * BitBoardSize + col;
+		return (row is < 0 or >= BitBoardSize || col is < 0 or >= BitBoardSize) ? -1 : row * BitBoardSize + col;
 	}
 
 	/// Returns the fence buttons that surround a tile
