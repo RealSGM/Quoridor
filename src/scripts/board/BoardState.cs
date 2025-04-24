@@ -330,15 +330,22 @@ public partial class BoardState: Control
 
 		int maximisingPlayerPath = Algorithms.GetPathToGoal(this, maximisingPlayer).Length;
 		int minimisingPlayerPath = Algorithms.GetPathToGoal(this, minimisingPlayer).Length;
+
+        // Value moves makes the player closer to the goal or opponent further away
 		int pathDifference = minimisingPlayerPath - maximisingPlayerPath;
-		int fenceScore = Pawns[minimisingPlayer].FencesRemaining - Pawns[maximisingPlayer].FencesRemaining;
 
-		int evaluation = 0;
+        // Value using less fences
+		int fenceScore = Pawns[maximisingPlayer].FencesRemaining - Pawns[minimisingPlayer].FencesRemaining;
 
-		evaluation += pathDifference * Helper.PATH_WEIGHT;
-		evaluation += fenceScore * Helper.FENCE_WEIGHT;
+        // Value the player being past the cneter
+        int playerRow = Pawns[maximisingPlayer].Index / Helper.BoardSize;
+        int centralityScore = (maximisingPlayer == 0) 
+            ? (playerRow <= Helper.centerRow ? 1 : -1) 
+            : (playerRow >= Helper.centerRow ? 1 : -1);
 
-		return evaluation;
+        return centralityScore 
+            + pathDifference * Helper.PATH_WEIGHT 
+            + fenceScore * Helper.FENCE_WEIGHT;
     }
     
     public StateKey GetStateKey() => new()

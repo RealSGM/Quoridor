@@ -97,3 +97,17 @@ func get_adjacent_tiles(tile: int = 0) -> String:
 		msg += str(adjacent_tiles[i]) + " "
 
 	return msg
+
+func evaluate_board(player: int = 0) -> String:
+	var evaluation = game.board.EvaluateBoard(player)
+	return "Evaluation: " + str(evaluation)
+
+
+func get_moves(player: int = 0) -> String:
+	var moves = game.board.GetAllMovesSmart(player)
+	var msg: String = ""
+
+	for i: int in range(moves.size()):
+		msg += str(moves[i]) + ",  "
+
+	return msg

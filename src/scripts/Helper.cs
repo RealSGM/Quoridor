@@ -10,11 +10,15 @@ public partial class Helper : Node
 {
 	public static readonly int[] Bits = [0, 1];
 	public static readonly Random Random = new();
+
 	public const int PATH_WEIGHT = 20;
 	public const int FENCE_WEIGHT = 10;
+	public const int CENTRALITY_WEIGHT = 10;
+
 	public const int MaxFences = 10;
 	public const int BoardSize = 9;
 	public const int BitBoardSize = 8;
+	public const int centerRow = BoardSize / 2;
 
 	public static readonly List<Func<int, int, int>> AdjacentFunctions =
 	[
