@@ -98,15 +98,16 @@ layout_mode = 2
 theme_override_constants/separation = 8
 
 [node name="Label" type="Label" parent="UserInterface/ActionInterface/InterfaceVBC/QLearningVBC/TrainingContainer/VBC/SpeedHBC" index="0"]
+custom_minimum_size = Vector2(162, 0)
 layout_mode = 2
 text = "Speed"
 horizontal_alignment = 1
 
-[node name="SpeedAnchor" type="Control" parent="UserInterface/ActionInterface/InterfaceVBC/QLearningVBC/TrainingContainer/VBC/SpeedHBC" index="1"]
+[node name="Anchor" type="Control" parent="UserInterface/ActionInterface/InterfaceVBC/QLearningVBC/TrainingContainer/VBC/SpeedHBC" index="1"]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="HSlider" type="HSlider" parent="UserInterface/ActionInterface/InterfaceVBC/QLearningVBC/TrainingContainer/VBC/SpeedHBC/SpeedAnchor" index="0"]
+[node name="SpeedHSlider" type="HSlider" parent="UserInterface/ActionInterface/InterfaceVBC/QLearningVBC/TrainingContainer/VBC/SpeedHBC/Anchor" index="0"]
 custom_minimum_size = Vector2(200, 67)
 layout_mode = 1
 anchors_preset = 8
@@ -121,16 +122,51 @@ offset_bottom = 33.5
 grow_horizontal = 2
 grow_vertical = 2
 max_value = 4.0
+value = 2.0
 scrollable = false
 
-[node name="RunSimulationButton" type="Button" parent="UserInterface/ActionInterface/InterfaceVBC/QLearningVBC/TrainingContainer/VBC" index="1"]
+[node name="EpsilonHBC" type="HBoxContainer" parent="UserInterface/ActionInterface/InterfaceVBC/QLearningVBC/TrainingContainer/VBC" index="1"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Label" type="Label" parent="UserInterface/ActionInterface/InterfaceVBC/QLearningVBC/TrainingContainer/VBC/EpsilonHBC" index="0"]
+custom_minimum_size = Vector2(162, 0)
+layout_mode = 2
+text = "Epsilon"
+horizontal_alignment = 1
+
+[node name="Anchor" type="Control" parent="UserInterface/ActionInterface/InterfaceVBC/QLearningVBC/TrainingContainer/VBC/EpsilonHBC" index="1"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="EpsilonHSlider" type="HSlider" parent="UserInterface/ActionInterface/InterfaceVBC/QLearningVBC/TrainingContainer/VBC/EpsilonHBC/Anchor" index="0"]
+custom_minimum_size = Vector2(200, 67)
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -100.0
+offset_top = -33.5
+offset_right = 100.0
+offset_bottom = 33.5
+grow_horizontal = 2
+grow_vertical = 2
+max_value = 1.0
+step = 0.01
+value = 0.5
+scrollable = false
+
+[node name="RunSimulationButton" type="Button" parent="UserInterface/ActionInterface/InterfaceVBC/QLearningVBC/TrainingContainer/VBC" index="2"]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Run Simulation"
 
 [connection signal="pressed" from="UserInterface/ActionInterface/InterfaceVBC/QLearningVBC/QTableContainer/VBC/HBC/SaveQTable" to="." method="_on_save_q_table_pressed"]
 [connection signal="pressed" from="UserInterface/ActionInterface/InterfaceVBC/QLearningVBC/QTableContainer/VBC/HBC/PruneButton" to="." method="_on_prune_button_pressed"]
-[connection signal="value_changed" from="UserInterface/ActionInterface/InterfaceVBC/QLearningVBC/TrainingContainer/VBC/SpeedHBC/SpeedAnchor/HSlider" to="." method="_on_h_slider_value_changed"]
+[connection signal="value_changed" from="UserInterface/ActionInterface/InterfaceVBC/QLearningVBC/TrainingContainer/VBC/SpeedHBC/Anchor/SpeedHSlider" to="." method="_on_speed_h_slider_value_changed"]
+[connection signal="value_changed" from="UserInterface/ActionInterface/InterfaceVBC/QLearningVBC/TrainingContainer/VBC/EpsilonHBC/Anchor/EpsilonHSlider" to="." method="_on_epsilon_h_slider_value_changed"]
 [connection signal="pressed" from="UserInterface/ActionInterface/InterfaceVBC/QLearningVBC/TrainingContainer/VBC/RunSimulationButton" to="." method="_on_run_simulation_button_pressed"]
 
 [editable path="UserInterface"]

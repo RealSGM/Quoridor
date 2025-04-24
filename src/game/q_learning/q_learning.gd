@@ -9,7 +9,8 @@ func _ready() -> void:
 	SignalManager.training_finished.connect(_on_training_finished)
 	SignalManager.move_selected.connect(_on_move_selected)
 	AlgorithmManager.qlearning.LoadQTable("")
-	_on_h_slider_value_changed(0)
+	_on_speed_h_slider_value_changed(2)
+	_on_epsilon_h_slider_value_changed(0.5)
 	super._ready()
 
 
@@ -74,10 +75,6 @@ func _on_move_selected(move: String) -> void:
 	_on_confirm_pressed()
 
 
-func _on_h_slider_value_changed(value: float) -> void:
-	AlgorithmManager.qlearning.simulationDelay = speeds[value]
-
-
 func _on_training_finished(winner: int) -> void:
 	if winner in Global.BITS:
 		user_interface.update_win(winner)
@@ -90,3 +87,11 @@ func _on_training_finished(winner: int) -> void:
 		_on_prune_button_pressed()
 		_on_save_q_table_pressed()
 		AlgorithmManager.qlearning.TrainSingleEpisode(board)
+
+
+func _on_speed_h_slider_value_changed(value: float) -> void:
+	AlgorithmManager.qlearning.simulationDelay = speeds[value]
+
+
+func _on_epsilon_h_slider_value_changed(value: float) -> void:
+	AlgorithmManager.qlearning.epsilon = value

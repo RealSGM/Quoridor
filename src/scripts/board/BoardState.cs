@@ -297,7 +297,7 @@ public partial class BoardState: Control
         List<string> moves = [];
 
         // Add all tiles
-        moves.AddRange(GetReachableTiles(player)
+        moves.AddRange(GetReachableTilesSmart(player)
             .Select(tile => Helper.GetMoveCodeAsString(player, "m", 0, tile)));
 
         ulong[] fences = GetAllFences(player);

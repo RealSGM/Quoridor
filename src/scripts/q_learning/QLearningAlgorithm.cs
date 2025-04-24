@@ -10,19 +10,15 @@ using System.Text.Json;
 public partial class QLearningAlgorithm : Node
 {
 	private Node SignalManager;
-	public float simulationDelay = 0.1f;
-	public bool isRunning = false;
-
 	private string defaultSavePath = "data/q_table.json";
-
 	private Dictionary<StateKey, Dictionary<string, float>> QTable = [];
-
-	private float epsilon = 1.0f;
-	private float minEpsilon = 0.05f;
-	private float epsilonDecay = 0.999f; // or something like 0.99
 
 	private float learningRate = 0.5f;   // 10% weight on new information
 	private float discountFactor = 0.9f; // Discount factor for future rewards
+
+	public float epsilon = 0.5f; // Exploration rate
+	public float simulationDelay = 0.1f;
+	public bool isRunning = false;
 
 	public override void _Ready() => SignalManager = GetNode("/root/SignalManager");
 
@@ -32,8 +28,6 @@ public partial class QLearningAlgorithm : Node
 		board.Initialise();
 		int currentPlayer = 0;
 		
-		isRunning = true;
-
 		while (!board.IsGameOver())
 		{
 			StateKey stateKey = board.GetStateKey();
@@ -64,6 +58,9 @@ public partial class QLearningAlgorithm : Node
 			
 			IllegalFenceCheck.GetIllegalFences(board, currentPlayer);
 		}
+
+		PruneQTable(0f);
+		SaveQTable(defaultSavePath);
 		int winner = board.IsWinner(0) ? 0 : board.IsWinner(1) ? 1 : 2;
 		SignalManager.EmitSignal("training_finished", winner);
 		isRunning = false;
@@ -73,16 +70,30 @@ public partial class QLearningAlgorithm : Node
 
 	public string ChooseAction(StateKey stateKey, int currentPlayer, BoardState board)
 	{
+		ulong[] fences = board.GetAllFences(currentPlayer);
+		string[] fenceMoves = [.. Helper.Bits
+			.SelectMany(dir => Helper.GetOnesInBitBoard(fences[dir])
+            .Select(i => Helper.GetMoveCodeAsString(currentPlayer, "f", dir, i)))];
+
+		string[] pawnMoves = [.. board
+			.GetReachableTilesSmart(currentPlayer)
+			.Select(tile => Helper.GetMoveCodeAsString(currentPlayer, "m", 0, tile))];
+
 		string[] allMoves = board.GetAllMoves(currentPlayer);
 
-		if (allMoves.Length == 0) return "";
-
 		// Exploration
-		if (Helper.Random.NextDouble() < epsilon) return allMoves[Helper.Random.Next(allMoves.Length)];
+		if (Helper.Random.NextDouble() > epsilon)
+		{
+			float maxQ = allMoves.Max(action => GetQValue(stateKey, action));
+			string[] bestMoves = [.. allMoves.Where(action => GetQValue(stateKey, action) == maxQ)];
+			return bestMoves[Helper.Random.Next(bestMoves.Length)];
+		}
 
-		float maxQ = allMoves.Max(action => GetQValue(stateKey, action));
-		var bestMoves = allMoves.Where(action => GetQValue(stateKey, action) == maxQ).ToArray();
-		return bestMoves[Helper.Random.Next(bestMoves.Length)];
+		// Exploitation
+		if (fenceMoves.Length > 0 && Helper.Random.NextDouble() > 0.5f)
+			return fenceMoves[Helper.Random.Next(fenceMoves.Length)];
+
+		return pawnMoves[Helper.Random.Next(pawnMoves.Length)];
 	}
 
 	public float GetQValue(StateKey stateKey, string action) => 
@@ -108,6 +119,11 @@ public partial class QLearningAlgorithm : Node
 
 		int[] oldOpponentPath = Algorithms.GetPathToGoal(prevBoard, 1 - currentPlayer);
 		int[] newOpponentPath = Algorithms.GetPathToGoal(board, 1 - currentPlayer);
+
+		int[] oldPlayerPath = Algorithms.GetPathToGoal(prevBoard, currentPlayer);
+		int[] newPlayerPath = Algorithms.GetPathToGoal(board, currentPlayer);
+		
+		reward += (oldPlayerPath.Length - newPlayerPath.Length) * 0.25f;
 		reward += (newOpponentPath.Length - oldOpponentPath.Length) * 0.5f;
 
 		return reward;
