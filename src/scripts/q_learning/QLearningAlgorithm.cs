@@ -31,6 +31,9 @@ public partial class QLearningAlgorithm : Node
 		while (!board.IsGameOver())
 		{
 			StateKey stateKey = board.GetStateKey();
+
+			ExploreState(board, currentPlayer, stateKey);
+
 			string action = ChooseAction(stateKey, currentPlayer, board);
 
 			if (action == "") break;
@@ -47,10 +50,6 @@ public partial class QLearningAlgorithm : Node
 			float oldQ = GetQValue(stateKey, action);
 
 			float newQ = oldQ + learningRate * (reward + discountFactor * maxFutureQ - oldQ);
-
-			// Safely update Q-value
-			if (!QTable.ContainsKey(stateKey))
-				QTable[stateKey] = [];
 			QTable[stateKey][action] = newQ;
 
 			board = newBoard;
@@ -67,6 +66,36 @@ public partial class QLearningAlgorithm : Node
 	}
 
 	#region Training ---
+
+	public void ExploreState(BoardState board, int currentPlayer, StateKey key)
+	{
+		if (!QTable.TryGetValue(key, out Dictionary<string, float> value))
+		{
+            value = [];
+            QTable[key] = value;
+		}
+		
+		// Get all possible moves for the current player
+		string[] allMoves = board.GetAllMoves(currentPlayer);
+
+		// Loop through all possible moves
+		foreach (string action in allMoves)
+		{
+			if (value.ContainsKey(action)) continue;
+			// Clone the board and apply the action
+			BoardState newBoard = board.Clone();
+			newBoard.AddMove(action);
+
+			// Get the new state key after the action	
+			StateKey nextStateKey = newBoard.GetStateKey();
+			float reward = GetReward(currentPlayer, newBoard, board);
+			float maxFutureQ = GetMaxQValue(nextStateKey, newBoard, 1 - currentPlayer);
+			float oldQ = GetQValue(key, action);
+			float newQ = oldQ + learningRate * (reward + discountFactor * maxFutureQ - oldQ);
+            value[action] = newQ;
+			newBoard.Free();
+		}
+	}
 
 	public string ChooseAction(StateKey stateKey, int currentPlayer, BoardState board)
 	{
