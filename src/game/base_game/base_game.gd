@@ -149,7 +149,7 @@ func undo_move() -> String:
 func update_fence_buttons() -> void:
 	for fence: int in range((Global.BOARD_SIZE - 1) * (Global.BOARD_SIZE - 1)):
 		var fence_button: FenceButton = fence_buttons[fence]
-		fence_button.disabled = not board.IsFenceEnabled(Global.fence_direction, fence, true) if board.GetFencesRemaining(current_player) else true
+		fence_button.disabled = not board.IsFenceEnabled(Global.fence_direction, fence, true) if board.HasFences(current_player) else true
 		# Disable mouse filter if the button is disabled
 		fence_button.mouse_filter = Control.MOUSE_FILTER_IGNORE if fence_button.disabled else Control.MOUSE_FILTER_STOP
 
@@ -310,7 +310,7 @@ func undo_board_ui() -> void:
 
 func finish_undo_board() -> void:
 	for player: int in Global.BITS:
-		user_interface.update_fence_counts(player, board.GetFencesRemaining(player) - 1)
+		user_interface.update_fence_counts(player, board.GetFencesRemaining(player))
 
 	IllegalFenceCheck.GetIllegalFences(board, current_player)
 	move_code = ""

@@ -63,13 +63,13 @@ func get_shortest_path(player: int = 0) -> String:
 
 
 func is_fence_legal(player: int = 0, dir: int = 0, index: int = 0) -> String:
-	var is_legal = IllegalFenceCheck.IsFenceIllegal(game.board, player, dir, index)
+	var is_illegal = IllegalFenceCheck.IsFenceIllegal(game.board, player, dir, index)
 	var text = "Player " + str(player) + " fence at " + str(index) + " is "
 
-	if is_legal:
-		text += "legal"
-	else:
+	if is_illegal:
 		text += "illegal"
+	else:
+		text += "legal"
 
 	return text
 

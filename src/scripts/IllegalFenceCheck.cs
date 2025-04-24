@@ -8,12 +8,10 @@ public partial class IllegalFenceCheck : Node
 {
 	public static void GetIllegalFences(BoardState board, int currentPlayer)
 	{
-		// Ignore if player has no more fences
-		if (!board.HasFences(currentPlayer)) return;
-
 		ulong[] possibleFences = board.GetEnabledFences(false);
+		ulong[] surroundingFences = [];
 
-		ulong[] surroundingFences = board.LastMove != null && board.LastMove.MoveType == 'm'
+		surroundingFences = board.LastMove.MoveType == 'm'
 			? Helper.GetFencesSurroundingTile(board.LastMove.Index)
 			: board.GetAllSurroundingFences();
 
