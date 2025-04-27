@@ -42,6 +42,9 @@ func _ready() -> void:
 	SignalManager.undo_pressed.connect(_on_undo_button_pressed)
 	reset_board()
 
+	if AlgorithmManager.qlearning in AlgorithmManager.chosen_algorithms:
+		AlgorithmManager.qlearning.LoadQTable("")
+
 
 func set_current_player(val: int) -> void:
 	reset_board_tiles()

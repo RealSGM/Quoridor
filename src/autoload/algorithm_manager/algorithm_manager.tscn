@@ -6,11 +6,14 @@
 [ext_resource type="Script" uid="uid://b2rhsdhrxmqjt" path="res://src/scripts/q_learning/QLearningAlgorithm.cs" id="3_qmstv"]
 
 [node name="AlgorithmManager" type="Node" node_paths=PackedStringArray("algorithms", "minimax", "mcts", "qlearning")]
+process_thread_group = 2
+process_thread_group_order = 0
+process_thread_messages = 0
 script = ExtResource("1_vlcab")
-algorithms = [NodePath("AI/MiniMax"), NodePath("AI/MCTS")]
+algorithms = [NodePath("AI/MiniMax"), NodePath("AI/MCTS"), NodePath("AI/QLearning")]
 minimax = NodePath("AI/MiniMax")
 mcts = NodePath("AI/MCTS")
-qlearning = NodePath("QLearning")
+qlearning = NodePath("AI/QLearning")
 
 [node name="AI" type="Node" parent="."]
 
@@ -20,7 +23,7 @@ script = ExtResource("1_qqd8t")
 [node name="MCTS" type="Node" parent="AI"]
 script = ExtResource("2_vlcab")
 
-[node name="QLearning" type="Node" parent="."]
+[node name="QLearning" type="Node" parent="AI"]
 process_thread_group = 2
 process_thread_group_order = 0
 process_thread_messages = 0

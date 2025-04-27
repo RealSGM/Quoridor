@@ -22,6 +22,35 @@ public partial class QLearningAlgorithm : Node
 
     public override void _Ready() => SignalManager = GetNode("/root/SignalManager");
 
+
+    public void GetMove(BoardState board, int currentPlayer)
+    {
+        // Get the current state key
+        StateKey stateKey = board.GetStateKey();
+
+        if (!QTable.ContainsKey(stateKey))
+        {
+            GD.Print($"State {stateKey} not found in QTable");
+            QTable[stateKey] = [];
+            // State not trained for, get random move
+            string[] allMoves = board.GetAllMoves(currentPlayer);
+            string randomMove = allMoves[Helper.Random.Next(allMoves.Length)];
+            SignalManager.EmitSignal("move_selected", randomMove);
+        }
+        else
+        {
+            // Get the best move based off Q Values
+            string[] allMoves = QTable[stateKey].Keys.ToArray();
+            float maxQ = allMoves.Max(action => GetQValue(stateKey, action));
+            string[] bestMoves = allMoves.Where(action => GetQValue(stateKey, action) == maxQ).ToArray();
+            string bestMove = bestMoves[Helper.Random.Next(bestMoves.Length)];
+            SignalManager.EmitSignal("move_selected", bestMove);
+        }
+    }
+
+
+    #region Training ---
+
     public async void TrainSingleEpisode(BoardState boardState)
     {
         BoardState board = boardState.Clone();
@@ -64,8 +93,6 @@ public partial class QLearningAlgorithm : Node
         SignalManager.EmitSignal("training_finished", winner);
         isRunning = false;
     }
-
-    #region Training ---
 
     public void ExploreState(BoardState board, int currentPlayer, StateKey key)
     {
@@ -131,6 +158,7 @@ public partial class QLearningAlgorithm : Node
             ? qVal
             : 0f;
 
+    
     public float GetMaxQValue(StateKey stateKey, BoardState board, int currentPlayer)
     {
         string[] allMoves = board.GetAllMoves(currentPlayer);
@@ -214,6 +242,12 @@ public partial class QLearningAlgorithm : Node
             if (QTable[state].Count == 0)
                 QTable.Remove(state);
         }
+    }
+
+    public void FreeQTable()
+    {
+        QTable.Clear();
+        QTable = [];
     }
 
     #endregion QTable Management ---

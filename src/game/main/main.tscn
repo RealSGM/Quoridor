@@ -90,6 +90,7 @@ bot_one_colours = NodePath("Background/BoardOptionsMenu/VBC/PlayerContainer/Play
 bot_two_container = NodePath("Background/BoardOptionsMenu/VBC/PlayerContainer/PlayerHBC/RightContainer/RightVBC/BotVBC")
 bot_two_algorithms = NodePath("Background/BoardOptionsMenu/VBC/PlayerContainer/PlayerHBC/RightContainer/RightVBC/BotVBC/TypeHBC/BotTwoAlgorithmsOptionButton")
 bot_two_colours = NodePath("Background/BoardOptionsMenu/VBC/PlayerContainer/PlayerHBC/RightContainer/RightVBC/BotVBC/ColoursHBC/BotColourOption")
+algorithm_names = Array[String](["Minimax", "MCTS", "QLearning"])
 global_options = [NodePath("Background/BoardOptionsMenu/VBC/PlayerContainer/BoardVBC")]
 player_containers = [NodePath("Background/BoardOptionsMenu/VBC/PlayerContainer/PlayerHBC/LeftContainer/OneVBC/PlayerVBC"), NodePath("Background/BoardOptionsMenu/VBC/PlayerContainer/PlayerHBC/LeftContainer/OneVBC/BotVBC"), NodePath("Background/BoardOptionsMenu/VBC/PlayerContainer/PlayerHBC/RightContainer/RightVBC/PlayerVBC"), NodePath("Background/BoardOptionsMenu/VBC/PlayerContainer/PlayerHBC/RightContainer/RightVBC/BotVBC")]
 menus = [NodePath("Background/MainMenu"), NodePath("Background/PlayMenu"), NodePath("Background/MultiplayerMenu"), NodePath("Background/BoardOptionsMenu")]
