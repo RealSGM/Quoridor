@@ -9,212 +9,212 @@ using System.Text.Json;
 [GlobalClass]
 public partial class QLearningAlgorithm : Node
 {
-	private Node SignalManager;
-	private string defaultSavePath = "data/q_table.json";
-	private Dictionary<StateKey, Dictionary<string, float>> QTable = [];
+    private Node SignalManager;
+    private string defaultSavePath = "data/q_table.json";
+    private Dictionary<StateKey, Dictionary<string, float>> QTable = [];
 
-	private float learningRate = 0.5f;   // 10% weight on new information
-	private float discountFactor = 0.9f; // Discount factor for future rewards
+    private float learningRate = 0.5f;   // 10% weight on new information
+    private float discountFactor = 0.9f; // Discount factor for future rewards
 
-	public float epsilon = 0.5f; // Exploration rate
-	public float simulationDelay = 0.1f;
-	public bool isRunning = false;
+    public float epsilon = 0.5f; // Exploration rate
+    public float simulationDelay = 0.1f;
+    public bool isRunning = false;
 
-	public override void _Ready() => SignalManager = GetNode("/root/SignalManager");
+    public override void _Ready() => SignalManager = GetNode("/root/SignalManager");
 
-	public async void TrainSingleEpisode(BoardState boardState)
-	{
-		BoardState board = boardState.Clone();
-		board.Initialise();
-		int currentPlayer = 0;
-		
-		while (!board.IsGameOver())
-		{
-			StateKey stateKey = board.GetStateKey();
+    public async void TrainSingleEpisode(BoardState boardState)
+    {
+        BoardState board = boardState.Clone();
+        board.Initialise();
+        int currentPlayer = 0;
 
-			ExploreState(board, currentPlayer, stateKey);
+        while (!board.IsGameOver())
+        {
+            StateKey stateKey = board.GetStateKey();
 
-			string action = ChooseAction(stateKey, currentPlayer, board);
+            ExploreState(board, currentPlayer, stateKey);
 
-			if (action == "") break;
+            string action = ChooseAction(stateKey, currentPlayer, board);
 
-			SignalManager.EmitSignal("move_selected", action);
-			if (simulationDelay > 0) await ToSignal(GetTree().CreateTimer(simulationDelay), "timeout");
+            if (action == "") break;
 
-			BoardState newBoard = board.Clone();
-			newBoard.AddMove(action);
-			StateKey nextStateKey = newBoard.GetStateKey();
+            SignalManager.EmitSignal("move_selected", action);
+            if (simulationDelay > 0) await ToSignal(GetTree().CreateTimer(simulationDelay), "timeout");
 
-			float reward = GetReward(currentPlayer, newBoard, board);
-			float maxFutureQ = GetMaxQValue(nextStateKey, board, 1 - currentPlayer);
-			float oldQ = GetQValue(stateKey, action);
+            BoardState newBoard = board.Clone();
+            newBoard.AddMove(action);
+            StateKey nextStateKey = newBoard.GetStateKey();
 
-			float newQ = oldQ + learningRate * (reward + discountFactor * maxFutureQ - oldQ);
-			QTable[stateKey][action] = newQ;
+            float reward = GetReward(currentPlayer, newBoard, board);
+            float maxFutureQ = GetMaxQValue(nextStateKey, board, 1 - currentPlayer);
+            float oldQ = GetQValue(stateKey, action);
 
-			board = newBoard;
-			currentPlayer = 1 - currentPlayer;
-			
-			IllegalFenceCheck.GetIllegalFences(board, currentPlayer);
-		}
+            float newQ = oldQ + learningRate * (reward + discountFactor * maxFutureQ - oldQ);
+            QTable[stateKey][action] = newQ;
 
-		PruneQTable(0f);
-		SaveQTable(defaultSavePath);
-		int winner = board.IsWinner(0) ? 0 : board.IsWinner(1) ? 1 : 2;
-		SignalManager.EmitSignal("training_finished", winner);
-		isRunning = false;
-	}
+            board = newBoard;
+            currentPlayer = 1 - currentPlayer;
 
-	#region Training ---
+            IllegalFenceCheck.GetIllegalFences(board, currentPlayer);
+        }
 
-	public void ExploreState(BoardState board, int currentPlayer, StateKey key)
-	{
-		if (!QTable.TryGetValue(key, out Dictionary<string, float> value))
-		{
+        PruneQTable(0f);
+        SaveQTable(defaultSavePath);
+        int winner = board.IsWinner(0) ? 0 : board.IsWinner(1) ? 1 : 2;
+        SignalManager.EmitSignal("training_finished", winner);
+        isRunning = false;
+    }
+
+    #region Training ---
+
+    public void ExploreState(BoardState board, int currentPlayer, StateKey key)
+    {
+        if (!QTable.TryGetValue(key, out Dictionary<string, float> value))
+        {
             value = [];
             QTable[key] = value;
-		}
-		
-		// Get all possible moves for the current player
-		string[] allMoves = board.GetAllMoves(currentPlayer);
+        }
 
-		// Loop through all possible moves
-		foreach (string action in allMoves)
-		{
-			if (value.ContainsKey(action)) continue;
-			// Clone the board and apply the action
-			BoardState newBoard = board.Clone();
-			newBoard.AddMove(action);
+        // Get all possible moves for the current player
+        string[] allMoves = board.GetAllMoves(currentPlayer);
 
-			// Get the new state key after the action	
-			StateKey nextStateKey = newBoard.GetStateKey();
-			float reward = GetReward(currentPlayer, newBoard, board);
-			float maxFutureQ = GetMaxQValue(nextStateKey, newBoard, 1 - currentPlayer);
-			float oldQ = GetQValue(key, action);
-			float newQ = oldQ + learningRate * (reward + discountFactor * maxFutureQ - oldQ);
+        // Loop through all possible moves
+        foreach (string action in allMoves)
+        {
+            if (value.ContainsKey(action)) continue;
+            // Clone the board and apply the action
+            BoardState newBoard = board.Clone();
+            newBoard.AddMove(action);
+
+            // Get the new state key after the action	
+            StateKey nextStateKey = newBoard.GetStateKey();
+            float reward = GetReward(currentPlayer, newBoard, board);
+            float maxFutureQ = GetMaxQValue(nextStateKey, newBoard, 1 - currentPlayer);
+            float oldQ = GetQValue(key, action);
+            float newQ = oldQ + learningRate * (reward + discountFactor * maxFutureQ - oldQ);
             value[action] = newQ;
-			newBoard.Free();
-		}
-	}
+            newBoard.Free();
+        }
+    }
 
-	public string ChooseAction(StateKey stateKey, int currentPlayer, BoardState board)
-	{
-		ulong[] fences = board.GetAllFences(currentPlayer);
-		string[] fenceMoves = [.. Helper.Bits
-			.SelectMany(dir => Helper.GetOnesInBitBoard(fences[dir])
+    public string ChooseAction(StateKey stateKey, int currentPlayer, BoardState board)
+    {
+        ulong[] fences = board.GetAllFences(currentPlayer);
+        string[] fenceMoves = [.. Helper.Bits
+            .SelectMany(dir => Helper.GetOnesInBitBoard(fences[dir])
             .Select(i => Helper.GetMoveCodeAsString(currentPlayer, "f", dir, i)))];
 
-		string[] pawnMoves = [.. board
-			.GetReachableTilesSmart(currentPlayer)
-			.Select(tile => Helper.GetMoveCodeAsString(currentPlayer, "m", 0, tile))];
+        string[] pawnMoves = [.. board
+            .GetReachableTilesSmart(currentPlayer)
+            .Select(tile => Helper.GetMoveCodeAsString(currentPlayer, "m", 0, tile))];
 
-		string[] allMoves = board.GetAllMoves(currentPlayer);
+        string[] allMoves = board.GetAllMoves(currentPlayer);
 
-		// Exploration
-		if (Helper.Random.NextDouble() > epsilon)
-		{
-			float maxQ = allMoves.Max(action => GetQValue(stateKey, action));
-			string[] bestMoves = [.. allMoves.Where(action => GetQValue(stateKey, action) == maxQ)];
-			return bestMoves[Helper.Random.Next(bestMoves.Length)];
-		}
+        // Exploration
+        if (Helper.Random.NextDouble() > epsilon)
+        {
+            float maxQ = allMoves.Max(action => GetQValue(stateKey, action));
+            string[] bestMoves = [.. allMoves.Where(action => GetQValue(stateKey, action) == maxQ)];
+            return bestMoves[Helper.Random.Next(bestMoves.Length)];
+        }
 
-		// Exploitation
-		if (fenceMoves.Length > 0 && Helper.Random.NextDouble() > 0.5f)
-			return fenceMoves[Helper.Random.Next(fenceMoves.Length)];
+        // Exploitation
+        if (fenceMoves.Length > 0 && Helper.Random.NextDouble() > 0.5f)
+            return fenceMoves[Helper.Random.Next(fenceMoves.Length)];
 
-		return pawnMoves[Helper.Random.Next(pawnMoves.Length)];
-	}
+        return pawnMoves[Helper.Random.Next(pawnMoves.Length)];
+    }
 
-	public float GetQValue(StateKey stateKey, string action) => 
-		QTable.TryGetValue(stateKey, out var actionDict) && 
-		actionDict.TryGetValue(action, out var qVal) 
-			? qVal 
-			: 0f;
+    public float GetQValue(StateKey stateKey, string action) =>
+        QTable.TryGetValue(stateKey, out var actionDict) &&
+        actionDict.TryGetValue(action, out var qVal)
+            ? qVal
+            : 0f;
 
-	public float GetMaxQValue(StateKey stateKey, BoardState board, int currentPlayer)
-	{
-		string[] allMoves = board.GetAllMoves(currentPlayer);
-		if (allMoves.Length == 0) return 0f;
+    public float GetMaxQValue(StateKey stateKey, BoardState board, int currentPlayer)
+    {
+        string[] allMoves = board.GetAllMoves(currentPlayer);
+        if (allMoves.Length == 0) return 0f;
 
-		return allMoves.Max(action => GetQValue(stateKey, action));
-	}
+        return allMoves.Max(action => GetQValue(stateKey, action));
+    }
 
-	public static float GetReward(int currentPlayer, BoardState board, BoardState prevBoard)
-	{
-		if (board.IsGameOver())
-			return board.IsWinner(currentPlayer) ? 100f : -100f;
+    public static float GetReward(int currentPlayer, BoardState board, BoardState prevBoard)
+    {
+        if (board.IsGameOver())
+            return board.IsWinner(currentPlayer) ? 100f : -100f;
 
-		float reward = 0f;
+        float reward = 0f;
 
-		int[] oldOpponentPath = Algorithms.GetPathToGoal(prevBoard, 1 - currentPlayer);
-		int[] newOpponentPath = Algorithms.GetPathToGoal(board, 1 - currentPlayer);
+        int[] oldOpponentPath = Algorithms.GetPathToGoal(prevBoard, 1 - currentPlayer);
+        int[] newOpponentPath = Algorithms.GetPathToGoal(board, 1 - currentPlayer);
 
-		int[] oldPlayerPath = Algorithms.GetPathToGoal(prevBoard, currentPlayer);
-		int[] newPlayerPath = Algorithms.GetPathToGoal(board, currentPlayer);
-		
-		reward += (oldPlayerPath.Length - newPlayerPath.Length) * 0.25f;
-		reward += (newOpponentPath.Length - oldOpponentPath.Length) * 0.5f;
+        int[] oldPlayerPath = Algorithms.GetPathToGoal(prevBoard, currentPlayer);
+        int[] newPlayerPath = Algorithms.GetPathToGoal(board, currentPlayer);
 
-		return reward;
-	}
+        reward += (oldPlayerPath.Length - newPlayerPath.Length) * 0.25f;
+        reward += (newOpponentPath.Length - oldOpponentPath.Length) * 0.5f;
 
-	#endregion Training ---
+        return reward;
+    }
 
-	#region QTable Management ---
+    #endregion Training ---
 
-	public void SaveQTable(string filePath)
-	{
-		if (string.IsNullOrEmpty(filePath)) filePath = defaultSavePath;
-		var saveData = new Dictionary<string, Dictionary<string, float>>();
+    #region QTable Management ---
 
-		foreach (var (state, actionDict) in QTable)
-		{
-			string stateKey = state.ToString();
-			saveData[stateKey] = new Dictionary<string, float>(actionDict);
-		}
+    public void SaveQTable(string filePath)
+    {
+        if (string.IsNullOrEmpty(filePath)) filePath = defaultSavePath;
+        var saveData = new Dictionary<string, Dictionary<string, float>>();
 
-		var saveOptions = new JsonSerializerOptions
-		{
-			WriteIndented = true,
-			PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-			Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
-		};
+        foreach (var (state, actionDict) in QTable)
+        {
+            string stateKey = state.ToString();
+            saveData[stateKey] = new Dictionary<string, float>(actionDict);
+        }
 
-		string json = JsonSerializer.Serialize(saveData, saveOptions);
-		File.WriteAllText(filePath, json);
-	}
+        var saveOptions = new JsonSerializerOptions
+        {
+            WriteIndented = true,
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+        };
 
-	public void LoadQTable(string filePath)
-	{
-		if (QTable.Count > 0) return;
+        string json = JsonSerializer.Serialize(saveData, saveOptions);
+        File.WriteAllText(filePath, json);
+    }
 
-		if (string.IsNullOrEmpty(filePath)) filePath = defaultSavePath;
-		if (!File.Exists(filePath)) return;
+    public void LoadQTable(string filePath)
+    {
+        if (QTable.Count > 0) return;
 
-		string json = File.ReadAllText(filePath);
+        if (string.IsNullOrEmpty(filePath)) filePath = defaultSavePath;
+        if (!File.Exists(filePath)) return;
 
-		if (string.IsNullOrEmpty(json)) return;
+        string json = File.ReadAllText(filePath);
 
-		var loadedData = JsonSerializer.Deserialize<Dictionary<string, Dictionary<string, float>>>(File.ReadAllText(filePath));
+        if (string.IsNullOrEmpty(json)) return;
 
-		QTable = loadedData.ToDictionary(
-			entry => StateKey.ParseFromFile(entry.Key),
-			entry => entry.Value
-		);
-	}
+        var loadedData = JsonSerializer.Deserialize<Dictionary<string, Dictionary<string, float>>>(File.ReadAllText(filePath));
 
-	public void PruneQTable(float threshold)
-	{
-		foreach (var state in QTable.Keys.ToList())
-		{
-			QTable[state] = QTable[state]
-				.Where(pair => pair.Value > threshold)
-				.ToDictionary(pair => pair.Key, pair => pair.Value);
+        QTable = loadedData.ToDictionary(
+            entry => StateKey.ParseFromFile(entry.Key),
+            entry => entry.Value
+        );
+    }
 
-			if (QTable[state].Count == 0)
-				QTable.Remove(state);
-		}
-	}
+    public void PruneQTable(float threshold)
+    {
+        foreach (var state in QTable.Keys.ToList())
+        {
+            QTable[state] = QTable[state]
+                .Where(pair => pair.Value > threshold)
+                .ToDictionary(pair => pair.Key, pair => pair.Value);
 
-	#endregion QTable Management ---
+            if (QTable[state].Count == 0)
+                QTable.Remove(state);
+        }
+    }
+
+    #endregion QTable Management ---
 }

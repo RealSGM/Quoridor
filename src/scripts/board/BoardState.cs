@@ -5,15 +5,16 @@ using System.Linq;
 using System.Text.RegularExpressions;
 
 [GlobalClass]
-public partial class BoardState: Control
+public partial class BoardState : Control
 {
     public ParsedMove LastMove { get; private set; } = null;
-	private FenceData[] Fences;
+    private FenceData[] Fences;
     private FenceData[] IllegalFences;
     private Pawn[] Pawns = new Pawn[2];
 
     #region Initialization ---
-    
+
+
     public BoardState Clone() => new()
     {
         Fences = [Fences[0], Fences[1]],
@@ -39,7 +40,8 @@ public partial class BoardState: Control
     public int[] GetEnabledFencesAsArray(int dir)
     {
         List<int> bits = [];
-        
+
+
         for (int i = 0; i < Helper.BitBoardSize * Helper.BitBoardSize; i++)
         {
             if (IsFenceEnabled(dir, i)) bits.Add(1);
@@ -68,7 +70,8 @@ public partial class BoardState: Control
 
     #endregion
 
-	#region Getters ---
+    #region Getters ---
+
 
     public bool GetFencePlaced(int direction, int index) => Fences[direction].IsPlaced(index);
     public int GetPawnTile(int player) => Pawns[player].Index;
@@ -83,9 +86,10 @@ public partial class BoardState: Control
         .Aggregate(0UL, (acc, i) => acc | (1UL << i))
     )];
 
-	#endregion
+    #endregion
 
     #region Moves ---
+
 
     public void PlaceFence(int player, int direction, int index)
     {
@@ -152,8 +156,10 @@ public partial class BoardState: Control
         int[] enemyCons = GetAdjacentTiles(enemyTile);
         int leapedTile = enemyCons[cardinalDirection];
 
-        return leapedTile != -1 
-            ? [leapedTile] 
+        return leapedTile != -1
+
+            ? [leapedTile]
+
             : [.. enemyCons.Where(tile => !filterSet.Contains(tile))];
     }
 
@@ -167,8 +173,10 @@ public partial class BoardState: Control
         foreach (var (tile, direction) in GetAdjacentTiles(playerTile).Select((tile, dir) => (tile, dir)))
         {
             if (tile == -1) continue;
-            reachables.AddRange(tile == enemyTile 
-                ? GetLeapedTiles(enemyTile, direction, filterSet) 
+            reachables.AddRange(tile == enemyTile
+
+                ? GetLeapedTiles(enemyTile, direction, filterSet)
+
                 : [tile]);
         }
 
@@ -231,14 +239,14 @@ public partial class BoardState: Control
     public int[] GetReachableTilesSmart(int player)
     {
         int[] path = Algorithms.GetPathToGoal(this, player);
-		int[] tiles = GetReachableTiles(player);
+        int[] tiles = GetReachableTiles(player);
         int playerTile = GetPawnTile(player);
 
         // Add best moves which are reachable
         List<int> allMoves = [.. path.Intersect(tiles)];
 
-		// Add reachable tiles to the dictionary, if no best move was found
-		if (allMoves.Count == 0) allMoves.AddRange(tiles);
+        // Add reachable tiles to the dictionary, if no best move was found
+        if (allMoves.Count == 0) allMoves.AddRange(tiles);
 
         return [.. allMoves
             .Where(tile => tile != playerTile)
@@ -315,39 +323,44 @@ public partial class BoardState: Control
 
     public bool IsWinner(int player) => Helper.GetGoalTiles(player).Contains(GetPawnTile(player));
 
-	public bool IsGameOver() => IsWinner(0) || IsWinner(1);
+    public bool IsGameOver() => IsWinner(0) || IsWinner(1);
 
-	public int GetGameResult(int simulatingPlayer)
-	{
-		if (IsWinner(simulatingPlayer)) return int.MaxValue;
-		if (IsWinner(1 - simulatingPlayer)) return int.MinValue;
-		return 0;
-	}
+    public int GetGameResult(int simulatingPlayer)
+    {
+        if (IsWinner(simulatingPlayer)) return int.MaxValue;
+        if (IsWinner(1 - simulatingPlayer)) return int.MinValue;
+        return 0;
+    }
 
     public int EvaluateBoard(int maximisingPlayer)
     {
         int minimisingPlayer = 1 - maximisingPlayer;
 
-		int maximisingPlayerPath = Algorithms.GetPathToGoal(this, maximisingPlayer).Length;
-		int minimisingPlayerPath = Algorithms.GetPathToGoal(this, minimisingPlayer).Length;
+        int maximisingPlayerPath = Algorithms.GetPathToGoal(this, maximisingPlayer).Length;
+        int minimisingPlayerPath = Algorithms.GetPathToGoal(this, minimisingPlayer).Length;
 
         // Value moves makes the player closer to the goal or opponent further away
-		int pathDifference = minimisingPlayerPath - maximisingPlayerPath;
+        int pathDifference = minimisingPlayerPath - maximisingPlayerPath;
 
         // Value using less fences
-		int fenceScore = Pawns[maximisingPlayer].FencesRemaining - Pawns[minimisingPlayer].FencesRemaining;
+        int fenceScore = Pawns[maximisingPlayer].FencesRemaining - Pawns[minimisingPlayer].FencesRemaining;
 
         // Value the player being past the cneter
         int playerRow = Pawns[maximisingPlayer].Index / Helper.BoardSize;
-        int centralityScore = (maximisingPlayer == 0) 
-            ? (playerRow <= Helper.centerRow ? 1 : -1) 
+        int centralityScore = (maximisingPlayer == 0)
+
+            ? (playerRow <= Helper.centerRow ? 1 : -1)
+
             : (playerRow >= Helper.centerRow ? 1 : -1);
 
-        return centralityScore 
-            + pathDifference * Helper.PATH_WEIGHT 
+        return centralityScore
+
+            + pathDifference * Helper.PATH_WEIGHT
+
             + fenceScore * Helper.FENCE_WEIGHT;
     }
-    
+
+
     public StateKey GetStateKey() => new()
     {
         Player0 = Pawns[0].Index,

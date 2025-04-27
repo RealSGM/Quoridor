@@ -25,7 +25,7 @@ public partial class ParsedMove(sbyte player, char moveType, char direction, sby
     public static ParsedMove Create(string code)
     {
         var (player, moveType, direction, index, previousIndex) = Helper.GetMoveCodeAsTuple(code);
-        return new ParsedMove((sbyte) player,
+        return new ParsedMove((sbyte)player,
             moveType[0],
             direction == 0 ? '+' : '-',
             (sbyte)index,
