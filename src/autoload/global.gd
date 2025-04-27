@@ -38,7 +38,7 @@ func get_fences(direction: int = 0) -> String:
 		bb_string += " " + str(fence_bitboard[i]) + " "
 
 	return bb_string
-	
+
 
 func get_enabled_fences(direction: int = 0) -> String:
 	var fence_bitboard = game.board.GetEnabledFencesAsArray(direction)

@@ -24,7 +24,7 @@ var move_history: String = ""
 	set(val):
 		if not move_code.is_empty():
 			var index: int = abs(move_code.split("_")[0].substr(3).to_int())
-			
+
 			match move_code[1]:
 				"f":
 					if !(board.GetFencePlaced(0, index) or board.GetFencePlaced(1, index)):
@@ -41,7 +41,7 @@ func _ready() -> void:
 	SignalManager.direction_toggled.connect(_on_directional_button_pressed)
 	SignalManager.undo_pressed.connect(_on_undo_button_pressed)
 	reset_board()
-	
+
 
 func set_current_player(val: int) -> void:
 	reset_board_tiles()
@@ -63,23 +63,23 @@ func reset_board_tiles() -> void:
 func reset_board() -> void:
 	board.Initialise()
 	current_player = 0
-	
+
 	user_interface.update_turn(current_player)
 
 	for index: int in range(tile_buttons.size()):
 		tile_buttons[index].clear_pawns()
-	
+
 	for index: int in range(fence_buttons.size()):
 		fence_buttons[index].clear_fences()
-	
+
 	for player: int in Global.BITS:
 		user_interface.update_fence_counts(player, board.GetFencesRemaining(player))
 
 	tile_buttons[board.GetPawnTile(0)].pawns[0].show()
 	tile_buttons[board.GetPawnTile(1)].pawns[1].show()
-	
+
 	update_fence_direction()
-	
+
 	board.show()
 
 
@@ -128,7 +128,7 @@ func undo_move() -> String:
 	# Get the last move and remove it from the history
 	var last_move: String = split_history[split_history.size() - 1]
 	split_history.remove_at(split_history.size() - 1)
-	
+
 	# Undo the last move on the board
 	board.UndoMove(last_move)
 
@@ -250,14 +250,14 @@ func _on_tile_pressed(tile: int) -> void:
 
 func _on_confirm_pressed() -> void:
 	reset_board_tiles()
-	
+
 	user_interface.confirm_button.disabled = true
 	user_interface.undo_button.disabled = false
-	
+
 	var index: int = move_code.split("_")[0].substr(2).to_int()
 	var direction: int = 1 if index < 0 else 0
 	index = abs(index)
-	
+
 	match move_code[1]:
 		"f":
 			confirm_place_fence(index, direction)
@@ -286,7 +286,7 @@ func _on_undo_button_pressed() -> void:
 	finish_undo_board()
 
 	current_player = 1 - current_player
-	
+
 	if move_history.is_empty():
 		user_interface.undo_button.disabled = true
 

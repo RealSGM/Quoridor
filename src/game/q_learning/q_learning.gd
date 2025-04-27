@@ -47,7 +47,7 @@ func _on_run_simulation_button_pressed() -> void:
 	if is_running && !AlgorithmManager.qlearning.isRunning:
 		user_interface._on_reset_button_pressed()
 		AlgorithmManager.qlearning.TrainSingleEpisode(board)
-		
+
 
 
 func _on_save_q_table_pressed() -> void:
