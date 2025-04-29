@@ -1,6 +1,5 @@
 using System;
 
-[Serializable]
 public class ParsedMove(sbyte player, char moveType, char direction, sbyte index, sbyte previousIndex = -1)
 {
     public sbyte Player { get; set; } = player;
