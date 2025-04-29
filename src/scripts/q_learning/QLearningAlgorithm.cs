@@ -21,8 +21,10 @@ public partial class QLearningAlgorithm : Node
 
     public override void _Ready() => SignalManager = GetNode("/root/SignalManager");
 
-    public void GetMove(BoardState board, int currentPlayer)
+    public void GetMove(BoardWrapper wrapper, int currentPlayer)
     {
+        BoardState board = wrapper.State;
+        
         // Get the current state key
         StateKey stateKey = board.GetStateKey();
 
