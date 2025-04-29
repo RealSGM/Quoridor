@@ -284,7 +284,7 @@ func _on_confirm_pressed() -> void:
 	# Switch to next player
 	else:
 		# Complete IFS before switching player
-		IllegalFenceCheck.GetIllegalFences(board, 1 - current_player)
+		IllegalFenceCheck.GetIllegalFences(board)
 		current_player = 1 - current_player
 
 
@@ -319,7 +319,7 @@ func finish_undo_board() -> void:
 	for player: int in Global.BITS:
 		user_interface.update_fence_counts(player, board.GetFencesRemaining(player))
 
-	IllegalFenceCheck.GetIllegalFences(board, current_player)
+	IllegalFenceCheck.GetIllegalFences(board)
 	move_code = ""
 
 	if move_history.is_empty():

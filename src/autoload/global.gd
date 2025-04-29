@@ -16,9 +16,12 @@ var coloured_fences: bool = false
 var players: Array[Dictionary] = [{}, {}, {"color": Color.GHOST_WHITE}]
 var game: BaseGame
 
-var is_outputting: bool = false
+var is_outputting: bool = true
 var dump_console_to_file: bool = false
 
+#func _ready() -> void:
+	#var foo: BoardState = BoardState.new()
+	#foo.Delete()
 
 func help() -> String:
 	Console.show_help()
@@ -124,3 +127,10 @@ func toggle_output() -> String:
 func test() -> String:
 	print_orphan_nodes()
 	return ""
+
+
+func orphan(id: int) -> String:
+	var foo: Object = instance_from_id(id)
+	if foo:
+		return "Orphan: " + foo.get_class()
+	return "Orphan does not exist"

@@ -85,7 +85,7 @@ public partial class QLearningAlgorithm : Node
             currentPlayer = 1 - currentPlayer;
             newBoard.Free();
 
-            IllegalFenceCheck.GetIllegalFences(board, currentPlayer);
+            IllegalFenceCheck.GetIllegalFences(board);
         }
 
         PruneQTable(0f);

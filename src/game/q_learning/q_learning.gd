@@ -29,7 +29,7 @@ func _on_confirm_pressed() -> void:
 	board.AddMove(move_code)
 	move_code = ""
 
-	IllegalFenceCheck.GetIllegalFences(board, 1 - current_player)
+	IllegalFenceCheck.GetIllegalFences(board)
 	current_player = 1 - current_player
 
 

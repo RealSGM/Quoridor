@@ -2,7 +2,6 @@ using Godot;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.RegularExpressions;
 
 [GlobalClass]
 public partial class BoardState : Node
@@ -14,12 +13,11 @@ public partial class BoardState : Node
 
 	#region Initialization ---
 
-
 	public BoardState Clone() => new()
 	{
 		Fences = [Fences[0], Fences[1]],
 		Pawns = [Pawns[0].Clone(), Pawns[1].Clone()],
-		IllegalFences = [IllegalFences[0], IllegalFences[1]],
+		IllegalFences = [IllegalFences[0].Clone(), IllegalFences[1].Clone()],
 		LastMove = LastMove?.Clone()
 	};
 
@@ -29,6 +27,11 @@ public partial class BoardState : Node
 		Pawns[1] = new Pawn(Helper.BoardSize >> 1);
 		Fences = [new FenceData(), new FenceData()];
 		IllegalFences = [new FenceData(), new FenceData()];
+	}
+
+	public void Delete()
+	{
+		QueueFree();
 	}
 
 	#endregion

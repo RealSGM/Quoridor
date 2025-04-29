@@ -56,7 +56,7 @@ public partial class MiniMaxAlgorithm : Node
         if (board.IsWinner(currentPlayer)) return (int.MinValue, board.GetLastMove());
         if (depth == 0) return (board.EvaluateBoard(maximisingPlayer), board.GetLastMove());
 
-        IllegalFenceCheck.GetIllegalFences(board, currentPlayer);
+        IllegalFenceCheck.GetIllegalFences(board);
         string[] moves = [.. board.GetAllMovesSmart(currentPlayer)];
 
         bool isMaximising = currentPlayer == maximisingPlayer;
