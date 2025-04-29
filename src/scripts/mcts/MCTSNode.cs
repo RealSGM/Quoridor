@@ -51,6 +51,9 @@ public class MCTSNode(MCTSNode parent, BoardState state, int currentplayer)
 
             MCTSNode childNode = new(this, newState, 1 - CurrentPlayer);
             Children.Add(childNode);
+
+            newState.Free();
+
             return childNode;
         }
 
@@ -89,7 +92,10 @@ public class MCTSNode(MCTSNode parent, BoardState state, int currentplayer)
             depth++;
         }
 
-        return tempState.GetGameResult(simulatingPlayer);
+        int result = tempState.GetGameResult(simulatingPlayer);
+        tempState.Free();
+
+        return result;
     }
 
 

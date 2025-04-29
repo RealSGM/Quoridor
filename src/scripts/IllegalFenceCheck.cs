@@ -43,6 +43,10 @@ public partial class IllegalFenceCheck : Node
 
         HashSet<int> goalTiles = [.. Helper.GetGoalTiles(player)];
 
-        return !Algorithms.IsValidPath(boardClone, start, goalTiles, player);
+        bool isValid = Algorithms.IsValidPath(boardClone, start, goalTiles, player);
+
+        boardClone = null;
+
+        return !isValid;
     }
 }

@@ -83,6 +83,7 @@ public partial class QLearningAlgorithm : Node
 
             board = newBoard;
             currentPlayer = 1 - currentPlayer;
+            newBoard.Free();
 
             IllegalFenceCheck.GetIllegalFences(board, currentPlayer);
         }
@@ -120,6 +121,7 @@ public partial class QLearningAlgorithm : Node
             float oldQ = GetQValue(key, action);
             float newQ = oldQ + learningRate * (reward + discountFactor * maxFutureQ - oldQ);
             value[action] = newQ;
+            
             newBoard.Free();
         }
     }
