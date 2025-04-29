@@ -29,7 +29,7 @@ func set_current_player(val: int) -> void:
 func play_turn() -> void:
 	var turns_played: int = move_history.split(";").size()
 	AlgorithmManager.minimax.SetMaxDepth(turns_played)
-	AlgorithmManager.run(board, current_player)
+	AlgorithmManager.run(board_wrapper, current_player)
 
 
 func confirm_place_fence(fence: int, direction: int) -> void:

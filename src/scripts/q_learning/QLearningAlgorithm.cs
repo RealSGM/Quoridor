@@ -51,9 +51,9 @@ public partial class QLearningAlgorithm : Node
 
     #region Training ---
 
-    public async void TrainSingleEpisode(BoardState boardState)
+    public async void TrainSingleEpisode()
     {
-        BoardState board = boardState.Clone();
+        BoardState board = new();
         board.Initialise();
         int currentPlayer = 0;
 
@@ -83,7 +83,6 @@ public partial class QLearningAlgorithm : Node
 
             board = newBoard;
             currentPlayer = 1 - currentPlayer;
-            newBoard.Free();
 
             IllegalFenceCheck.GetIllegalFences(board);
         }
@@ -121,8 +120,6 @@ public partial class QLearningAlgorithm : Node
             float oldQ = GetQValue(key, action);
             float newQ = oldQ + learningRate * (reward + discountFactor * maxFutureQ - oldQ);
             value[action] = newQ;
-            
-            newBoard.Free();
         }
     }
 

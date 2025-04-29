@@ -72,16 +72,6 @@ func get_enabled_fences(direction: int = 0) -> String:
 	return bb_string
 
 
-func get_shortest_path(player: int = 0) -> String:
-	var path = Algorithms.GetPathToGoal(game.board, player)
-
-	var msg: String = "[ Start -> "
-
-	for i: int in range(path.size()):
-		msg += str(path[i]) + " -> "
-	return msg + " End]"
-
-
 func get_fence_corners(tile: int = 0) -> String:
 	var corners = Helper.GetFenceCorners(tile)
 	var msg: String = ""
@@ -100,18 +90,6 @@ func get_adjacent_tiles(tile: int = 0) -> String:
 		msg += str(adjacent_tiles[i]) + " "
 
 	return msg
-
-
-func is_fence_legal(player: int = 0, dir: int = 0, index: int = 0) -> String:
-	var is_illegal = IllegalFenceCheck.IsFenceIllegal(game.board, player, dir, index)
-	var text = "Player " + str(player) + " fence at " + str(index) + " is "
-
-	if is_illegal:
-		text += "illegal"
-	else:
-		text += "legal"
-
-	return text
 
 
 func toggle_dump() -> String:

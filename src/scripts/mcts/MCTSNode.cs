@@ -52,7 +52,7 @@ public class MCTSNode(MCTSNode parent, BoardState state, int currentplayer)
             MCTSNode childNode = new(this, newState, 1 - CurrentPlayer);
             Children.Add(childNode);
 
-            newState.Free();
+            newState = null; // Free the state to avoid memory leaks
 
             return childNode;
         }
@@ -93,7 +93,7 @@ public class MCTSNode(MCTSNode parent, BoardState state, int currentplayer)
         }
 
         int result = tempState.GetGameResult(simulatingPlayer);
-        tempState.Free();
+        tempState = null; // Free the state to avoid memory leaks
 
         return result;
     }

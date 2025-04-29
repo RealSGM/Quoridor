@@ -6,6 +6,13 @@ using System.Threading.Tasks;
 [GlobalClass]
 public partial class IllegalFenceCheck : Node
 {
+
+    public static void GetIllegalFences(BoardWrapper wrapper)
+    {
+        BoardState board = wrapper.State;
+        GetIllegalFences(board);
+    }
+
     public static void GetIllegalFences(BoardState board)
     {
         ulong[] possibleFences = board.GetEnabledFences(false);
@@ -37,11 +44,9 @@ public partial class IllegalFenceCheck : Node
     {
         BoardState boardClone = board.Clone();
         boardClone.PlaceFence(player, direction, fence);
+        
         int start = boardClone.GetPawnTile(player);
         HashSet<int> goalTiles = [.. Helper.GetGoalTiles(player)];
-        bool isValid = Algorithms.IsValidPath(boardClone, start, goalTiles, player);
-
-        boardClone.QueueFree();
-        return !isValid;
+        return !Algorithms.IsValidPath(boardClone, start, goalTiles, player);
     }
 }

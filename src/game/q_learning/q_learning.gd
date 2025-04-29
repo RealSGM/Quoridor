@@ -26,10 +26,10 @@ func _on_confirm_pressed() -> void:
 		"m":
 			confirm_move_pawn(index)
 
-	board.AddMove(move_code)
+	board_wrapper.AddMove(move_code)
 	move_code = ""
 
-	IllegalFenceCheck.GetIllegalFences(board)
+	IllegalFenceCheck.GetIllegalFences(board_wrapper)
 	current_player = 1 - current_player
 
 
@@ -45,7 +45,7 @@ func _on_run_simulation_button_pressed() -> void:
 
 	if is_running && !AlgorithmManager.qlearning.isRunning:
 		user_interface._on_reset_button_pressed()
-		AlgorithmManager.qlearning.TrainSingleEpisode(board)
+		AlgorithmManager.qlearning.TrainSingleEpisode()
 
 
 
@@ -85,7 +85,7 @@ func _on_training_finished(winner: int) -> void:
 		user_interface._on_reset_button_pressed()
 		_on_prune_button_pressed()
 		_on_save_q_table_pressed()
-		AlgorithmManager.qlearning.TrainSingleEpisode(board)
+		AlgorithmManager.qlearning.TrainSingleEpisode()
 
 
 func _on_speed_h_slider_value_changed(value: float) -> void:
