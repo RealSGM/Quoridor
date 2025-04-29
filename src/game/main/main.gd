@@ -190,11 +190,9 @@ func _on_start_game_pressed() -> void:
 	var game: BaseGame = Resources.get_resource(game_type.to_lower() + "_game").instantiate()
 	Global.game = game
 	Global.coloured_fences = fence_coloured_button.is_pressed()
-	game.setup_board()
+	game.setup_board(board_dimensions)
 
 	background.add_child(game, true)
-	game.board.scale = Vector2.ONE * float(board_dimensions) / float(game.board_container.size.x)
-
 
 func _on_exit_button_pressed() -> void:
 	Global.game.queue_free()

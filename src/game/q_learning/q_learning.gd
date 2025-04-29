@@ -8,7 +8,6 @@ var is_running: bool = false
 func _ready() -> void:
 	SignalManager.training_finished.connect(_on_training_finished)
 	SignalManager.move_selected.connect(_on_move_selected)
-	AlgorithmManager.qlearning.LoadQTable("")
 	_on_speed_h_slider_value_changed(2)
 	_on_epsilon_h_slider_value_changed(0.5)
 	super._ready()

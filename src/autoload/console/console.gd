@@ -123,11 +123,13 @@ func replace_input_text(text: String, reset_tab: bool) -> void:
 	input.grab_focus()
 	input.text = text
 	_on_input_text_changed(text, reset_tab)
-
 	input.caret_column = 999999  # Hacky way of moving cursor to end of LineEdit
 
 
 func add_entry(text: String, index: int = 0) -> void:
+	if not Global.is_outputting:
+		return
+
 	var command: Label = Resources.get_resource("command").instantiate()
 	command.text = text
 	command.modulate = COLORS[index]

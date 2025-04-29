@@ -3,15 +3,17 @@ class_name BaseGame extends Control
 ## Sends signals to the board and user interface
 
 @export_category("Nodes")
-@export var board: BoardState
 @export var tile_container: GridContainer
 @export var board_container: PanelContainer
 @export var fence_button_container: GridContainer
 @export var user_interface: UserInterface
+@export var board_anchor: Control
 
 var tile_buttons: Array[TileButton] = []
 var fence_buttons: Array[FenceButton] = []
 var move_history: String = ""
+var board: BoardState = BoardState.new()
+
 
 ## Update board when the player is changed
 @onready var current_player: int:
@@ -83,15 +85,17 @@ func reset_board() -> void:
 
 	update_fence_direction()
 
-	board.show()
-
-
 ## Setup the board with the selected size
-func setup_board() -> void:
+func setup_board(dim: float) -> void:
 	instance_tile_buttons()
 	instance_fence_buttons()
 	spawn_pawns()
 	reset_board()
+
+	board_anchor.hide()
+	await RenderingServer.frame_pre_draw
+	board_anchor.scale = Vector2.ONE * (dim / float(board_container.size.x))
+	board_anchor.show()
 
 
 ## Set the fence container size and instance the fence buttons under the
