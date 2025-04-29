@@ -1,23 +1,27 @@
 using System;
 
 [Serializable]
-public struct StateKey : IEquatable<StateKey>
+public class StateKey : IEquatable<StateKey>
 {
     public byte Player0 { get; set; }
     public byte Player1 { get; set; }
     public ulong HorizontalFences { get; set; }
     public ulong VerticalFences { get; set; }
-    public override readonly int GetHashCode() => HashCode.Combine(Player0, Player1, HorizontalFences, VerticalFences);
-    public static bool operator ==(StateKey left, StateKey right) => left.Equals(right);
-    public static bool operator !=(StateKey left, StateKey right) => !(left == right);
-    public override readonly bool Equals(object obj) => obj is StateKey other && Equals(other);
-    public override readonly string ToString() => $"{Player0}|{Player1}|{HorizontalFences}|{VerticalFences}";
-    public readonly bool Equals(StateKey other) =>
+
+    public override string ToString() => $"{Player0}|{Player1}|{HorizontalFences}|{VerticalFences}";
+    public override int GetHashCode() => HashCode.Combine(Player0, Player1, HorizontalFences, VerticalFences);
+    
+    public static bool operator ==(StateKey left, StateKey right) => Equals(left, right);
+    public static bool operator !=(StateKey left, StateKey right) => !Equals(left, right);
+    public override bool Equals(object obj) => obj is StateKey other && Equals(other);
+
+    public bool Equals(StateKey other) =>
+        other != null &&
         Player0 == other.Player0 &&
         Player1 == other.Player1 &&
         HorizontalFences == other.HorizontalFences &&
         VerticalFences == other.VerticalFences;
-
+    
     public static StateKey ParseFromFile(string text)
     {
         var parts = text.Split('|');
@@ -29,4 +33,6 @@ public struct StateKey : IEquatable<StateKey>
             VerticalFences = ulong.Parse(parts[3])
         };
     }
+
+
 }

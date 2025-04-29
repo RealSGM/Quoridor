@@ -1,5 +1,4 @@
 using Godot;
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -22,13 +21,12 @@ public partial class QLearningAlgorithm : Node
 
     public override void _Ready() => SignalManager = GetNode("/root/SignalManager");
 
-
     public void GetMove(BoardState board, int currentPlayer)
     {
         // Get the current state key
         StateKey stateKey = board.GetStateKey();
 
-        if (!QTable.ContainsKey(stateKey))
+        if (!QTable.TryGetValue(stateKey, out Dictionary<string, float> value))
         {
             GD.Print($"State {stateKey} not found in QTable");
             QTable[stateKey] = [];
@@ -40,20 +38,21 @@ public partial class QLearningAlgorithm : Node
         else
         {
             // Get the best move based off Q Values
-            string[] allMoves = QTable[stateKey].Keys.ToArray();
+            string[] allMoves = [.. value.Keys];
             float maxQ = allMoves.Max(action => GetQValue(stateKey, action));
             string[] bestMoves = allMoves.Where(action => GetQValue(stateKey, action) == maxQ).ToArray();
             string bestMove = bestMoves[Helper.Random.Next(bestMoves.Length)];
             SignalManager.EmitSignal("move_selected", bestMove);
         }
-    }
 
+        stateKey = null;
+    }
 
     #region Training ---
 
-    public async void TrainSingleEpisode(BoardState boardState)
+    public async void TrainSingleEpisode()
     {
-        BoardState board = boardState.Clone();
+        BoardState board = new();
         board.Initialise();
         int currentPlayer = 0;
 
@@ -83,7 +82,6 @@ public partial class QLearningAlgorithm : Node
 
             board = newBoard;
             currentPlayer = 1 - currentPlayer;
-            newBoard.Free();
 
             IllegalFenceCheck.GetIllegalFences(board);
         }
@@ -92,6 +90,7 @@ public partial class QLearningAlgorithm : Node
         SaveQTable(defaultSavePath);
         int winner = board.IsWinner(0) ? 0 : board.IsWinner(1) ? 1 : 2;
         SignalManager.EmitSignal("training_finished", winner);
+
         isRunning = false;
     }
 
@@ -121,8 +120,6 @@ public partial class QLearningAlgorithm : Node
             float oldQ = GetQValue(key, action);
             float newQ = oldQ + learningRate * (reward + discountFactor * maxFutureQ - oldQ);
             value[action] = newQ;
-            
-            newBoard.Free();
         }
     }
 

@@ -24,16 +24,16 @@ public partial class MiniMaxAlgorithm : Node
 
     public void SetMaxDepth(int turns_played) => START_DEPTH = turns_played <= 2 ? 1 : 3;
 
-    public void GetMove(BoardState board, int currentPlayer)
+    public void GetMove(BoardWrapper wrapper, int currentPlayer)
     {
         // Debugging ---
-        Console = GetNode<Window>("/root/Console");
         Console.Call("add_entry", "Creating Game Tree...", 0);
         nodesVisited = 1;
         Stopwatch stopwatch = new();
         stopwatch.Start();
         // Debugging ---
 
+        BoardState board = wrapper.State.Clone();
         ValueTuple<int, string> bestMoveTuple = MiniMax(board, START_DEPTH, currentPlayer, currentPlayer, int.MinValue, int.MaxValue);
         string bestMove = bestMoveTuple.Item2;
         SignalManager.EmitSignal("move_selected", bestMove);
@@ -44,7 +44,6 @@ public partial class MiniMaxAlgorithm : Node
         Console.Call("add_entry", $"Best Move: {bestMove}, Value: {bestMoveTuple.Item1}", 0);
         Console.Call("add_entry", $"Nodes Visited: {nodesVisited}, Time: {milliseconds}ms", 0);
         // Debugging ---
-
     }
 
     private (int v, string m) MiniMax(BoardState board, int depth, int currentPlayer, int maximisingPlayer, int alpha, int beta)
@@ -71,7 +70,7 @@ public partial class MiniMaxAlgorithm : Node
             newBoard.AddMove(move);
 
             int value = MiniMax(newBoard, depth - 1, 1 - currentPlayer, maximisingPlayer, alpha, beta).v;
-            newBoard.Free();
+            newBoard = null; // Free memory
 
             moveScores[move] = value;
 

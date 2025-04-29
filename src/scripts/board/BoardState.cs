@@ -1,15 +1,13 @@
-using Godot;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
-[GlobalClass]
-public partial class BoardState : Node
+public class BoardState
 {
-	public ParsedMove LastMove { get; private set; } = null;
-	private FenceData[] Fences;
-	private FenceData[] IllegalFences;
-	private Pawn[] Pawns = new Pawn[2];
+	public ParsedMove LastMove { get; set; } = null;
+	public FenceData[] Fences;
+	public FenceData[] IllegalFences;
+	public Pawn[] Pawns = new Pawn[2];
 
 	#region Initialization ---
 
@@ -27,31 +25,6 @@ public partial class BoardState : Node
 		Pawns[1] = new Pawn(Helper.BoardSize >> 1);
 		Fences = [new FenceData(), new FenceData()];
 		IllegalFences = [new FenceData(), new FenceData()];
-	}
-
-	public void Delete()
-	{
-		QueueFree();
-	}
-
-	#endregion
-
-	#region Godot Helper Methods ---
-
-	public int[] GetFencesAsArray(int dir) => Helper.BitboardToArray(Fences[dir].Fences);
-
-	public int[] GetEnabledFencesAsArray(int dir)
-	{
-		List<int> bits = [];
-
-
-		for (int i = 0; i < Helper.BitBoardSize * Helper.BitBoardSize; i++)
-		{
-			if (IsFenceEnabled(dir, i)) bits.Add(1);
-			else bits.Add(0);
-		}
-
-		return [.. bits];
 	}
 
 	#endregion
