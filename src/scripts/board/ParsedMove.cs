@@ -1,9 +1,6 @@
 using System;
-using Godot;
 
-[GlobalClass]
-[Serializable]
-public partial class ParsedMove(sbyte player, char moveType, char direction, sbyte index, sbyte previousIndex = -1) : Node
+public class ParsedMove(sbyte player, char moveType, char direction, sbyte index, sbyte previousIndex = -1)
 {
     public sbyte Player { get; set; } = player;
     public char MoveType { get; set; } = moveType;
