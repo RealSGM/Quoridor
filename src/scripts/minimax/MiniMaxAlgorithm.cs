@@ -27,7 +27,6 @@ public partial class MiniMaxAlgorithm : Node
     public void GetMove(BoardWrapper wrapper, int currentPlayer)
     {
         // Debugging ---
-        Console = GetNode<Window>("/root/Console");
         Console.Call("add_entry", "Creating Game Tree...", 0);
         nodesVisited = 1;
         Stopwatch stopwatch = new();
@@ -45,7 +44,6 @@ public partial class MiniMaxAlgorithm : Node
         Console.Call("add_entry", $"Best Move: {bestMove}, Value: {bestMoveTuple.Item1}", 0);
         Console.Call("add_entry", $"Nodes Visited: {nodesVisited}, Time: {milliseconds}ms", 0);
         // Debugging ---
-
     }
 
     private (int v, string m) MiniMax(BoardState board, int depth, int currentPlayer, int maximisingPlayer, int alpha, int beta)
