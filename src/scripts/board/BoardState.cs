@@ -320,15 +320,11 @@ public class BoardState
 		// Value the player being past the cneter
 		int playerRow = Pawns[maximisingPlayer].Index / Helper.BoardSize;
 		int centralityScore = (maximisingPlayer == 0)
-
 			? (playerRow <= Helper.centerRow ? 1 : -1)
-
 			: (playerRow >= Helper.centerRow ? 1 : -1);
 
 		return centralityScore
-
 			+ pathDifference * Helper.PATH_WEIGHT
-
 			+ fenceScore * Helper.FENCE_WEIGHT;
 	}
 

@@ -2,13 +2,17 @@ class_name QLearningTraining extends BaseGame
 
 @export var run_simulation_button: Button
 @export var speeds: Array[float] = [0, 0.01, 0.05, 0.1, 0.2]
+@export var waits: Array[float] = [0, 0.05, 0.1, 0.25, 0.5]
 
 var is_running: bool = false
+var wait_time: float = waits[2]
 
 func _ready() -> void:
 	SignalManager.training_finished.connect(_on_training_finished)
 	SignalManager.move_selected.connect(_on_move_selected)
+	AlgorithmManager.qlearning.LoadQTable("")
 	_on_speed_h_slider_value_changed(2)
+	_on_wait_h_slider_value_changed(2)
 	_on_epsilon_h_slider_value_changed(0.5)
 	super._ready()
 
@@ -81,7 +85,7 @@ func _on_training_finished(winner: int) -> void:
 		user_interface.win_label.text = "Error / Draw"
 		is_running = false # NOTE This is for debugging
 	if is_running:
-		await get_tree().create_timer(0.25).timeout
+		await get_tree().create_timer(wait_time).timeout
 		user_interface._on_reset_button_pressed()
 		_on_prune_button_pressed()
 		_on_save_q_table_pressed()
@@ -94,3 +98,7 @@ func _on_speed_h_slider_value_changed(value: float) -> void:
 
 func _on_epsilon_h_slider_value_changed(value: float) -> void:
 	AlgorithmManager.qlearning.epsilon = value
+
+
+func _on_wait_h_slider_value_changed(value: float) -> void:
+	wait_time = waits[value]
