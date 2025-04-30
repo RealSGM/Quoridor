@@ -1,6 +1,9 @@
 using Godot;
 using System.Collections.Generic;
 
+/// <summary>
+/// Wrapper class for the BoardState to expose its methods and properties to Godot.
+/// </summary>
 [GlobalClass]
 public partial class BoardWrapper : Node
 {
@@ -29,6 +32,8 @@ public partial class BoardWrapper : Node
 	public bool IsFenceEnabled(int direction, int index, bool checkIllegal) => State.IsFenceEnabled(direction, index, checkIllegal);
 
 	public bool HasFences(int player) => State.HasFences(player);
+
+	public void SetLastMove(string code) => State.SetLastMove(code);
 
 	#region Godot Helper Methods ---
 

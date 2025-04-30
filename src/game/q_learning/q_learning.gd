@@ -50,7 +50,6 @@ func _on_run_simulation_button_pressed() -> void:
 		AlgorithmManager.qlearning.TrainSingleEpisode()
 
 
-
 func _on_save_q_table_pressed() -> void:
 	Console.add_entry("Force saving QTable", 0)
 	AlgorithmManager.qlearning.SaveQTable("")

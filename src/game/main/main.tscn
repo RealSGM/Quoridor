@@ -52,7 +52,7 @@ bg_color = Color(0.164706, 0.164706, 0.180392, 1)
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_52gmj"]
 bg_color = Color(0.164706, 0.164706, 0.180392, 1)
 
-[node name="Main" type="Control" node_paths=PackedStringArray("main_menu", "play_menu", "multiplayer_menu", "board_options_menu", "start_game_button", "background", "play_button", "exit_button", "singleplayer_button", "multiplayer_button", "play_back_button", "bot_v_bot_button", "qlearning_button", "board_vbc", "board_options_back_button", "board_container", "player_one_container", "p_one_colours", "player_one_name", "fence_coloured_button", "p_two_colours", "player_two_name", "player_two_container", "bot_one_container", "bot_one_algorithms", "bot_one_colours", "bot_two_container", "bot_two_algorithms", "bot_two_colours", "global_options", "player_containers", "menus")]
+[node name="Main" type="Control" node_paths=PackedStringArray("main_menu", "play_menu", "multiplayer_menu", "board_options_menu", "background", "play_button", "exit_button", "singleplayer_button", "multiplayer_button", "play_back_button", "bot_v_bot_button", "qlearning_button", "board_vbc", "start_game_button", "board_options_back_button", "board_container", "player_one_container", "p_one_colours", "player_one_name", "fence_coloured_button", "p_two_colours", "player_two_name", "player_two_container", "bot_one_container", "bot_one_algorithms", "bot_one_colours", "bot_two_container", "bot_two_algorithms", "bot_two_colours", "global_options", "player_containers", "menus")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -65,7 +65,6 @@ main_menu = NodePath("Background/MainMenu")
 play_menu = NodePath("Background/PlayMenu")
 multiplayer_menu = NodePath("Background/MultiplayerMenu")
 board_options_menu = NodePath("Background/BoardOptionsMenu")
-start_game_button = NodePath("Background/BoardOptionsMenu/VBC/MenuAnchor/VBoxContainer/StartGameButton")
 background = NodePath("Background")
 play_button = NodePath("Background/MainMenu/Container/VBC/PlayButton")
 exit_button = NodePath("Background/MainMenu/Container/VBC/ExitButton")
@@ -75,6 +74,7 @@ play_back_button = NodePath("Background/PlayMenu/ButtonVBC/BackAnchor/Container/
 bot_v_bot_button = NodePath("Background/PlayMenu/ButtonVBC/PanelContainer/HBoxContainer/ExperimentalVBC/BotVBotButton")
 qlearning_button = NodePath("Background/PlayMenu/ButtonVBC/PanelContainer/HBoxContainer/ExperimentalVBC/QLearningButton")
 board_vbc = NodePath("Background/BoardOptionsMenu/VBC/PlayerContainer/BoardVBC")
+start_game_button = NodePath("Background/BoardOptionsMenu/VBC/MenuAnchor/VBoxContainer/StartGameButton")
 board_options_back_button = NodePath("Background/BoardOptionsMenu/VBC/MenuAnchor/VBoxContainer/BackButton")
 board_container = NodePath("Background/BoardOptionsMenu/VBC/PlayerContainer/BoardVBC")
 player_one_container = NodePath("Background/BoardOptionsMenu/VBC/PlayerContainer/PlayerHBC/LeftContainer/OneVBC/PlayerVBC")

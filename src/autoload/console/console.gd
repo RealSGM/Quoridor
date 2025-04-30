@@ -1,20 +1,20 @@
 extends Window
 
 const COLORS: Array[Color] = [
-	Color("#B0BEC5"),  # Default
-	Color("#FF4C4C"),  # Error
-	Color("#D4EDDA"),  # Success
+	Color("#B0BEC5"),  ## Default
+	Color("#FF4C4C"),  ## Error
+	Color("#D4EDDA"),  ## Success
 ]
 
 @export var history_vbc: VBoxContainer
 @export var input: LineEdit
 
-# History
+## History
 var history: Array[String] = [""]
 var current_input: String
 var input_index: int = 1
 
-# Autocomplete
+## Autocomplete
 var pre_auto_complete_input: String
 var autocomplete_list: Array
 var tab_count: int = -999
@@ -29,7 +29,6 @@ var global_methods: Array
 
 @onready var expression: Expression = Expression.new()
 
-
 func _ready() -> void:
 	hide()
 
@@ -38,6 +37,7 @@ func _ready() -> void:
 	global_methods.erase("_ready")
 
 
+## Handle console input
 func _input(event: InputEvent) -> void:
 	if event.is_action_pressed("toggle_console"):
 		visible = !visible
@@ -55,6 +55,7 @@ func _input(event: InputEvent) -> void:
 		autocomplete()
 
 
+## Parse and execute the input relative to Global.gd
 func parse_expresion(text: String) -> void:
 	# Ignore clear console from entry buffer
 	if text != "clear()":
@@ -83,6 +84,7 @@ func parse_expresion(text: String) -> void:
 	entry_buffer.append(["Invalid Function", 1])
 
 
+## Get previous / next history
 func traverse_history(modifier: int) -> void:
 	# Ignore empty history
 	if history.is_empty():
@@ -180,7 +182,7 @@ func _on_timer_timeout() -> void:
 
 
 func _on_visibility_changed() -> void:
-	await get_tree().process_frame
+	await RenderingServer.frame_post_draw
 	input.grab_focus()
 
 

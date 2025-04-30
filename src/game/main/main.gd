@@ -5,7 +5,6 @@ extends Control
 @export var play_menu: Control
 @export var multiplayer_menu: Control
 @export var board_options_menu: Control
-@export var start_game_button: Button
 @export var background: ColorRect
 
 @export_category("Main Menu Buttons")
@@ -21,6 +20,7 @@ extends Control
 
 @export_category("Board Options")
 @export var board_vbc: VBoxContainer
+@export var start_game_button: Button
 @export var board_options_back_button: Button
 
 @export_category("Global Options")
@@ -61,7 +61,6 @@ var game_type: String
 	"BotVBot": [bot_one_container, bot_two_container],
 	"QLearning": []
 	}
-
 
 func _input(event: InputEvent) -> void:
 	if event.is_action_pressed("toggle_console"):
@@ -109,6 +108,8 @@ func setup_algorithm_names() -> void:
 	for algo: String in algorithm_names:
 		bot_one_algorithms.add_item(algo)
 		bot_two_algorithms.add_item(algo)
+
+	# Set the option to the latest added algorithm
 	bot_one_algorithms.selected = algorithm_names.size() - 1
 	bot_two_algorithms.selected = algorithm_names.size() - 1
 	bot_one_algorithms.clear_radio_boxes()
@@ -178,6 +179,7 @@ func _on_back_button_pressed() -> void:
 	menu_stack.back().show()
 
 
+## Override the game type as no other board options will be needed
 func _on_qlearning_game_pressed() -> void:
 	game_type = "Q_Learning"
 	_on_start_game_pressed()
@@ -194,6 +196,7 @@ func _on_start_game_pressed() -> void:
 
 	background.add_child(game, true)
 
+
 func _on_exit_button_pressed() -> void:
 	Global.game.queue_free()
 	AlgorithmManager.qlearning.FreeQTable()
@@ -208,7 +211,6 @@ func _on_colour_selected(index: int, prev_index: int, other_button: OptionButton
 
 	# Re-enable the previously selected colour in the other option button
 	other_button.set_item_disabled(prev_index, false)
-
 	# Disable the selected colour in the other option button
 	other_button.set_item_disabled(index, true)
 

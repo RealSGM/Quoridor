@@ -22,6 +22,9 @@ var board_wrapper: BoardWrapper = BoardWrapper.new()
 		set_current_player(val)
 
 
+## Handle updated move_code
+## If new move_code, clear previous move
+## Update the confirm button
 @onready var move_code: String = "":
 	set(val):
 		if not move_code.is_empty():
@@ -48,6 +51,7 @@ func _ready() -> void:
 		AlgorithmManager.qlearning.LoadQTable("")
 
 
+## Update the board and UI the current player
 func set_current_player(val: int) -> void:
 	reset_board_tiles()
 	set_tiles(board_wrapper.GetPawnTile(current_player))
@@ -65,6 +69,7 @@ func reset_board_tiles() -> void:
 	)
 
 
+## Reset the board fully, acting as a new game
 func reset_board() -> void:
 	board_wrapper.Initialise()
 	current_player = 0
@@ -84,6 +89,7 @@ func reset_board() -> void:
 	tile_buttons[board_wrapper.GetPawnTile(1)].pawns[1].show()
 
 	update_fence_direction()
+
 
 ## Setup the board with the selected size
 func setup_board(dim: float) -> void:
@@ -128,6 +134,7 @@ func instance_tile_buttons() -> void:
 		tile_buttons.append(tile_button)
 
 
+## Gets the old move, and undoes it
 func undo_move() -> String:
 	# Split move history into an array
 	var split_history: PackedStringArray = move_history.split(";")

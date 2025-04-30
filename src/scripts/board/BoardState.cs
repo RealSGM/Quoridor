@@ -52,6 +52,12 @@ public class BoardState
 	public int GetFencesRemaining(int player) => Pawns[player].FencesRemaining;
 	public ulong[] GetFences() => [.. Helper.Bits.Select(dir => Fences[dir].Fences)];
 
+	/// <summary>
+	/// Returns all the enabled fences for both players.
+	/// The fences are represented as a bitboard, where each bit represents a tile on the board.
+	/// </summary>
+	/// <param name="checkIllegal"></param>
+	/// <returns></returns>
 	public ulong[] GetEnabledFences(bool checkIllegal = true) => [.. Helper.Bits.Select(dir => Enumerable
 		.Range(0, Helper.BitBoardSize * Helper.BitBoardSize)
 		.Where(i => IsFenceEnabled(dir, i, checkIllegal))
@@ -103,7 +109,12 @@ public class BoardState
 
 	#region Tiles ---
 
-	/// Return NESW connections for given index, -1 if no connection
+	/// <summary>
+	/// Returns the adjacent tiles of the given tile index.
+	/// If a tile is blocked by a fence, it will be marked as -1.
+	/// </summary>
+	/// <param name="index">The index of the tile.</param>
+	/// <returns>An array of integers representing the adjacent tiles.</returns>
 	public int[] GetAdjacentTiles(int index)
 	{
 		int[] cons = Helper.InitialiseConnections(index, Helper.BoardSize);
@@ -122,7 +133,14 @@ public class BoardState
 		return cons;
 	}
 
-	/// Return the tiles leaped over by the enemy
+	/// <summary>
+	/// Gets the leaped tiles for the given enemy tile and cardinal direction.
+	/// If the leaped tile is blocked by a fence, it will be marked as -1.
+	/// </summary>
+	/// <param name="enemyTile">The index of the enemy tile.</param>
+	/// <param name="cardinalDirection">The direction to leap in.</param>
+	/// <param name="filterSet">A set of tiles to filter out.</param>
+	/// <returns>An array of integers representing the leaped tiles.</returns>
 	public int[] GetLeapedTiles(int enemyTile, int cardinalDirection, HashSet<int> filterSet)
 	{
 		int[] enemyCons = GetAdjacentTiles(enemyTile);
@@ -135,6 +153,12 @@ public class BoardState
 			: [.. enemyCons.Where(tile => !filterSet.Contains(tile))];
 	}
 
+	/// <summary>
+	/// Gets the adjacent tiles for the given player tile.
+	/// If a tile is blocked by a fence, it will be marked as -1.
+	/// If the enemy pawn is on the tile, it will be marked as -1, but will attempt to leap over it.
+	/// If the leaped tile is blocked by a fence, it will be marked as -1 and get the adjacent tiles instead.
+	/// </summary>
 	public int[] GetReachableTiles(int player)
 	{
 		int playerTile = GetPawnTile(player);
@@ -161,6 +185,14 @@ public class BoardState
 
 	public bool HasFences(int player) => Pawns[player].FencesRemaining > 0;
 
+	/// <summary>
+	/// Checks if a fence is placeable in either direction.
+	/// Checks if thefence is illegal and if the adjacent fences are placed.
+	/// </summary>
+	/// <param name="dir"></param>
+	/// <param name="index"></param>
+	/// <param name="checkIllegal"></param>
+	/// <returns></returns>
 	public bool IsFenceEnabled(int dir, int index, bool checkIllegal = true)
 	{
 		if (GetFencePlaced(dir, index)) return false;
@@ -178,6 +210,11 @@ public class BoardState
 
 	# region Get Moves ---
 
+	/// <summary>
+	/// Returns all the fences that are behind the player.
+	/// </summary>
+	/// <param name="player"></param>
+	/// <returns></returns>
 	public ulong[] GetFencesBehindPlayer(int player)
 	{
 		int goalRow = Helper.GetGoalTiles(player)[0] / Helper.BoardSize;
@@ -191,7 +228,8 @@ public class BoardState
 		return [fencesBehind, fencesBehind];
 	}
 
-	/// Returns all the fences that are surrounding the given index and direction
+	/// <summary>
+	/// Returns all fences that connected to existing fences.
 	public ulong[] GetAllSurroundingFences()
 	{
 		ulong[] fences = [0, 0];
@@ -208,6 +246,12 @@ public class BoardState
 		return fences;
 	}
 
+	/// <summary>
+	/// Returns all the reachable tiles for the given player.
+	/// Only returns reachable tiles within the shortest path to the goal.
+	/// </summary>
+	/// <param name="player"></param>
+	/// <returns> An array of integers representing the reachable tiles.</returns>
 	public int[] GetReachableTilesSmart(int player)
 	{
 		int[] path = Algorithms.GetPathToGoal(this, player);
