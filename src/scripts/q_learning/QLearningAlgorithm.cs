@@ -91,7 +91,7 @@ public partial class QLearningAlgorithm : Node
 			// TODO: Add debug warning check
 		}
 
-		PruneQTable(0f);
+		// PruneQTable(0.2f);
 		SaveQTable(defaultSavePath);
 		int winner = board.IsWinner(0) ? 0 : board.IsWinner(1) ? 1 : 2;
 		SignalManager.EmitSignal("training_finished", winner);
