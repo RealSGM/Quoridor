@@ -24,9 +24,8 @@ public partial class QLearningAlgorithm : Node
     public void GetMove(BoardWrapper wrapper, int currentPlayer)
     {
         BoardState board = wrapper.State;
-        
-        // Get the current state key
         StateKey stateKey = board.GetStateKey();
+        ExploreState(board, currentPlayer, stateKey);
 
         if (!QTable.TryGetValue(stateKey, out Dictionary<string, float> value))
         {
@@ -57,11 +56,11 @@ public partial class QLearningAlgorithm : Node
         BoardState board = new();
         board.Initialise();
         int currentPlayer = 0;
+        int moves = 0;
 
         while (!board.IsGameOver())
         {
             StateKey stateKey = board.GetStateKey();
-
             ExploreState(board, currentPlayer, stateKey);
 
             string action = ChooseAction(stateKey, currentPlayer, board);
@@ -86,6 +85,10 @@ public partial class QLearningAlgorithm : Node
             currentPlayer = 1 - currentPlayer;
 
             IllegalFenceCheck.GetIllegalFences(board);
+            moves++;
+
+            // if (moves > 125) break;
+            // TODO: Add debug warning check
         }
 
         PruneQTable(0f);
@@ -159,7 +162,6 @@ public partial class QLearningAlgorithm : Node
             ? qVal
             : 0f;
 
-    
     public float GetMaxQValue(StateKey stateKey, BoardState board, int currentPlayer)
     {
         string[] allMoves = board.GetAllMoves(currentPlayer);

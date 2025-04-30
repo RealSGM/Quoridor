@@ -32,8 +32,6 @@ func _on_confirm_pressed() -> void:
 
 	board_wrapper.AddMove(move_code)
 	move_code = ""
-
-	IllegalFenceCheck.GetIllegalFences(board_wrapper)
 	current_player = 1 - current_player
 
 
