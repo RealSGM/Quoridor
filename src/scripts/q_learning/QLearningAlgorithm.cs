@@ -18,6 +18,7 @@ public partial class QLearningAlgorithm : Node
 	public float epsilon = 0.5f; // Exploration rate
 	public float simulationDelay = 0.1f;
 	public bool isRunning = false;
+	public bool showMoves = true;
 
 	public override void _Ready() => SignalManager = GetNode("/root/SignalManager");
 
@@ -56,7 +57,6 @@ public partial class QLearningAlgorithm : Node
 		BoardState board = new();
 		board.Initialise();
 		int currentPlayer = 0;
-		int moves = 0;
 
 		while (!board.IsGameOver())
 		{
@@ -66,8 +66,7 @@ public partial class QLearningAlgorithm : Node
 			string action = ChooseAction(stateKey, currentPlayer, board);
 
 			if (action == "") break;
-
-			SignalManager.EmitSignal("move_selected", action);
+			if (showMoves) SignalManager.EmitSignal("move_selected", action);
 			if (simulationDelay > 0) await ToSignal(GetTree().CreateTimer(simulationDelay), "timeout");
 
 			BoardState newBoard = board.Clone();
@@ -85,10 +84,6 @@ public partial class QLearningAlgorithm : Node
 			currentPlayer = 1 - currentPlayer;
 
 			IllegalFenceCheck.GetIllegalFences(board);
-			moves++;
-
-			// if (moves > 125) break;
-			// TODO: Add debug warning check
 		}
 
 		// PruneQTable(0.2f);

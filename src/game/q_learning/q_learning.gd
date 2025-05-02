@@ -57,7 +57,7 @@ func _on_save_q_table_pressed() -> void:
 
 func _on_prune_button_pressed() -> void:
 	Console.add_entry("Force pruning QTable", 0)
-	AlgorithmManager.qlearning.PruneQTable(0)
+	AlgorithmManager.qlearning.PruneQTable(0.2)
 
 
 func confirm_place_fence(fence: int, direction: int) -> void:
