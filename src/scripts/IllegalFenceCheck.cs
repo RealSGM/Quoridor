@@ -1,7 +1,6 @@
 using Godot;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 
 [GlobalClass]
 public partial class IllegalFenceCheck : Node
@@ -25,9 +24,9 @@ public partial class IllegalFenceCheck : Node
 		// Perform bitwise AND operation on each pair
 		possibleFences = [.. possibleFences.Zip(surroundingFences, (pf, sf) => pf & sf)];
 
-		Parallel.ForEach(Helper.Bits, dir =>
+		foreach (int dir in Helper.Bits)
 		{
-			Parallel.ForEach(Helper.GetOnesInBitBoard(possibleFences[dir]), index =>
+			foreach (int index in Helper.GetOnesInBitBoard(possibleFences[dir]))
 			{
 				foreach (int player in Helper.Bits)
 				{
@@ -36,8 +35,8 @@ public partial class IllegalFenceCheck : Node
 					board.GetIllegalFences()[dir].SetPlaced(index);
 					break;
 				}
-			});
-		});
+			}
+		}
 	}
 
 	public static bool IsFenceIllegal(BoardState board, int player, int direction, int fence)
