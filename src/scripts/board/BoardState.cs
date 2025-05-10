@@ -44,7 +44,6 @@ public class BoardState
 
 	#region Getters ---
 
-
 	public bool GetFencePlaced(int direction, int index) => Fences[direction].IsPlaced(index);
 	public int GetPawnTile(int player) => Pawns[player].Index;
 	public ulong GetIllegalFences(int dir) => IllegalFences[dir].Fences;

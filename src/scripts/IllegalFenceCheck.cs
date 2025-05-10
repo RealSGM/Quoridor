@@ -17,7 +17,7 @@ public partial class IllegalFenceCheck : Node
 		ulong[] possibleFences = board.GetEnabledFences(false);
 		ulong[] surroundingFences = [];
 
-		surroundingFences = board.LastMove.MoveType == 'm'
+		surroundingFences = board.LastMove != null && board.LastMove.MoveType == 'm'
 			? Helper.GetFencesSurroundingTile(board.LastMove.Index)
 			: board.GetAllSurroundingFences();
 

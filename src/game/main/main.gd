@@ -141,14 +141,16 @@ func set_game_data() -> void:
 		"BotVBot":
 			Global.players[0]["name"] = "Bot One"
 			Global.players[0]["color"] = Global.COLORS[bot_one_colours.selected]
+			selected_colour = bot_two_colours.selected
+			selected_name = "Bot Two"
 			AlgorithmManager.set_chosen_algorithm(0, bot_one_algorithms.selected)
 			AlgorithmManager.set_chosen_algorithm(1, bot_two_algorithms.selected)
 		"Q_Learning":
 			Global.players[0]["color"] = Global.COLORS[0]
 			Global.players[1]["color"] = Global.COLORS[1]
-
 			selected_colour = bot_two_colours.selected
 			selected_name = "Bot Two"
+
 	Global.players[1]["color"] = Global.COLORS[selected_colour]
 	Global.players[1]["name"] = selected_name
 
