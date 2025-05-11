@@ -51,7 +51,7 @@ func save_algorithm_data() -> void:
 	}
 
 	var file: FileAccess = FileAccess.open(FILE_PATH, FileAccess.WRITE)
-	file.store_string(JSON.stringify(json_ready))
+	file.store_string(JSON.stringify(json_ready, "\t"))
 	file.close()
 	file = null
 
