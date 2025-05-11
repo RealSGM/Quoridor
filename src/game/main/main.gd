@@ -202,6 +202,7 @@ func _on_start_game_pressed() -> void:
 func _on_exit_button_pressed() -> void:
 	Global.game.queue_free()
 	AlgorithmManager.qlearning.FreeQTable()
+	AlgorithmManager.save_algorithm_data()
 	show_main_menu()
 
 

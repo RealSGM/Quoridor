@@ -52,6 +52,10 @@ func update_winner(player: int) -> void:
 	# Reset the current turn for both algorithms, set to -1 as another signal updates it to 0
 	AlgorithmManager.algorithm_data[winning_algorithm]["current_turn"] = -1
 	AlgorithmManager.algorithm_data[losing_algorithm]["current_turn"] = 0
+	AlgorithmManager.save_algorithm_data()
+
+	if autoplay_button.is_pressed():
+		reset_board()
 
 
 func play_turn() -> void:
@@ -68,9 +72,10 @@ func _on_next_move_pressed() -> void:
 
 func _on_autoplay_button_toggled(toggled_on: bool) -> void:
 	autoplay_button.text = "Auto: %s" % ["On" if toggled_on else "Off"]
-	next_move_button.disabled = toggled_on
+	var game_over: bool = board_wrapper.IsWinner(0) || board_wrapper.IsWinner(1)
+	next_move_button.disabled = toggled_on || game_over
 
-	if toggled_on:
+	if toggled_on && not game_over:
 		_on_next_move_pressed()
 
 

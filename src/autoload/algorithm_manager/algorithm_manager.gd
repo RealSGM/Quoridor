@@ -1,5 +1,7 @@
 extends Node
 
+const FILE_PATH := "user://algorithm_data.json"
+
 const DATA: Dictionary = {
 	"games_played": 0,
 	"wins": 0,
@@ -27,15 +29,9 @@ const TOTAL_LIST: Array = [
 var chosen_algorithms: Array = [null, null]
 var algorithm_data: Dictionary[Node, Dictionary] = {}
 
-
 func _ready() -> void:
 	SignalManager.data_collected.connect(_update_stat)
-
-	algorithm_data = {
-		minimax: DATA.duplicate(true),
-		mcts: DATA.duplicate(true),
-		qlearning: DATA.duplicate(true)
-	}
+	load_algorithm_data()
 
 
 func set_chosen_algorithm(arr_index: int, algo_index: int) -> void:
@@ -45,6 +41,38 @@ func set_chosen_algorithm(arr_index: int, algo_index: int) -> void:
 ## Run the chosen algorithm, using the BoardWrapper
 func run(wrapper, player: int) -> void:
 	chosen_algorithms[player].GetMove(wrapper, player)
+
+
+func save_algorithm_data() -> void:
+	var json_ready: Dictionary[String, Dictionary] = {
+		"minimax": algorithm_data[minimax],
+		"mcts": algorithm_data[mcts],
+		"qlearning": algorithm_data[qlearning]
+	}
+
+	var file: FileAccess = FileAccess.open(FILE_PATH, FileAccess.WRITE)
+	file.store_string(JSON.stringify(json_ready))
+	file.close()
+	file = null
+
+
+func load_algorithm_data() -> void:
+	var file: FileAccess = FileAccess.open(FILE_PATH, FileAccess.READ)
+	var content: Dictionary = JSON.parse_string(file.get_as_text())
+
+	algorithm_data[minimax] = DATA.duplicate(true)
+	algorithm_data[mcts] = DATA.duplicate(true)
+	algorithm_data[qlearning] = DATA.duplicate(true)
+
+	if content.has("minimax"):
+		algorithm_data[minimax] = content["minimax"]
+	if content.has("mcts"):
+		algorithm_data[mcts] = content["mcts"]
+	if content.has("qlearning"):
+		algorithm_data[qlearning] = content["qlearning"]
+
+	file.close()
+	file = null
 
 
 func _update_stat(node: Node, stat: String, val: Variant) -> void:
