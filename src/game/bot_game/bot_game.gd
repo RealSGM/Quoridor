@@ -26,12 +26,6 @@ func set_current_player(val: int) -> void:
 	turn_ready = true
 
 
-func play_turn() -> void:
-	var turns_played: int = move_history.split(";").size()
-	AlgorithmManager.minimax.SetMaxDepth(turns_played)
-	AlgorithmManager.run(board_wrapper, current_player)
-
-
 func confirm_place_fence(fence: int, direction: int) -> void:
 	_on_fence_button_pressed(abs(fence), direction)
 	super.confirm_place_fence(fence, direction)
@@ -46,6 +40,24 @@ func _on_undo_button_pressed() -> void:
 	undo_board_ui()
 	finish_undo_board()
 	current_player = 1 - current_player
+
+
+func update_winner(player: int) -> void:
+	var winning_algorithm: Node = AlgorithmManager.chosen_algorithms[player]
+	var losing_algorithm: Node = AlgorithmManager.chosen_algorithms[1 - player]
+	SignalManager.data_collected.emit(winning_algorithm, "wins", 1)
+	SignalManager.data_collected.emit(winning_algorithm, "games_played", 1)
+	SignalManager.data_collected.emit(losing_algorithm, "games_played", 1)
+
+	# Reset the current turn for both algorithms, set to -1 as another signal updates it to 0
+	AlgorithmManager.algorithm_data[winning_algorithm]["current_turn"] = -1
+	AlgorithmManager.algorithm_data[losing_algorithm]["current_turn"] = 0
+
+
+func play_turn() -> void:
+	var turns_played: int = move_history.split(";").size()
+	AlgorithmManager.minimax.SetMaxDepth(turns_played)
+	AlgorithmManager.run(board_wrapper, current_player)
 
 
 func _on_next_move_pressed() -> void:

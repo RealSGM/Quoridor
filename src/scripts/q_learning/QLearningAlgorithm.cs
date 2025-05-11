@@ -28,14 +28,15 @@ public partial class QLearningAlgorithm : Node
 		StateKey stateKey = board.GetStateKey();
 		ExploreState(board, currentPlayer, stateKey);
 
+		string bestMove = "";
+
 		if (!QTable.TryGetValue(stateKey, out Dictionary<string, float> value))
 		{
 			GD.Print($"State {stateKey} not found in QTable");
 			QTable[stateKey] = [];
 			// State not trained for, get random move
 			string[] allMoves = board.GetAllMoves(currentPlayer);
-			string randomMove = allMoves[Helper.Random.Next(allMoves.Length)];
-			SignalManager.EmitSignal("move_selected", randomMove);
+			bestMove = allMoves[Helper.Random.Next(allMoves.Length)];
 		}
 		else
 		{
@@ -43,11 +44,17 @@ public partial class QLearningAlgorithm : Node
 			string[] allMoves = [.. value.Keys];
 			float maxQ = allMoves.Max(action => GetQValue(stateKey, action));
 			string[] bestMoves = allMoves.Where(action => GetQValue(stateKey, action) == maxQ).ToArray();
-			string bestMove = bestMoves[Helper.Random.Next(bestMoves.Length)];
-			SignalManager.EmitSignal("move_selected", bestMove);
+			bestMove = bestMoves[Helper.Random.Next(bestMoves.Length)];
 		}
 
 		stateKey = null;
+
+		// Debugging ---
+		SignalManager.EmitSignal("move_selected", bestMove);
+		SignalManager.EmitSignal("data_collected", this, "moves_made", 1);
+		SignalManager.EmitSignal("data_collected", this, "current_turn", 1);
+		if (bestMove.Contains('m')) SignalManager.EmitSignal("data_collected", this, "pawn_moves", 1);	
+		// Debugging ---
 	}
 
 	#region Training ---

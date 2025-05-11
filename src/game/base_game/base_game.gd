@@ -51,6 +51,10 @@ func _ready() -> void:
 		AlgorithmManager.qlearning.LoadQTable("")
 
 
+func update_winner(_current_player: int) -> void:
+	pass
+
+
 ## Update the board and UI the current player
 func set_current_player(val: int) -> void:
 	reset_board_tiles()
@@ -285,8 +289,12 @@ func _on_confirm_pressed() -> void:
 	board_wrapper.AddMove(move_code)
 	move_code = ""
 
+	if self is BotGame:
+		SignalManager.data_collected.emit(AlgorithmManager.chosen_algorithms[current_player], "fences_remaining_cumulative", board_wrapper.GetFencesRemaining(current_player))
+
 	# Check if the pawn has reached end goal
 	if board_wrapper.IsWinner(current_player):
+		update_winner(current_player)
 		user_interface.update_win(current_player)
 	# Switch to next player
 	else:

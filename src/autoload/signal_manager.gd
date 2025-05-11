@@ -9,3 +9,4 @@ signal reset_board_requested
 
 signal move_selected
 signal training_finished
+signal data_collected
