@@ -1,8 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Godot;
 
-public class MCTSNode(MCTSNode parent, BoardState state, int currentplayer)
+public class MCTSNode(MCTSNode parent, BoardState state, int currentplayer, ParsedMove lastMove = null)
 {
 	public MCTSNode Parent = parent;
 	public BoardState State = state;
@@ -10,91 +11,92 @@ public class MCTSNode(MCTSNode parent, BoardState state, int currentplayer)
 	public int Wins = 0;
 	public int Visits = 0;
 	public int CurrentPlayer = currentplayer;
+	public ParsedMove LastMove = lastMove;
 
 	public bool IsLeaf() => Children.Count == 0;
 
-	// Returns a child node with the highest UCT value
 	public MCTSNode SelectChild(double explorationConstant = 1.41)
 	{
 		if (IsLeaf() || State.IsGameOver()) return this;
 
-		return Children.OrderByDescending(c =>
-			(double)c.Wins / (c.Visits + 1) +
-			explorationConstant * Math.Sqrt(Math.Log(Visits + 1) / (c.Visits + 1))
-		).First();
+		double totalVisits = Math.Max(1, Visits);
+
+		return Children.MaxBy(child =>
+		{
+			if (child.Visits == 0)
+				return double.PositiveInfinity;
+
+			double winRate = (double)child.Wins / child.Visits;
+			double explorationTerm = explorationConstant * Math.Sqrt(Math.Log(totalVisits) / child.Visits);
+
+			// Movement bias (gradually reduces as the node's visits increase)
+			double movementBias = (child.LastMove != null && child.LastMove.MoveType == 'm') ? 0.33 : 0;
+
+			return winRate + explorationTerm + movementBias;
+		});
 	}
 
-	// Expands the node by adding all moves that have not been explored yet, considering weighted moves
 	public MCTSNode Expand()
 	{
-		HashSet<BoardState> exploredStates = [.. Children.Select(c => c.State)];
+		IllegalFenceCheck.GetIllegalFences(State);
+		HashSet<StateKey> exploredKeys = [.. Children.Select(c => c.State.GetStateKey())];
 
-		int[] pawnMoves = [.. State.GetReachableTilesSmart(CurrentPlayer)];
-		ulong[] fencesMoves = State.GetFenceMovesSmart(CurrentPlayer);
+		List<string> allMoves = [];
+		int[] pawnMoves = State.GetReachableTilesSmart(CurrentPlayer);
+		ulong[] fencesMoves = State.GetAllFences(CurrentPlayer);
 
-		List<string> mappedPawnMoves = [.. pawnMoves.Select(tile => Helper.GetMoveCodeAsString(CurrentPlayer, "m", 0, tile))];
-		List<string> mappedFenceMoves = [.. fencesMoves
-			.SelectMany((fence, index) => Helper.GetOnesInBitBoard(fence)
-			.Select(i => Helper.GetMoveCodeAsString(CurrentPlayer, "f", index, i)))];
-
-		List<string> biasedMoves = Helper.Random.NextDouble() < 0.5
-			? [.. mappedPawnMoves, .. mappedFenceMoves]
-			: [.. mappedFenceMoves, .. mappedPawnMoves];
-
-		// Try adding the first unvisited state
-		foreach (string move in biasedMoves)
+		allMoves.AddRange(pawnMoves.Select(tile => Helper.GetMoveCodeAsString(CurrentPlayer, "m", 0, tile)));
+		
+		for (int index = 0; index < fencesMoves.Length; index++)
 		{
-			BoardState newState = State.Clone();
-			newState.AddMove(move);
-
-			if (exploredStates.Contains(newState)) continue;
-
-			MCTSNode childNode = new(this, newState, 1 - CurrentPlayer);
-			Children.Add(childNode);
-
-			newState = null; // Free the state to avoid memory leaks
-
-			return childNode;
+			allMoves.AddRange(Helper.GetOnesInBitBoard(fencesMoves[index]).Select(bit => Helper.GetMoveCodeAsString(CurrentPlayer, "f", index, bit)));
 		}
 
-		return this; // All states already explored
+		Helper.Shuffle(allMoves, Helper.Random); // Fisher–Yates shuffle
+
+		foreach (string move in allMoves)
+		{
+			BoardState simState = State.Clone();
+			simState.AddMove(move);
+			StateKey simKey = simState.GetStateKey();
+
+			if (exploredKeys.Contains(simKey))  continue;
+
+			MCTSNode child = new(this, simState, 1 - CurrentPlayer, ParsedMove.Create(move));
+			Children.Add(child);
+		}
+
+		return Children.FirstOrDefault() ?? this;
 	}
 
-
-	// Simulates a game from the current state until it reaches a terminal state
-
-	public int Simulate(int simulatingPlayer, int maxPlayoutDepth = 50)
+	public int Simulate(int simulatingPlayer, int maxPlayoutDepth = 100)
 	{
 		BoardState tempState = State.Clone();
 		int depth = 0;
-		Random random = new();
 
-		// While the game is not over and the simulation depth is not reached
+		// Use shared random (should be class-level or injected)
+		Random rng = Helper.Random;
+
+		int currentPlayer = CurrentPlayer;
+
 		while (!tempState.IsGameOver() && depth < maxPlayoutDepth)
 		{
-			string selectedMove = null;
-
-			List<string> moves = random.NextDouble() <= 0.5
-				? [.. State.GetReachableTilesSmart(CurrentPlayer)
-					.Select(tile => Helper.GetMoveCodeAsString(CurrentPlayer, "m", 0, tile))]
-				: [.. State.GetFenceMovesSmart(CurrentPlayer)
-					.SelectMany((fence, index) => Helper.GetOnesInBitBoard(fence)
-					.Select(i => Helper.GetMoveCodeAsString(CurrentPlayer, "f", index, i)))];
-
+			IllegalFenceCheck.GetIllegalFences(tempState);
+			List<string> moves = rng.NextDouble() < 0.70 
+			? [.. tempState.GetReachableTilesSmart(currentPlayer).Select(tile => Helper.GetMoveCodeAsString(currentPlayer, "m", 0, tile))]
+            : [.. tempState.GetAllFences(currentPlayer)
+				.SelectMany((fence, index) => Helper.GetOnesInBitBoard(fence)
+					.Select(bit => Helper.GetMoveCodeAsString(currentPlayer, "f", index, bit)))];
 
 			if (moves.Count == 0) break;
 
-			selectedMove = moves[random.Next(moves.Count)];
-
+			string selectedMove = moves[rng.Next(moves.Count)];
 			tempState.AddMove(selectedMove);
-			CurrentPlayer = 1 - CurrentPlayer;
-			IllegalFenceCheck.GetIllegalFences(tempState);
+			currentPlayer = 1 - currentPlayer;
 			depth++;
 		}
 
 		int result = tempState.GetGameResult(simulatingPlayer);
-		tempState = null; // Free the state to avoid memory leaks
-
 		return result;
 	}
 
@@ -106,7 +108,7 @@ public class MCTSNode(MCTSNode parent, BoardState state, int currentplayer)
 		// Propagate the result back to the root node
 		while (node != null)
 		{
-			node.Visits += 1;
+			node.Visits++;
 			// If the result is a win, increment the wins for this node
 			if (result == int.MaxValue) node.Wins += 1;
 			// Move up to the parent node
