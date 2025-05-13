@@ -33,6 +33,4 @@ public class StateKey : IEquatable<StateKey>
 			VerticalFences = ulong.Parse(parts[3])
 		};
 	}
-
-
 }

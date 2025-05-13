@@ -30,7 +30,7 @@ public class MCTSNode(MCTSNode parent, BoardState state, int currentplayer, Pars
 			double explorationTerm = explorationConstant * Math.Sqrt(Math.Log(totalVisits) / child.Visits);
 
 			// Movement bias (gradually reduces as the node's visits increase)
-			double movementBias = (child.LastMove != null && child.LastMove.MoveType == 'm') ? 0.33 : 0;
+			double movementBias = (child.LastMove != null && child.LastMove.MoveType == 'm') ? 0.1 : 0;
 
 			return winRate + explorationTerm + movementBias;
 		});
@@ -43,7 +43,7 @@ public class MCTSNode(MCTSNode parent, BoardState state, int currentplayer, Pars
 
 		List<string> allMoves = [];
 		int[] pawnMoves = State.GetReachableTilesSmart(CurrentPlayer);
-		ulong[] fencesMoves = State.GetAllFences(CurrentPlayer);
+		ulong[] fencesMoves = State.GetFenceMovesSmart(CurrentPlayer);
 
 		allMoves.AddRange(pawnMoves.Select(tile => Helper.GetMoveCodeAsString(CurrentPlayer, "m", 0, tile)));
 		
@@ -84,7 +84,7 @@ public class MCTSNode(MCTSNode parent, BoardState state, int currentplayer, Pars
 			IllegalFenceCheck.GetIllegalFences(tempState);
 			List<string> moves = rng.NextDouble() < 0.70 
 			? [.. tempState.GetReachableTilesSmart(currentPlayer).Select(tile => Helper.GetMoveCodeAsString(currentPlayer, "m", 0, tile))]
-            : [.. tempState.GetAllFences(currentPlayer)
+            : [.. tempState.GetFenceMovesSmart(currentPlayer)
 				.SelectMany((fence, index) => Helper.GetOnesInBitBoard(fence)
 					.Select(bit => Helper.GetMoveCodeAsString(currentPlayer, "f", index, bit)))];
 

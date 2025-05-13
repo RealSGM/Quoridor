@@ -36,7 +36,8 @@ public class BoardState
 	public void SetLastMove(string code)
 	{
 		if (code == string.Empty) return;
-		var (player, moveType, dir, index, previousIndex) = Helper.GetMoveCodeAsTuple(code);
+		ParsedMove move = ParsedMove.Create(code);
+		var (player, moveType, dir, index, previousIndex) = move.GetMoveAsTuple();
 		LastMove = new((sbyte)player, moveType[0], (char)dir, (sbyte)index, (sbyte)previousIndex);
 	}
 
@@ -67,7 +68,6 @@ public class BoardState
 
 	#region Moves ---
 
-
 	public void PlaceFence(int player, int direction, int index)
 	{
 		Pawns[player].PlaceFence();
@@ -84,7 +84,8 @@ public class BoardState
 
 	public void AddMove(string code)
 	{
-		var (player, moveType, dir, index, _) = Helper.GetMoveCodeAsTuple(code);
+		ParsedMove move = ParsedMove.Create(code);
+		var (player, moveType, dir, index, _) = move.GetMoveAsTuple();
 		if (moveType == "m") ShiftPawn(player, index);
 		if (moveType == "f") PlaceFence(player, dir, index);
 		LastMove = new((sbyte)player, moveType[0], (char)dir, (sbyte)index);
@@ -99,7 +100,8 @@ public class BoardState
 
 	public void UndoMove(string code)
 	{
-		var (currentPlayer, moveType, direction, index, previousIndex) = Helper.GetMoveCodeAsTuple(code);
+		ParsedMove move = ParsedMove.Create(code);
+		var (currentPlayer, moveType, direction, index, previousIndex) = move.GetMoveAsTuple();
 		if (moveType == "m") ShiftPawn(currentPlayer, previousIndex);
 		if (moveType == "f") UndoSetFence(currentPlayer, direction, index);
 	}
@@ -145,11 +147,7 @@ public class BoardState
 		int[] enemyCons = GetAdjacentTiles(enemyTile);
 		int leapedTile = enemyCons[cardinalDirection];
 
-		return leapedTile != -1
-
-			? [leapedTile]
-
-			: [.. enemyCons.Where(tile => !filterSet.Contains(tile))];
+		return leapedTile != -1 ? [leapedTile] : [.. enemyCons.Where(tile => !filterSet.Contains(tile))];
 	}
 
 	/// <summary>
@@ -168,11 +166,7 @@ public class BoardState
 		foreach (var (tile, direction) in GetAdjacentTiles(playerTile).Select((tile, dir) => (tile, dir)))
 		{
 			if (tile == -1) continue;
-			reachables.AddRange(tile == enemyTile
-
-				? GetLeapedTiles(enemyTile, direction, filterSet)
-
-				: [tile]);
+			reachables.AddRange(tile == enemyTile ? GetLeapedTiles(enemyTile, direction, filterSet): [tile]);
 		}
 
 		return [.. reachables];
@@ -186,7 +180,7 @@ public class BoardState
 
 	/// <summary>
 	/// Checks if a fence is placeable in either direction.
-	/// Checks if thefence is illegal and if the adjacent fences are placed.
+	/// Checks if the fence is illegal and if the adjacent fences are placed.
 	/// </summary>
 	/// <param name="dir"></param>
 	/// <param name="index"></param>
@@ -337,7 +331,6 @@ public class BoardState
 	#region Evaluation ---
 
 	public bool IsWinner(int player) => Helper.GetGoalTiles(player).Contains(GetPawnTile(player));
-
 	public bool IsGameOver() => IsWinner(0) || IsWinner(1);
 
 	public int GetGameResult(int simulatingPlayer)

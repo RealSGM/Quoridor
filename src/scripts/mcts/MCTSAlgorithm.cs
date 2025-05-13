@@ -40,10 +40,10 @@ public partial class MCTSAlgorithm : Node
 		Console.Call("add_entry", $"Best Move: {bestChild.State.GetLastMove()}, Wins: {bestChild.Wins}, Visits: {bestChild.Visits}", 0);
 
 		SignalManager.EmitSignal("move_selected", bestChild.State.GetLastMove().Split('_')[0]);
-		SignalManager.EmitSignal("data_collected", this, "moves_made", 1);
+		SignalManager.EmitSignal("data_collected", this, "moves_made_cumulative", 1);
 		SignalManager.EmitSignal("data_collected", this, "current_turn", 1);
 		SignalManager.EmitSignal("data_collected", this, "nodes_searched_cumulative", root.Visits);
 		SignalManager.EmitSignal("data_collected", this, "move_speeds_cumulative", Time.GetTicksMsec() - startTime);
-		if (bestChild.State.GetLastMove().Contains('m')) SignalManager.EmitSignal("data_collected", this, "pawn_moves", 1);
+		if (bestChild.State.GetLastMove().Contains('m')) SignalManager.EmitSignal("data_collected", this, "pawn_moves_cumulative", 1);
 	}
 }

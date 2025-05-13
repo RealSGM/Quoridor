@@ -5,19 +5,17 @@ const FILE_PATH := "user://algorithm_data.json"
 const DATA: Dictionary = {
 	"games_played": 0,
 	"wins": 0,
-	"moves_made": 0, # Total
-	"pawn_moves": 0, # Total
-	"current_turn": 0, # Reset value for each game
+	"current_turn": 0, # Total
 	"move_speeds_cumulative": [], # Sum of move speeds done per each round
 	"fences_remaining_cumulative": [], # Sum of fences remaining per each round
 	"nodes_searched_cumulative": [], # Sum of nodes searched per each round (Minimax only)
+	"moves_made_cumulative": [], # Sum of moves made per each round
+	"pawn_moves_cumulative": [], # Sum of pawn moves per each round
 }
 
 const TOTAL_LIST: Array = [
 	"games_played",
 	"wins",
-	"moves_made",
-	"pawn_moves",
 	"current_turn",
 ]
 
@@ -58,11 +56,17 @@ func save_algorithm_data() -> void:
 
 func load_algorithm_data() -> void:
 	var file: FileAccess = FileAccess.open(FILE_PATH, FileAccess.READ)
-	var content: Dictionary = JSON.parse_string(file.get_as_text())
+	var content = JSON.parse_string(file.get_as_text())
+
+	file.close()
+	file = null
 
 	algorithm_data[minimax] = DATA.duplicate(true)
 	algorithm_data[mcts] = DATA.duplicate(true)
 	algorithm_data[qlearning] = DATA.duplicate(true)
+
+	if not content:
+		return
 
 	if content.has("minimax"):
 		algorithm_data[minimax] = content["minimax"]
@@ -70,9 +74,6 @@ func load_algorithm_data() -> void:
 		algorithm_data[mcts] = content["mcts"]
 	if content.has("qlearning"):
 		algorithm_data[qlearning] = content["qlearning"]
-
-	file.close()
-	file = null
 
 
 func _update_stat(node: Node, stat: String, val: Variant) -> void:

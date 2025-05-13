@@ -44,11 +44,11 @@ public partial class MiniMaxAlgorithm : Node
 		Console.Call("add_entry", $"Best Move: {bestMove}, Value: {bestMoveTuple.Item1}", 0);
 		Console.Call("add_entry", $"Nodes Visited: {nodesVisited}, Time: {milliseconds}ms", 0);
 
-		SignalManager.EmitSignal("data_collected", this, "moves_made", 1);
+		SignalManager.EmitSignal("data_collected", this, "moves_made_cumulative", 1);
 		SignalManager.EmitSignal("data_collected", this, "current_turn", 1);
 		SignalManager.EmitSignal("data_collected", this, "nodes_searched_cumulative", nodesVisited);
 		SignalManager.EmitSignal("data_collected", this, "move_speeds_cumulative", milliseconds);
-		if (bestMove.Contains('m')) SignalManager.EmitSignal("data_collected", this, "pawn_moves", 1);
+		if (bestMove.Contains('m')) SignalManager.EmitSignal("data_collected", this, "pawn_moves_cumulative", 1);
 		// Debugging ---
 	}
 

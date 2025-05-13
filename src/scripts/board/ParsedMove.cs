@@ -33,11 +33,23 @@ public class ParsedMove(sbyte player, char moveType, char direction, sbyte index
 
 	public static ParsedMove Create(string code)
 	{
-		var (player, moveType, direction, index, previousIndex) = Helper.GetMoveCodeAsTuple(code);
-		return new ParsedMove((sbyte)player,
+		// Example: 0m+67_76
+		string[] parts = code.Split('_');
+		int previousIndex = parts.Length > 1 ? int.Parse(parts[1]) : -1;
+
+		code = parts[0];	
+		sbyte player = sbyte.Parse(code[0].ToString());
+		char[] moveType = code[1].ToString().ToCharArray();
+		int direction = code[2] == '-' ? 1 : 0;
+		sbyte index = sbyte.Parse(code[3..]);
+		
+		return new ParsedMove(
+			player,
 			moveType[0],
 			direction == 0 ? '+' : '-',
-			(sbyte)index,
+            index,
 			(sbyte)(previousIndex == -1 ? -1 : previousIndex));
 	}
+
+	public (int player, string moveType, int direction, int index, int previousIndex) GetMoveAsTuple() => (Player, MoveType.ToString(), Direction == '-' ? 1 : 0, Index, PreviousIndex);
 }

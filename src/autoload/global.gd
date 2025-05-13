@@ -19,10 +19,6 @@ var game: BaseGame
 var is_outputting: bool = true
 var dump_console_to_file: bool = false
 
-#func _ready() -> void:
-	#var foo: BoardState = BoardState.new()
-	#foo.Delete()
-
 func help() -> String:
 	Console.show_help()
 	return ""
@@ -100,11 +96,6 @@ func toggle_dump() -> String:
 func toggle_output() -> String:
 	is_outputting = !is_outputting
 	return "Outputting to Console is %s" % ["enabled" if is_outputting else "disabled"]
-
-
-func test() -> String:
-	print_orphan_nodes()
-	return ""
 
 
 func orphan(id: int) -> String:
