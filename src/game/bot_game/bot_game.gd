@@ -55,7 +55,7 @@ func update_winner(player: int) -> void:
 	AlgorithmManager.save_algorithm_data()
 
 	if autoplay_button.is_pressed():
-		reset_board()
+		user_interface._on_reset_button_pressed()
 
 
 func play_turn() -> void:

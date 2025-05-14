@@ -359,11 +359,13 @@ public class BoardState
 			? (playerRow <= Helper.centerRow ? 1 : -1)
 			: (playerRow >= Helper.centerRow ? 1 : -1);
 
+		int offset = Helper.Random.Next(0, 10);
+
 		return centralityScore
 			+ pathDifference * Helper.PATH_WEIGHT
-			+ fenceScore * Helper.FENCE_WEIGHT;
+			+ fenceScore * Helper.FENCE_WEIGHT
+			+ offset;
 	}
-
 
 	public StateKey GetStateKey() => new()
 	{
