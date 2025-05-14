@@ -43,7 +43,7 @@ public class MCTSNode(MCTSNode parent, BoardState state, int currentplayer, Pars
 
 		List<string> allMoves = [];
 		int[] pawnMoves = State.GetReachableTilesSmart(CurrentPlayer);
-		ulong[] fencesMoves = State.GetFenceMovesSmart(CurrentPlayer);
+		ulong[] fencesMoves = State.GetAllFences(CurrentPlayer);
 
 		allMoves.AddRange(pawnMoves.Select(tile => Helper.GetMoveCodeAsString(CurrentPlayer, "m", 0, tile)));
 		
@@ -84,7 +84,7 @@ public class MCTSNode(MCTSNode parent, BoardState state, int currentplayer, Pars
 			IllegalFenceCheck.GetIllegalFences(tempState);
 			List<string> moves = rng.NextDouble() < 0.70 
 			? [.. tempState.GetReachableTilesSmart(currentPlayer).Select(tile => Helper.GetMoveCodeAsString(currentPlayer, "m", 0, tile))]
-            : [.. tempState.GetFenceMovesSmart(currentPlayer)
+            : [.. tempState.GetAllFences(currentPlayer)
 				.SelectMany((fence, index) => Helper.GetOnesInBitBoard(fence)
 					.Select(bit => Helper.GetMoveCodeAsString(currentPlayer, "f", index, bit)))];
 
