@@ -1,6 +1,6 @@
 extends Node
 
-const FILE_PATH := "user://algorithm_data.json"
+const FILE_PATH := "data/algorithm_data.json"
 
 const DATA: Dictionary = {
 	"games_played": 0,

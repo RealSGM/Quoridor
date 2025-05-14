@@ -53,7 +53,7 @@ public partial class QLearningAlgorithm : Node
 		SignalManager.EmitSignal("move_selected", bestMove);
 		SignalManager.EmitSignal("data_collected", this, "moves_made_cumulative", 1);
 		SignalManager.EmitSignal("data_collected", this, "current_turn", 1);
-		if (bestMove.Contains('m')) SignalManager.EmitSignal("data_collected", this, "pawn_moves_cumulative", 1);	
+		if (bestMove.Contains('m')) SignalManager.EmitSignal("data_collected", this, "pawn_moves_cumulative", 1);
 		// Debugging ---
 	}
 
