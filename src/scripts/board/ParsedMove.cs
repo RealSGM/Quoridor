@@ -33,7 +33,6 @@ public class ParsedMove(sbyte player, char moveType, char direction, sbyte index
 
 	public static ParsedMove Create(string code)
 	{
-		// Example: 0m+67_76
 		string[] parts = code.Split('_');
 		int previousIndex = parts.Length > 1 ? int.Parse(parts[1]) : -1;
 
