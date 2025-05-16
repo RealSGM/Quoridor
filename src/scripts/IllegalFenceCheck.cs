@@ -39,6 +39,26 @@ public partial class IllegalFenceCheck : Node
 		}
 	}
 
+	public static void CheckAllIllegalFences(BoardWrapper wrapper)
+	{
+		BoardState board = wrapper.State;
+		ulong[] enabledFences = board.GetEnabledFences(false);
+
+		foreach (int dir in Helper.Bits)
+		{
+			foreach (int index in Helper.GetOnesInBitBoard(enabledFences[dir]))
+			{
+				foreach (int player in Helper.Bits)
+				{
+					board.GetIllegalFences()[dir].UndoSetPlaced(index);
+					if (!IsFenceIllegal(board, player, dir, index)) continue;
+					board.GetIllegalFences()[dir].SetPlaced(index);
+					break;
+				}
+			}
+		}
+	}
+
 	public static bool IsFenceIllegal(BoardState board, int player, int direction, int fence)
 	{
 		BoardState boardClone = board.Clone();
