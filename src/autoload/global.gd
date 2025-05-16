@@ -57,7 +57,7 @@ func get_fences(direction: int = 0) -> String:
 
 
 func get_enabled_fences(direction: int = 0) -> String:
-	var fence_bitboard = game.board.GetEnabledFencesAsArray(direction)
+	var fence_bitboard = game.board_wrapper.GetEnabledFencesAsArray(direction)
 	var bb_string: String = ""
 
 	for i: int in range(fence_bitboard.size()):
