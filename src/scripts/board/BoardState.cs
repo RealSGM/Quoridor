@@ -38,7 +38,7 @@ public class BoardState
 		if (code == string.Empty) return;
 		ParsedMove move = ParsedMove.Create(code);
 		var (player, moveType, dir, index, previousIndex) = move.GetMoveAsTuple();
-		LastMove = new((sbyte)player, moveType[0], (char)dir, (sbyte)index, (sbyte)previousIndex);
+		LastMove = new((sbyte)player, moveType[0], dir == 0, (sbyte)index, (sbyte)previousIndex);
 	}
 
 	#endregion
@@ -88,13 +88,13 @@ public class BoardState
 		var (player, moveType, dir, index, _) = move.GetMoveAsTuple();
 		if (moveType == "m") ShiftPawn(player, index);
 		if (moveType == "f") PlaceFence(player, dir, index);
-		LastMove = new((sbyte)player, moveType[0], (char)dir, (sbyte)index);
+		LastMove = new((sbyte)player, moveType[0], dir == 0, (sbyte)index);
 	}
 
 	public void AddMove(ParsedMove move)
 	{
 		if (move.MoveType == 'm') ShiftPawn(move.Player, move.Index);
-		if (move.MoveType == 'f') PlaceFence(move.Player, move.Direction, move.Index);
+		if (move.MoveType == 'f') PlaceFence(move.Player, move.IsHorizontal ? 0 : 1, move.Index);
 		LastMove = move.Clone();
 	}
 
