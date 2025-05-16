@@ -158,20 +158,6 @@ public partial class QLearningAlgorithm : Node
 		return pawnMoves[Helper.Random.Next(pawnMoves.Length)];
 	}
 
-	public float GetQValue(StateKey stateKey, string action) =>
-		QTable.TryGetValue(stateKey, out var actionDict) &&
-		actionDict.TryGetValue(action, out var qVal)
-			? qVal
-			: 0f;
-
-	public float GetMaxQValue(StateKey stateKey, BoardState board, int currentPlayer)
-	{
-		string[] allMoves = board.GetAllMoves(currentPlayer);
-		if (allMoves.Length == 0) return 0f;
-
-		return allMoves.Max(action => GetQValue(stateKey, action));
-	}
-
 	public static float GetReward(int currentPlayer, BoardState board, BoardState prevBoard)
 	{
 		if (board.IsGameOver())
@@ -189,6 +175,20 @@ public partial class QLearningAlgorithm : Node
 		reward += (newOpponentPath.Length - oldOpponentPath.Length) * 0.5f;
 
 		return reward;
+	}
+
+	public float GetQValue(StateKey stateKey, string action) =>
+		QTable.TryGetValue(stateKey, out var actionDict) &&
+		actionDict.TryGetValue(action, out var qVal)
+			? qVal
+			: 0f;
+
+	public float GetMaxQValue(StateKey stateKey, BoardState board, int currentPlayer)
+	{
+		string[] allMoves = board.GetAllMoves(currentPlayer);
+		if (allMoves.Length == 0) return 0f;
+
+		return allMoves.Max(action => GetQValue(stateKey, action));
 	}
 
 	#endregion Training ---
