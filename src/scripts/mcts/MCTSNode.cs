@@ -28,9 +28,7 @@ public class MCTSNode(MCTSNode parent, BoardState state, int currentplayer, Pars
 
 			double winRate = (double)child.Wins / child.Visits;
 			double explorationTerm = explorationConstant * Math.Sqrt(Math.Log(totalVisits) / child.Visits);
-
-			// Movement bias (gradually reduces as the node's visits increase)
-			double movementBias = (child.LastMove != null && child.LastMove.MoveType == 'm') ? 0.1 : 0;
+			double movementBias = (child.LastMove != null && child.LastMove.MoveType == 'm') ? 0.2 : 0;
 
 			return winRate + explorationTerm + movementBias;
 		});
@@ -39,19 +37,9 @@ public class MCTSNode(MCTSNode parent, BoardState state, int currentplayer, Pars
 	public MCTSNode Expand()
 	{
 		IllegalFenceCheck.GetIllegalFences(State);
+		string[] allMoves = State.GetAllMoves(CurrentPlayer);
+
 		HashSet<StateKey> exploredKeys = [.. Children.Select(c => c.State.GetStateKey())];
-
-		List<string> allMoves = [];
-		int[] pawnMoves = State.GetReachableTilesSmart(CurrentPlayer);
-		ulong[] fencesMoves = State.GetAllFences(CurrentPlayer);
-
-		allMoves.AddRange(pawnMoves.Select(tile => Helper.GetMoveCodeAsString(CurrentPlayer, "m", 0, tile)));
-		
-		for (int index = 0; index < fencesMoves.Length; index++)
-		{
-			allMoves.AddRange(Helper.GetOnesInBitBoard(fencesMoves[index]).Select(bit => Helper.GetMoveCodeAsString(CurrentPlayer, "f", index, bit)));
-		}
-
 		Helper.Shuffle(allMoves, Helper.Random); // Fisher–Yates shuffle
 
 		foreach (string move in allMoves)
@@ -60,12 +48,12 @@ public class MCTSNode(MCTSNode parent, BoardState state, int currentplayer, Pars
 			simState.AddMove(move);
 			StateKey simKey = simState.GetStateKey();
 
-			if (exploredKeys.Contains(simKey))  continue;
+			if (exploredKeys.Contains(simKey)) continue;
 
-			MCTSNode child = new(this, simState, 1 - CurrentPlayer, ParsedMove.Create(move));
+			ParsedMove parsedMove = ParsedMove.Create(move);
+			MCTSNode child = new(this, simState, 1 - CurrentPlayer, parsedMove);
 			Children.Add(child);
 		}
-
 		return Children.FirstOrDefault() ?? this;
 	}
 
@@ -82,9 +70,9 @@ public class MCTSNode(MCTSNode parent, BoardState state, int currentplayer, Pars
 		while (!tempState.IsGameOver() && depth < maxPlayoutDepth)
 		{
 			IllegalFenceCheck.GetIllegalFences(tempState);
-			List<string> moves = rng.NextDouble() < 0.70 
-			? [.. tempState.GetReachableTilesSmart(currentPlayer).Select(tile => Helper.GetMoveCodeAsString(currentPlayer, "m", 0, tile))]
-            : [.. tempState.GetAllFences(currentPlayer)
+			List<string> moves = rng.NextDouble() < 0.70
+				? [.. tempState.GetReachableTilesSmart(currentPlayer).Select(tile => Helper.GetMoveCodeAsString(currentPlayer, "m", 0, tile))]
+				: [.. tempState.GetAllFences(currentPlayer)
 				.SelectMany((fence, index) => Helper.GetOnesInBitBoard(fence)
 					.Select(bit => Helper.GetMoveCodeAsString(currentPlayer, "f", index, bit)))];
 
@@ -99,7 +87,6 @@ public class MCTSNode(MCTSNode parent, BoardState state, int currentplayer, Pars
 		int result = tempState.GetGameResult(simulatingPlayer);
 		return result;
 	}
-
 
 	public void Backpropagate(int result)
 	{
