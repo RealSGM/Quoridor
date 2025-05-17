@@ -29,7 +29,6 @@ public class MCTSNode(MCTSNode parent, BoardState state, int currentplayer, Pars
 			double winRate = (double)child.Wins / child.Visits;
 			double explorationTerm = explorationConstant * Math.Sqrt(Math.Log(totalVisits) / child.Visits);
 			double movementBias = (child.LastMove != null && child.LastMove.MoveType == 'm') ? 0.2 : 0;
-
 			return winRate + explorationTerm + movementBias;
 		});
 	}
@@ -40,7 +39,7 @@ public class MCTSNode(MCTSNode parent, BoardState state, int currentplayer, Pars
 		string[] allMoves = State.GetAllMoves(CurrentPlayer);
 
 		HashSet<StateKey> exploredKeys = [.. Children.Select(c => c.State.GetStateKey())];
-		Helper.Shuffle(allMoves, Helper.Random); // Fisher–Yates shuffle
+		Helper.Shuffle(allMoves, Helper.Random);
 
 		foreach (string move in allMoves)
 		{
@@ -61,16 +60,12 @@ public class MCTSNode(MCTSNode parent, BoardState state, int currentplayer, Pars
 	{
 		BoardState tempState = State.Clone();
 		int depth = 0;
-
-		// Use shared random (should be class-level or injected)
-		Random rng = Helper.Random;
-
 		int currentPlayer = CurrentPlayer;
 
 		while (!tempState.IsGameOver() && depth < maxPlayoutDepth)
 		{
 			IllegalFenceCheck.GetIllegalFences(tempState);
-			List<string> moves = rng.NextDouble() < 0.70
+			List<string> moves = Helper.Random.NextDouble() < 0.70
 				? [.. tempState.GetReachableTilesSmart(currentPlayer).Select(tile => Helper.GetMoveCodeAsString(currentPlayer, "m", 0, tile))]
 				: [.. tempState.GetAllFences(currentPlayer)
 				.SelectMany((fence, index) => Helper.GetOnesInBitBoard(fence)
@@ -78,7 +73,7 @@ public class MCTSNode(MCTSNode parent, BoardState state, int currentplayer, Pars
 
 			if (moves.Count == 0) break;
 
-			string selectedMove = moves[rng.Next(moves.Count)];
+			string selectedMove = moves[Helper.Random.Next(moves.Count)];
 			tempState.AddMove(selectedMove);
 			currentPlayer = 1 - currentPlayer;
 			depth++;
@@ -91,14 +86,10 @@ public class MCTSNode(MCTSNode parent, BoardState state, int currentplayer, Pars
 	public void Backpropagate(int result)
 	{
 		MCTSNode node = this;
-
-		// Propagate the result back to the root node
 		while (node != null)
 		{
 			node.Visits++;
-			// If the result is a win, increment the wins for this node
 			if (result == int.MaxValue) node.Wins += 1;
-			// Move up to the parent node
 			node = node.Parent;
 		}
 	}

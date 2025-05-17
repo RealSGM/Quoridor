@@ -27,6 +27,13 @@ const TOTAL_LIST: Array = [
 var chosen_algorithms: Array = [null, null]
 var algorithm_data: Dictionary[Node, Dictionary] = {}
 
+var current_set = 0
+var algorithm_sets: Array = [
+	[qlearning, minimax],
+	[qlearning, mcts],
+	[minimax, mcts],
+]
+
 func _ready() -> void:
 	SignalManager.data_collected.connect(_update_stat)
 	load_algorithm_data()
