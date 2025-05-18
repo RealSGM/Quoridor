@@ -63,9 +63,6 @@ public partial class IllegalFenceCheck : Node
 	{
 		BoardState boardClone = board.Clone();
 		boardClone.PlaceFence(player, direction, fence);
-
-		int start = boardClone.GetPawnTile(player);
-		HashSet<int> goalTiles = [.. Helper.GetGoalTiles(player)];
-		return !Algorithms.IsValidPath(boardClone, start, goalTiles, player);
+		return !Algorithms.IsValidPath(boardClone, player);
 	}
 }

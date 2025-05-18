@@ -21,20 +21,22 @@ public class ParsedMove(sbyte player, char moveType, bool isHorizontal, sbyte in
 
 	public static ParsedMove Create(string code)
 	{
+		// Split the code into parts using '_' as the delimiter
 		string[] parts = code.Split('_');
-		int previousIndex = parts.Length > 1 ? int.Parse(parts[1]) : -1;
+		code = parts[0];
 
-		code = parts[0];	
-		sbyte player = sbyte.Parse(code[0].ToString());
-		char[] moveType = code[1].ToString().ToCharArray();
-		char dir = code[2];
-		sbyte index = sbyte.Parse(code[3..]);
+		int previousIndex = parts.Length > 1 ? int.Parse(parts[1]) : -1; // Get the previous index, used for undoing moves
+		sbyte player = sbyte.Parse(code[0].ToString()); // Parse the player number
+		char[] moveType = code[1].ToString().ToCharArray(); // Parse the move type
+		char dir = code[2]; // Parse the direction
+		sbyte index = sbyte.Parse(code[3..]); // Parse the index
 		
+		// Return a new ParsedMove object with the parsed values
 		return new ParsedMove(
 			player,
 			moveType[0],
 			dir == '+',
-            index,
+			index,
 			(sbyte)(previousIndex == -1 ? -1 : previousIndex));
 	}
 

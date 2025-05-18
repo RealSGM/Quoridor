@@ -5,16 +5,10 @@ using System.Linq;
 [GlobalClass]
 public partial class Algorithms : Node
 {
-	/// <summary>
-	/// Checks if there is a valid path from the start tile to any of the goal tiles for the given player.
-	/// </summary>
-	/// <param name="board"></param>
-	/// <param name="startTile"></param>
-	/// <param name="goalTiles"></param>
-	/// <param name="player"></param>
-	/// <returns></returns>
-	public static bool IsValidPath(BoardState board, int startTile, HashSet<int> goalTiles, int player)
+	public static bool IsValidPath(BoardState board, int player)
 	{
+		int startTile = board.GetPawnTile(player);
+		HashSet<int> goalTiles = [.. Helper.GetGoalTiles(player)];
 		HashSet<int> visited = [startTile];
 		Stack<int> stack = new();
 		stack.Push(startTile);
@@ -37,12 +31,6 @@ public partial class Algorithms : Node
 		return false;
 	}
 
-	/// <summary>
-	/// Finds the shortest path from the player's current tile to any of the goal tiles.
-	/// </summary>
-	/// <param name="board"></param>
-	/// <param name="player"></param>
-	/// <returns>An array of tile indices representing the path from the start tile to the goal tile.</returns>
 	public static int[] GetPathToGoal(BoardState board, int player)
 	{
 		HashSet<int> goalTiles = [.. Helper.GetGoalTiles(player)];
