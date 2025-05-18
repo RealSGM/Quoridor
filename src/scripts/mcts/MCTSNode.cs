@@ -28,7 +28,7 @@ public class MCTSNode(MCTSNode parent, BoardState state, int currentplayer, Pars
 
 			double winRate = (double)child.Wins / child.Visits;
 			double explorationTerm = explorationConstant * Math.Sqrt(Math.Log(totalVisits) / child.Visits);
-			double movementBias = (child.LastMove != null && child.LastMove.MoveType == 'm') ? 0.2 : 0; // Movement bias for pawn moves
+			double movementBias = (child.LastMove != null && child.LastMove.MoveType == 'm') ? 0.1 : 0; // Movement bias for pawn moves
 			return winRate + explorationTerm + movementBias;
 		});
 	}
