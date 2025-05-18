@@ -73,6 +73,17 @@ def parse_data(key: str):
     print(f"Average fences remaining for {key}: {average_fences_remaining}")
     print("--------------------")
 
+    # Plot average fences remaining
+    turns = list(range(1, len(average_fences_remaining) + 1))
+    plt.figure(figsize=(10, 6))
+    plt.plot(turns, average_fences_remaining, marker='o', linestyle='-', color='blue')
+    plt.title(f'Average Fences Remaining Over Turns ({key})')
+    plt.xlabel('Turn Number')
+    plt.ylabel('Average Fences Remaining')
+    plt.grid(True)
+    plt.show()
+
+
 if __name__ == '__main__':
     load_data()
     for key in data:
