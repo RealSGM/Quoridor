@@ -35,6 +35,7 @@ public partial class MCTSAlgorithm : Node
 		}
 		
 		MCTSNode bestChild = root.Children.OrderByDescending(c => c.Visits).First();
+		int pawnMoves = bestChild.State.GetLastMove().Contains('m') ? 1 : 0;
 
 		Console.Call("add_entry", "Found Best Move in " + (Time.GetTicksMsec() - startTime) + " ms", 0);
 		Console.Call("add_entry", $"Best Move: {bestChild.State.GetLastMove()}, Wins: {bestChild.Wins}, Visits: {bestChild.Visits}", 0);
@@ -44,6 +45,6 @@ public partial class MCTSAlgorithm : Node
 		SignalManager.EmitSignal("data_collected", this, "current_turn", 1);
 		SignalManager.EmitSignal("data_collected", this, "nodes_searched_cumulative", root.Visits);
 		SignalManager.EmitSignal("data_collected", this, "move_speeds_cumulative", Time.GetTicksMsec() - startTime);
-		if (bestChild.State.GetLastMove().Contains('m')) SignalManager.EmitSignal("data_collected", this, "pawn_moves_cumulative", 1);
+		SignalManager.EmitSignal("data_collected", this, "pawn_moves_cumulative", pawnMoves);
 	}
 }

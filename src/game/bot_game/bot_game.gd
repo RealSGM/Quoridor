@@ -11,6 +11,7 @@ func _ready() -> void:
 	user_interface.is_bots = true
 	turn_ready = true
 	SignalManager.move_selected.connect(_on_move_selected)
+	AlgorithmManager.start_new_game()
 
 
 func set_current_player(val: int) -> void:
@@ -24,6 +25,11 @@ func set_current_player(val: int) -> void:
 	turn_ready = false
 	play_turn()
 	turn_ready = true
+
+
+func reset_board() -> void:
+	super.reset_board()
+	AlgorithmManager.start_new_game()
 
 
 func confirm_place_fence(fence: int, direction: int) -> void:
@@ -48,11 +54,7 @@ func update_winner(player: int) -> void:
 	SignalManager.data_collected.emit(winning_algorithm, "wins", 1)
 	SignalManager.data_collected.emit(winning_algorithm, "games_played", 1)
 	SignalManager.data_collected.emit(losing_algorithm, "games_played", 1)
-
-	# Reset the current turn for both algorithms, set to -1 as another signal updates it to 0
-	AlgorithmManager.algorithm_data[winning_algorithm]["current_turn"] = -1
-	AlgorithmManager.algorithm_data[losing_algorithm]["current_turn"] = 0
-	AlgorithmManager.save_algorithm_data()
+	AlgorithmManager.end_game()
 
 	if autoplay_button.is_pressed():
 		user_interface._on_reset_button_pressed()

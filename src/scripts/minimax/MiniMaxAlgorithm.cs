@@ -31,25 +31,25 @@ public partial class MiniMaxAlgorithm : Node
 		nodesVisited = 1;
 		Stopwatch stopwatch = new();
 		stopwatch.Start();
-		// Debugging ---
 
 		BoardState board = wrapper.State.Clone();
 		ValueTuple<int, string> bestMoveTuple = MiniMax(board, START_DEPTH, currentPlayer, currentPlayer, int.MinValue, int.MaxValue);
 		string bestMove = bestMoveTuple.Item2;
-		SignalManager.EmitSignal("move_selected", bestMove);
 
 		// Debugging ---
 		stopwatch.Stop();
 		long milliseconds = (long)(stopwatch.ElapsedTicks * (1_000.0 / Stopwatch.Frequency));
+		int pawnMoves = bestMove.Contains('m') ? 1 : 0;
+
 		Console.Call("add_entry", $"Best Move: {bestMove}, Value: {bestMoveTuple.Item1}", 0);
 		Console.Call("add_entry", $"Nodes Visited: {nodesVisited}, Time: {milliseconds}ms", 0);
-
+		
+		SignalManager.EmitSignal("move_selected", bestMove);
 		SignalManager.EmitSignal("data_collected", this, "moves_made_cumulative", 1);
 		SignalManager.EmitSignal("data_collected", this, "current_turn", 1);
 		SignalManager.EmitSignal("data_collected", this, "nodes_searched_cumulative", nodesVisited);
 		SignalManager.EmitSignal("data_collected", this, "move_speeds_cumulative", milliseconds);
-		if (bestMove.Contains('m')) SignalManager.EmitSignal("data_collected", this, "pawn_moves_cumulative", 1);
-		// Debugging ---
+		SignalManager.EmitSignal("data_collected", this, "pawn_moves_cumulative", pawnMoves);
 	}
 
 	private (int v, string m) MiniMax(BoardState board, int depth, int currentPlayer, int maximisingPlayer, int alpha, int beta)

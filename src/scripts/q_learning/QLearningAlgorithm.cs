@@ -48,13 +48,12 @@ public partial class QLearningAlgorithm : Node
 		}
 
 		stateKey = null;
+		int pawnMoves = bestMove.Contains('m') ? 1 : 0;
 
-		// Debugging ---
 		SignalManager.EmitSignal("move_selected", bestMove);
 		SignalManager.EmitSignal("data_collected", this, "moves_made_cumulative", 1);
 		SignalManager.EmitSignal("data_collected", this, "current_turn", 1);
-		if (bestMove.Contains('m')) SignalManager.EmitSignal("data_collected", this, "pawn_moves_cumulative", 1);
-		// Debugging ---
+		SignalManager.EmitSignal("data_collected", this, "pawn_moves_cumulative", pawnMoves);
 	}
 
 	#region Training ---

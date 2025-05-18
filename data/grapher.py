@@ -1,35 +1,45 @@
 import json
 import matplotlib.pyplot as plt
-import numpy as np
+import os
 
 data = {}
 FILE_NAME = 'data/algorithm_data.json'
+SAVE_FILE = 'data/processed_data.json'
+GRAPH_DIR = 'data/graphs'
 
-'''
-    {
-        "mcts": {
-            "current_turn": 1,
-            "fences_remaining_cumulative": [
-            ],
-            "games_played": 28.0,
-            "move_speeds_cumulative": [
-            ],
-            "moves_made_cumulative": [
-            ],
-            "nodes_searched_cumulative": [
-            ],
-            "pawn_moves_cumulative": [
-            ],
-            "wins": 0.0
-        },
-    }
-'''
+processed_data = {}
+
+# Ensure graph directory exists
+os.makedirs(GRAPH_DIR, exist_ok=True)
+
+def save_data():
+    with open(SAVE_FILE, 'w') as f:
+        json.dump(processed_data, f, indent=4)
+    print(f"Processed data saved to {SAVE_FILE}")
+
+def graph_data(data: list, name: str):
+    # Plot average fences remaining
+    turns = list(range(1, len(data) + 1))
+    plt.figure(figsize=(10, 6))
+    plt.plot(turns, data, marker='o', linestyle='-', color='blue')
+    plt.title(f'Average {name.capitalize()} Over Turns')
+    plt.xlabel('Turn Number')
+    plt.ylabel(f'Average {name.capitalize()}')
+    plt.grid(True)
+    
+    os.makedirs(f"{GRAPH_DIR}/{key}", exist_ok=True)
+
+    # Save plot to file
+    filename = f"{GRAPH_DIR}/{key}/{name}.png"
+    plt.savefig(filename)
+    plt.close()  # Close plot to free memory
+
+    print(f"Plot saved to: {filename}")
 
 def load_data():
     global data
     with open(FILE_NAME, 'r') as f:
         data = json.load(f)
-
 
 def parse_data(key: str):
     if key not in data:
@@ -55,36 +65,41 @@ def parse_data(key: str):
     average_pawn_moves = total_pawn_moves / games_played if games_played > 0 else 0
     average_game_length = total_moves / games_played if games_played > 0 else 0
     
-    average_fences_remaining = []
+    average_fences_remaining = [
+        round(f / m, 2) if m > 0 else 0
+        for f, m in zip(fences_cumulative, moves_cumulative)
+    ]
     
-    for i in range(len(fences_cumulative)):
-        fences_remaining = fences_cumulative[i]
-        if len(moves_cumulative) <= i:
-            continue
-        moves_made = moves_cumulative[i]
-        average_fences = round(fences_remaining / moves_made, 2) if moves_made > 0 else 0
-        average_fences_remaining.append(average_fences)
-        
-    print(f"Win rate for {key}: {average_win_rate:.2%}")
-    print(f"Average move speed for {key}: {average_move_speed:.2f}")
-    print(f"Average nodes searched for in a game of {key}: {average_nodes:.2f}")
-    print(f"Average pawn moves in a game of {key}: {average_pawn_moves:.2f}")
-    print(f"Average game length for {key}: {average_game_length:.2f}")
-    print(f"Average fences remaining for {key}: {average_fences_remaining}")
-    print("--------------------")
-
-    # Plot average fences remaining
-    turns = list(range(1, len(average_fences_remaining) + 1))
-    plt.figure(figsize=(10, 6))
-    plt.plot(turns, average_fences_remaining, marker='o', linestyle='-', color='blue')
-    plt.title(f'Average Fences Remaining Over Turns ({key})')
-    plt.xlabel('Turn Number')
-    plt.ylabel('Average Fences Remaining')
-    plt.grid(True)
-    plt.show()
-
+    average_nodes = [
+        round(n / m, 2) if m > 0 else 0
+        for n, m in zip(nodes_cumulative, moves_cumulative)
+    ]
+    
+    average_pawn_moves = [
+        round(p / m, 2) if m > 0 else 0
+        for p, m in zip(pawn_moves_cumulative, moves_cumulative)
+    ]
+    
+    average_speeds = [
+        round(s / m, 2) if m > 0 else 0
+        for s, m in zip(move_speeds_cumulative, moves_cumulative)
+    ]
+    
+    processed_data[key] = {
+        'win_rate': average_win_rate,
+        'move_speed': average_move_speed,
+        'nodes': average_nodes,
+        'pawn_moves': average_pawn_moves,
+        'game_length': average_game_length
+    }
+    
+    graph_data(average_fences_remaining, 'Fences Remaining')
+    graph_data(average_nodes, 'Nodes')
+    graph_data(average_pawn_moves, 'Pawn Moves')
+    graph_data(average_speeds, 'Move Speeds')
 
 if __name__ == '__main__':
     load_data()
     for key in data:
         parse_data(key)
+    save_data()
