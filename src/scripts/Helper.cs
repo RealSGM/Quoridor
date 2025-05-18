@@ -7,12 +7,9 @@ using Godot;
 [GlobalClass]
 public partial class Helper : Node
 {
-	public static readonly int[] Bits = [0, 1]; // General purpose bits
 	public static readonly Random Random = new();
+	public static readonly int[] Bits = [0, 1]; // General purpose bits
 
-	/// <summary>
-	/// Weights for the different types of evaluations
-	/// </summary>
 	public const int PATH_WEIGHT = 20;
 	public const int FENCE_WEIGHT = 10;
 	public const int CENTRALITY_WEIGHT = 10;
@@ -22,9 +19,9 @@ public partial class Helper : Node
 	public const int BitBoardSize = 8;
 	public const int centerRow = BoardSize / 2;
 
-	/// <summary>
-	/// List of functions to get adjacent tiles in the order of North, East, South, West
-	/// </summary>
+	#region Index Mapping ---
+
+	/// List of all functions to get adjacent tiles in respective directions
 	public static readonly List<Func<int, int, int>> AdjacentFunctions =
 	[
 		GetNorthAdjacent,
@@ -33,42 +30,12 @@ public partial class Helper : Node
 		GetWestAdjacent
 	];
 
-	/// <summary>
-	/// Returns the move code as a string
-	/// Template: 0m+12_13, 1m+1_2, 1f+5, 1f-5, 0f+24, 0f-24
-	/// </summary>
-	/// <param name="player"></param>
-	/// <param name="moveType"></param>
-	/// <param name="direction"></param>
-	/// <param name="index"></param>
-	/// <param name="previousIndex"></param>
-	/// <returns>Move code as a string</returns>
-	public static string GetMoveCodeAsString(int player, string moveType, int direction, int index, int previousIndex = -1)
-	{
-		string moveCode = $"{player}{moveType}{GetMappedIndex(index, direction)}";
-		if (previousIndex != -1)
-			moveCode += $"_{previousIndex}";
+	public static int GetNorthAdjacent(int index, int size) => index >= size ? index - size : -1; // Get the index of the tile above
+	public static int GetEastAdjacent(int index, int size) => (index + 1) % size != 0 ? index + 1 : -1; // Get the index of the tile to the right
+	public static int GetSouthAdjacent(int index, int size) => index < size * (size - 1) ? index + size : -1; // Get the index of the tile below
+	public static int GetWestAdjacent(int index, int size) => index % size != 0 ? index - 1 : -1; // Get the index of the tile to the left
 
-		return moveCode;
-	}
-
-	/// <summary>
-	/// Returns the fence index as a string with + and - for direction
-	/// </summary>
-	/// <param name="index"></param>
-	/// <param name="direction"></param>
-	/// <returns>Fence index as a string</returns>
-	public static string GetMappedIndex(int index, int direction) => $"{(direction == 0 ? "+" : "-")}{Math.Abs(index)}";
-
-	public static int[] GetGoalTiles(int player) => [.. Enumerable.Range(player * BitBoardSize * BoardSize, BoardSize)];
-
-	#region Index Mapping ---
-
-	public static int GetNorthAdjacent(int index, int size) => index >= size ? index - size : -1;
-	public static int GetEastAdjacent(int index, int size) => (index + 1) % size != 0 ? index + 1 : -1;
-	public static int GetSouthAdjacent(int index, int size) => index < size * (size - 1) ? index + size : -1;
-	public static int GetWestAdjacent(int index, int size) => index % size != 0 ? index - 1 : -1;
-
+	/// Initalise the corner connections for given index
 	public static int[] InitialiseCornerConnections(int index, int size) =>
 	[
 		GetNorthAdjacent(GetEastAdjacent(index, size), size),
@@ -77,7 +44,7 @@ public partial class Helper : Node
 		GetNorthAdjacent(GetWestAdjacent(index, size), size),
 	];
 
-	// Initalise the NESW connections for given index
+	/// Initalise the NESW connections for given index
 	public static int[] InitialiseConnections(int index, int size) =>
 	[
 		GetNorthAdjacent(index, size),
@@ -88,8 +55,32 @@ public partial class Helper : Node
 
 	#endregion
 
-	#region Tile Mapping ---
+	/// <summary>
+	/// Returns the move code as a string
+	/// </summary>
+	/// <param name="player">Player number</param>
+	/// <param name="moveType">Move type (e.g. "f" for fence)</param>
+	/// <param name="direction">Direction (0 for horizontal, 1 for vertical)</param>
+	/// <param name="index">Index</param>
+	/// <param name="previousIndex">Previous index (optional)</param>
+	/// <returns>Move code as a string</returns>
+	public static string GetMoveCodeAsString(int player, string moveType, int direction, int index, int previousIndex = -1)
+	{
+		string moveCode = $"{player}{moveType}{(direction == 0 ? "+" : "-")}{Math.Abs(index)}";
+		if (previousIndex != -1)
+			moveCode += $"_{previousIndex}";
 
+		return moveCode;
+	}
+
+	#region Tile Mapping ---
+	/// <summary>
+	/// Returns the tile index for a given fence tile
+	/// </summary>
+	/// <param name="tile"></param>
+	/// <param name="offset"></param>
+	/// <param name="cornerIndex"></param>
+	/// <returns>>Tile index for the given fence tile</returns>
 	public static int GetFenceCorner(int tile, int offset, int cornerIndex)
 	{
 		if (tile == -1) return -1;
@@ -98,6 +89,14 @@ public partial class Helper : Node
 		return (row + offset) * BitBoardSize + col + (cornerIndex % 2 == 0 ? -1 : 0);
 	}
 
+	/// <summary>
+	/// Gets the fence index for a given tile index and offsets
+	/// </summary>
+	/// <param name="tile">Tile index</param>
+	/// <param name="verticalOffset">Vertical offset</param>
+	/// <param name="horizontalOffset">Horizontal offset</param>
+	/// <returns>Fence index for the given tile index</returns>
+	/// <remarks>Returns -1 if the tile is out of bounds</remarks>
 	public static int TileToFence(int tile, int verticalOffset, int horizontalOffset)
 	{
 		int row = tile / BoardSize + verticalOffset;
@@ -114,6 +113,7 @@ public partial class Helper : Node
 			TileToFence(tile, 0, -1)  // BottomRight
 		];
 
+	/// Order the connections based on the player
 	public static int[] OrderConnections(int[] tiles, int player)
 	{
 		int[] order = player == 0 ? [0, 1, 3, 2] : [2, 1, 3, 0];
@@ -124,6 +124,7 @@ public partial class Helper : Node
 
 	#region BitBoard Functions ---
 
+	/// Returns the index of all the ones in a bitboard in constant time
 	public static IEnumerable<int> GetOnesInBitBoard(ulong bitboard)
 	{
 		while (bitboard != 0)
@@ -134,6 +135,7 @@ public partial class Helper : Node
 		}
 	}
 
+	/// Gets the fences surrounding a tile
 	public static ulong[] GetFencesSurroundingTile(int index)
 	{
 		ulong mask = GetFenceCorners(index)
@@ -144,31 +146,27 @@ public partial class Helper : Node
 
 	public static ulong[] GetSurroundingFences(int index, int dir)
 	{
-		// Store surrounding fences [Horizontal, Vertical]
-		ulong[] surrFences = [0, 0];
+		ulong[] surrFences = [0, 0]; // Store surrounding fences [Horizontal, Vertical]
 		int[] adjFences = InitialiseConnections(index, BitBoardSize);
 		int oppDir = 1 - dir;
 
 		foreach (int bit in Bits)
 		{
-			// Get the adjacent fence
 			int adjIndex = (2 * bit) + oppDir;
-			int adjFence = adjFences[adjIndex];
+			int adjFence = adjFences[adjIndex]; // Get the adjacent fences
 			if (adjFence == -1) continue;
 
-			// Get the leaped adjacent fence
-			int leapedAdjFence = AdjacentFunctions[adjIndex](adjFence, BitBoardSize);
+			int leapedAdjFence = AdjacentFunctions[adjIndex](adjFence, BitBoardSize); // Get the fence leaped over the adjacent fence
 			if (leapedAdjFence == -1) continue;
 
-			surrFences[dir] |= 1UL << leapedAdjFence;
+			surrFences[dir] |= 1UL << leapedAdjFence; // Set the bit for the leaped adjacent fence
 		}
 
-		// Add perpendicular adjacent fences
-		surrFences[oppDir] |= adjFences
+		surrFences[oppDir] |= adjFences // Add perpendicular adjacent fences
 			.Where(adjFence => adjFence != -1)
 			.Aggregate(0UL, (acc, adjFence) => acc | (1UL << adjFence));
 
-		surrFences[oppDir] |= InitialiseCornerConnections(index, BitBoardSize)
+		surrFences[oppDir] |= InitialiseCornerConnections(index, BitBoardSize) // Add corner connections
 			.Where(connection => connection != -1)
 			.Aggregate(0UL, (acc, connection) => acc | (1UL << connection));
 
@@ -198,4 +196,11 @@ public partial class Helper : Node
 			(list[i], list[j]) = (list[j], list[i]);
 		}
 	}
+	
+	/// <summary>
+	/// Returns an array of indices for the goal tiles for a given player
+	/// </summary>
+	/// <param name="player">Player number</param>
+	/// <returns>Array of goal tile indices</returns>
+	public static int[] GetGoalTiles(int player) => [.. Enumerable.Range(player * BitBoardSize * BoardSize, BoardSize)];
 }

@@ -118,19 +118,17 @@ public class BoardState
 	/// <returns>An array of integers representing the adjacent tiles.</returns>
 	public int[] GetAdjacentTiles(int index)
 	{
-		int[] cons = Helper.InitialiseConnections(index, Helper.BoardSize);
-		int[] corners = Helper.GetFenceCorners(index);
+		int[] cons = Helper.InitialiseConnections(index, Helper.BoardSize); // Get the tile connections
+		int[] corners = Helper.GetFenceCorners(index); // Get the indexes of the fences around the tile
 		int dir = 1;
 
-		// Loop through each connection
-		for (int i = 0; i < cons.Length; i++)
+		for (int i = 0; i < cons.Length; i++) // Loop through each connection
 		{
-			dir = 1 - dir;
-			if (cons[i] == -1) continue;
-			if (corners[i] > -1 && GetFencePlaced(dir, corners[i])) cons[i] = -1;
-			if (corners[(i + 1) % cons.Length] > -1 && GetFencePlaced(dir, corners[(i + 1) % cons.Length])) cons[i] = -1;
+			dir = 1 - dir; // Flip the direction
+			if (cons[i] == -1) continue; // Ignore tiles that are blocked by fences
+			if (corners[i] > -1 && GetFencePlaced(dir, corners[i])) cons[i] = -1; // Check if the tile is blocked by a fence
+			if (corners[(i + 1) % cons.Length] > -1 && GetFencePlaced(dir, corners[(i + 1) % cons.Length])) cons[i] = -1; // Check if the tile is blocked by a fence
 		}
-
 		return cons;
 	}
 
@@ -160,12 +158,12 @@ public class BoardState
 	{
 		int playerTile = GetPawnTile(player);
 		int enemyTile = Pawns[1 - player].Index;
-		HashSet<int> filterSet = [-1, playerTile, enemyTile];
+		HashSet<int> filterSet = [-1, playerTile, enemyTile]; // Tiles which are deemed unreachable
 		List<int> reachables = [];
 
 		foreach (var (tile, direction) in GetAdjacentTiles(playerTile).Select((tile, dir) => (tile, dir)))
 		{
-			if (tile == -1) continue;
+			if (tile == -1) continue; // Ignore tiles that are blocked by fences
 			reachables.AddRange(tile == enemyTile ? GetLeapedTiles(enemyTile, direction, filterSet): [tile]);
 		}
 
@@ -188,10 +186,11 @@ public class BoardState
 	/// <returns></returns>
 	public bool IsFenceEnabled(int dir, int index, bool checkIllegal = true)
 	{
-		if (GetFencePlaced(dir, index)) return false;
-		if (GetFencePlaced(1 - dir, index)) return false;
-		if (checkIllegal && IllegalFences[dir].IsPlaced(index)) return false;
+		if (GetFencePlaced(dir, index)) return false; // Fence in the same direction is already placed
+		if (GetFencePlaced(1 - dir, index)) return false; // Fence in the opposite direction is already placed
+		if (checkIllegal && IllegalFences[dir].IsPlaced(index)) return false; // Fence is illegal
 
+		// Check if the adjacent fences are placed
 		return Helper.Bits.All(bit =>
 		{
 			int adjFence = Helper.AdjacentFunctions[2 * bit + (1 - dir)](index, Helper.BitBoardSize);
@@ -202,24 +201,6 @@ public class BoardState
 	#endregion
 
 	# region Get Moves ---
-
-	/// <summary>
-	/// Returns all the fences that are behind the player.
-	/// </summary>
-	/// <param name="player"></param>
-	/// <returns></returns>
-	public ulong[] GetFencesBehindPlayer(int player)
-	{
-		int goalRow = Helper.GetGoalTiles(player)[0] / Helper.BoardSize;
-		int playerRow = GetPawnTile(player) / Helper.BoardSize;
-		int numRowsToFill = playerRow - goalRow;
-
-		ulong fencesBehind = (1UL << (8 * numRowsToFill)) - 1;
-
-		if (player == 0) fencesBehind = ~fencesBehind;
-
-		return [fencesBehind, fencesBehind];
-	}
 
 	/// <summary>
 	/// Returns all fences that connected to existing fences.
@@ -251,8 +232,7 @@ public class BoardState
 		int[] tiles = GetReachableTiles(player);
 		int playerTile = GetPawnTile(player);
 
-		// Add best moves which are reachable
-		List<int> allMoves = [.. path.Intersect(tiles)];
+		List<int> allMoves = [.. path.Intersect(tiles)]; // Add best moves which are reachable
 
 		// Add reachable tiles to the dictionary, if no best move was found
 		if (allMoves.Count == 0) allMoves.AddRange(tiles);
@@ -261,46 +241,6 @@ public class BoardState
 			.Where(tile => tile != playerTile)
 			.Distinct()
 			.ToArray()];
-	}
-
-	public ulong[] GetFenceMovesSmart(int player)
-	{
-		ulong[] fences = [0, 0];
-
-		if (!HasFences(player)) return fences;
-
-		ulong[] enabledFences = GetEnabledFences();
-		ulong[] surroundingFences = GetAllSurroundingFences();
-		ulong[] fencesBehind = GetFencesBehindPlayer(player);
-		ulong[] enemySurrFences = Helper.GetFencesSurroundingTile(Pawns[1 - player].Index);
-
-		// Loop through both directions
-		foreach (int direction in Helper.Bits)
-		{
-			fences[direction] |= surroundingFences[direction];
-			fences[direction] |= enemySurrFences[direction];
-			fences[direction] |= fencesBehind[direction];
-			fences[direction] &= enabledFences[direction];
-		}
-
-		return fences;
-	}
-
-	public string[] GetAllMovesSmart(int player)
-	{
-		List<string> moves = [];
-
-		// Add all tiles
-		moves.AddRange(GetReachableTilesSmart(player)
-			.Select(tile => Helper.GetMoveCodeAsString(player, "m", 0, tile)));
-
-		ulong[] fences = GetFenceMovesSmart(player);
-
-		moves.AddRange(Helper.Bits.SelectMany(dir => Helper.GetOnesInBitBoard(fences[dir])
-			.Select(i => Helper.GetMoveCodeAsString(player, "f", dir, i))
-		));
-
-		return [.. moves];
 	}
 
 	public ulong[] GetAllFences(int player)
@@ -346,20 +286,17 @@ public class BoardState
 
 		int maximisingPlayerPath = Algorithms.GetPathToGoal(this, maximisingPlayer).Length;
 		int minimisingPlayerPath = Algorithms.GetPathToGoal(this, minimisingPlayer).Length;
-
-		// Value moves makes the player closer to the goal or opponent further away
 		int pathDifference = minimisingPlayerPath - maximisingPlayerPath;
 
-		// Value using less fences
 		int fenceScore = Pawns[maximisingPlayer].FencesRemaining - Pawns[minimisingPlayer].FencesRemaining;
 
-		// Value the player being past the cneter
+		// Flat bonus for being past the center row
 		int playerRow = Pawns[maximisingPlayer].Index / Helper.BoardSize;
 		int centralityScore = (maximisingPlayer == 0)
 			? (playerRow <= Helper.centerRow ? 1 : -1)
 			: (playerRow >= Helper.centerRow ? 1 : -1);
 
-		int offset = Helper.Random.Next(0, 10);
+		int offset = Helper.Random.Next(0, 10); // Small offset to break ties
 
 		return centralityScore
 			+ pathDifference * Helper.PATH_WEIGHT

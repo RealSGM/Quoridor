@@ -28,7 +28,7 @@ public class MCTSNode(MCTSNode parent, BoardState state, int currentplayer, Pars
 
 			double winRate = (double)child.Wins / child.Visits;
 			double explorationTerm = explorationConstant * Math.Sqrt(Math.Log(totalVisits) / child.Visits);
-			double movementBias = (child.LastMove != null && child.LastMove.MoveType == 'm') ? 0.2 : 0;
+			double movementBias = (child.LastMove != null && child.LastMove.MoveType == 'm') ? 0.2 : 0; // Movement bias for pawn moves
 			return winRate + explorationTerm + movementBias;
 		});
 	}
@@ -39,15 +39,15 @@ public class MCTSNode(MCTSNode parent, BoardState state, int currentplayer, Pars
 		string[] allMoves = State.GetAllMoves(CurrentPlayer);
 
 		HashSet<StateKey> exploredKeys = [.. Children.Select(c => c.State.GetStateKey())];
-		Helper.Shuffle(allMoves, Helper.Random);
+		Helper.Shuffle(allMoves, Helper.Random); // Shuffle moves to ensure randomness
 
-		foreach (string move in allMoves)
+		foreach (string move in allMoves) // Add all moves as children
 		{
 			BoardState simState = State.Clone();
 			simState.AddMove(move);
 			StateKey simKey = simState.GetStateKey();
 
-			if (exploredKeys.Contains(simKey)) continue;
+			if (exploredKeys.Contains(simKey)) continue; // Ignore explored states
 
 			ParsedMove parsedMove = ParsedMove.Create(move);
 			MCTSNode child = new(this, simState, 1 - CurrentPlayer, parsedMove);
@@ -62,6 +62,7 @@ public class MCTSNode(MCTSNode parent, BoardState state, int currentplayer, Pars
 		int depth = 0;
 		int currentPlayer = CurrentPlayer;
 
+		// Perform a random simulation until the game is over or max depth is reached
 		while (!tempState.IsGameOver() && depth < maxPlayoutDepth)
 		{
 			IllegalFenceCheck.GetIllegalFences(tempState);

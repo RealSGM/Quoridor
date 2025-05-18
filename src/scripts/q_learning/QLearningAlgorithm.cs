@@ -103,21 +103,20 @@ public partial class QLearningAlgorithm : Node
 
 	public void ExploreState(BoardState board, int currentPlayer, StateKey key)
 	{
+		// Check if the state is already in the QTable
 		if (!QTable.TryGetValue(key, out Dictionary<string, float> value))
 		{
 			value = [];
 			QTable[key] = value;
 		}
 
-		// Get all possible moves for the current player
-		string[] allMoves = board.GetAllMoves(currentPlayer);
+		string[] allMoves = board.GetAllMoves(currentPlayer); // Get all possible moves for the current player
 
-		// Loop through all possible moves
-		foreach (string action in allMoves)
+		foreach (string action in allMoves) // Loop through all possible moves
 		{
-			if (value.ContainsKey(action)) continue;
-			// Clone the board and apply the action
-			BoardState newBoard = board.Clone();
+			if (value.ContainsKey(action)) continue; // Skip if already trained
+
+			BoardState newBoard = board.Clone(); // Clone the board and apply the action
 			newBoard.AddMove(action);
 
 			// Get the new state key after the action
@@ -133,17 +132,16 @@ public partial class QLearningAlgorithm : Node
 	public string ChooseAction(StateKey stateKey, int currentPlayer, BoardState board)
 	{
 		ulong[] fences = board.GetAllFences(currentPlayer);
-		string[] fenceMoves = [.. Helper.Bits
-			.SelectMany(dir => Helper.GetOnesInBitBoard(fences[dir])
-			.Select(i => Helper.GetMoveCodeAsString(currentPlayer, "f", dir, i)))];
 
+		string[] allMoves = board.GetAllMoves(currentPlayer); // Get all possible moves for the current player
 		string[] pawnMoves = [.. board
 			.GetReachableTilesSmart(currentPlayer)
-			.Select(tile => Helper.GetMoveCodeAsString(currentPlayer, "m", 0, tile))];
+			.Select(tile => Helper.GetMoveCodeAsString(currentPlayer, "m", 0, tile))]; // Get all pawn moves
+		string[] fenceMoves = [.. Helper.Bits
+			.SelectMany(dir => Helper.GetOnesInBitBoard(fences[dir])
+			.Select(i => Helper.GetMoveCodeAsString(currentPlayer, "f", dir, i)))]; // Get all fence moves
 
-		string[] allMoves = board.GetAllMoves(currentPlayer);
-
-		// Exploration
+		// Exploitation - Pick the move wiith the highest Q value
 		if (Helper.Random.NextDouble() > epsilon)
 		{
 			float maxQ = allMoves.Max(action => GetQValue(stateKey, action));
@@ -151,7 +149,7 @@ public partial class QLearningAlgorithm : Node
 			return bestMoves[Helper.Random.Next(bestMoves.Length)];
 		}
 
-		// Exploitation
+		// Exploration - Pick a random move, 50% chance to pick a fence move
 		if (fenceMoves.Length > 0 && Helper.Random.NextDouble() > 0.5f)
 			return fenceMoves[Helper.Random.Next(fenceMoves.Length)];
 
@@ -160,10 +158,7 @@ public partial class QLearningAlgorithm : Node
 
 	public static float GetReward(int currentPlayer, BoardState board, BoardState prevBoard)
 	{
-		if (board.IsGameOver())
-			return board.IsWinner(currentPlayer) ? 100f : -100f;
-
-		float reward = 0f;
+		if (board.IsGameOver()) return board.IsWinner(currentPlayer) ? 100f : -100f; // Game over, reward based on winner
 
 		int[] oldOpponentPath = Algorithms.GetPathToGoal(prevBoard, 1 - currentPlayer);
 		int[] newOpponentPath = Algorithms.GetPathToGoal(board, 1 - currentPlayer);
@@ -171,7 +166,7 @@ public partial class QLearningAlgorithm : Node
 		int[] oldPlayerPath = Algorithms.GetPathToGoal(prevBoard, currentPlayer);
 		int[] newPlayerPath = Algorithms.GetPathToGoal(board, currentPlayer);
 
-		reward += (oldPlayerPath.Length - newPlayerPath.Length) * 0.25f;
+		float reward = (oldPlayerPath.Length - newPlayerPath.Length) * 0.25f;
 		reward += (newOpponentPath.Length - oldOpponentPath.Length) * 0.5f;
 
 		return reward;

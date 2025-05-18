@@ -1,5 +1,4 @@
 using Godot;
-using System.Collections.Generic;
 using System.Linq;
 
 [GlobalClass]
@@ -14,15 +13,14 @@ public partial class IllegalFenceCheck : Node
 
 	public static void GetIllegalFences(BoardState board)
 	{
-		ulong[] possibleFences = board.GetEnabledFences(false);
-		ulong[] surroundingFences = [];
-
-		surroundingFences = board.LastMove != null && board.LastMove.MoveType == 'm'
+		ulong[] possibleFences = board.GetEnabledFences(false); // Get the enabled fences, ignoring illegal ones
+		// If the last move was a pawn movement, get the fences surrounding that tile
+		// Otherwise, get all surrounding fences
+		ulong[] surroundingFences = board.LastMove != null && board.LastMove.MoveType == 'm'
 			? Helper.GetFencesSurroundingTile(board.LastMove.Index)
 			: board.GetAllSurroundingFences();
-
-		// Perform bitwise AND operation on each pair
-		possibleFences = [.. possibleFences.Zip(surroundingFences, (pf, sf) => pf & sf)];
+		
+		possibleFences = [.. possibleFences.Zip(surroundingFences, (pf, sf) => pf & sf)]; // Perform bitwise AND operation on each pair
 
 		foreach (int dir in Helper.Bits)
 		{
@@ -30,6 +28,7 @@ public partial class IllegalFenceCheck : Node
 			{
 				foreach (int player in Helper.Bits)
 				{
+					// Reset Illegal Fence and check
 					board.GetIllegalFences()[dir].UndoSetPlaced(index);
 					if (!IsFenceIllegal(board, player, dir, index)) continue;
 					board.GetIllegalFences()[dir].SetPlaced(index);
@@ -62,7 +61,7 @@ public partial class IllegalFenceCheck : Node
 	public static bool IsFenceIllegal(BoardState board, int player, int direction, int fence)
 	{
 		BoardState boardClone = board.Clone();
-		boardClone.PlaceFence(player, direction, fence);
-		return !Algorithms.IsValidPath(boardClone, player);
+		boardClone.PlaceFence(player, direction, fence); // Place the fence on the clone
+		return !Algorithms.IsValidPath(boardClone, player); // Run a DFS to check if the path is valid
 	}
 }
