@@ -86,7 +86,7 @@ func load_algorithm_data() -> void:
 	if content.has("qlearning"):
 		algorithm_data[qlearning] = content["qlearning"]
 	if content.has("randomai"):
-		algorithm_data[random_ai] = content["qlearning"]
+		algorithm_data[random_ai] = content["randomai"]
 
 
 func start_new_game() -> void:
