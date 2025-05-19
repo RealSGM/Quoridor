@@ -1,6 +1,7 @@
 import json
 import matplotlib.pyplot as plt
 import os
+import numpy as np
 
 data = {}
 FILE_NAME = 'data/algorithm_data.json'
@@ -12,6 +13,10 @@ processed_data = {}
 # Ensure graph directory exists
 os.makedirs(GRAPH_DIR, exist_ok=True)
 
+metric_labels = {
+    'win_rate': 'Win Rate',
+}
+
 # Store per-metric data to graph after parsing all
 metric_lines = {
     'Fences Remaining': {},
@@ -20,10 +25,35 @@ metric_lines = {
     'Move Speeds': {}
 }
 
-def save_data():
-    with open(SAVE_FILE, 'w') as f:
-        json.dump(processed_data, f, indent=4)
-    print(f"Processed data saved to {SAVE_FILE}")
+def graph_single_metric_bar(processed_data: dict, metric: str, output_dir='data/graphs'):
+    # Capitalize and format the metric name for the title
+    formatted_name = metric.replace('_', ' ').title()
+    
+    # Extract algorithm names and metric values
+    algorithms = list(processed_data.keys())
+    values = [processed_data[algo].get(metric, 0) for algo in algorithms]
+
+    # Plot bar graph
+    plt.figure(figsize=(10, 6))
+    bars = plt.bar(algorithms, values, color='skyblue', edgecolor='black')
+    
+    # Annotate bars with values
+    for bar, value in zip(bars, values):
+        height = bar.get_height()
+        plt.text(bar.get_x() + bar.get_width() / 2, height, f'{value:.2f}',
+            ha='center', va='bottom', fontsize=10)
+
+    plt.title(f'{formatted_name} by Algorithm')
+    plt.xlabel('Algorithm')
+    plt.ylabel(formatted_name)
+    plt.grid(axis='y', linestyle='--', alpha=0.6)
+
+    os.makedirs(output_dir, exist_ok=True)
+    filename = f'{output_dir}/{metric}.png'
+    plt.tight_layout()
+    plt.savefig(filename)
+    plt.close()
+    print(f'Bar graph saved to: {filename}')
 
 def graph_data_all_algorithms(metric_data: dict, metric_name: str):
     plt.figure(figsize=(10, 6))
@@ -42,6 +72,11 @@ def graph_data_all_algorithms(metric_data: dict, metric_name: str):
     plt.savefig(filename)
     plt.close()
     print(f"Plot saved to: {filename}")
+
+def save_data():
+    with open(SAVE_FILE, 'w') as f:
+        json.dump(processed_data, f, indent=4)
+    print(f"Processed data saved to {SAVE_FILE}")
 
 def load_data():
     global data
@@ -121,5 +156,7 @@ if __name__ == '__main__':
     # Plot each metric with all algorithms
     for metric_name, algo_data in metric_lines.items():
         graph_data_all_algorithms(algo_data, metric_name)
+    
+    graph_single_metric_bar(processed_data, 'win_rate')
 
     save_data()
