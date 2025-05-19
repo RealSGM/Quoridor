@@ -12,32 +12,42 @@ processed_data = {}
 # Ensure graph directory exists
 os.makedirs(GRAPH_DIR, exist_ok=True)
 
+# Store per-metric data to graph after parsing all
+metric_lines = {
+    'Fences Remaining': {},
+    'Nodes': {},
+    'Pawn Moves': {},
+    'Move Speeds': {}
+}
+
 def save_data():
     with open(SAVE_FILE, 'w') as f:
         json.dump(processed_data, f, indent=4)
     print(f"Processed data saved to {SAVE_FILE}")
 
-def graph_data(data: list, name: str):
-    # Plot average fences remaining
-    turns = list(range(1, len(data) + 1))
+def graph_data_all_algorithms(metric_data: dict, metric_name: str):
     plt.figure(figsize=(10, 6))
-    plt.plot(turns, data, marker='o', linestyle='-', color='blue')
-    plt.title(f'Average {name.capitalize()} Over Turns')
-    plt.xlabel('Turn Number')
-    plt.ylabel(f'Average {name.capitalize()}')
-    plt.grid(True)
     
-    os.makedirs(f"{GRAPH_DIR}/{key}", exist_ok=True)
-
-    # Save plot to file
-    filename = f"{GRAPH_DIR}/{key}/{name}.png"
+    for algo_name, values in metric_data.items():
+        turns = list(range(1, len(values) + 1))
+        plt.plot(turns, values, marker='o', linestyle='-', label=algo_name)
+    
+    plt.title(f'Average {metric_name} As Game Progresses')
+    plt.xlabel('Round Number')
+    plt.ylabel(f'Average {metric_name}')
+    plt.grid(True)
+    plt.legend()
+    
+    filename = f"{GRAPH_DIR}/{metric_name.replace(' ', '_').lower()}.png"
     plt.savefig(filename)
-    plt.close()  # Close plot to free memory
-
+    plt.close()
     print(f"Plot saved to: {filename}")
 
 def load_data():
     global data
+    if not os.path.exists(FILE_NAME) or os.stat(FILE_NAME).st_size == 0:
+        print(f"File {FILE_NAME} is missing or empty.")
+        return
     with open(FILE_NAME, 'r') as f:
         data = json.load(f)
 
@@ -45,26 +55,29 @@ def parse_data(key: str):
     if key not in data:
         return None
     print(f"Parsing data for {key}...")
+
+    d = data[key]
     
-    wins = float(data[key]['wins'])
-    games_played = float(data[key]['games_played'])
-    fences_cumulative = data[key]['fences_remaining_cumulative']
-    moves_cumulative = data[key]['moves_made_cumulative']
-    move_speeds_cumulative = data[key]['move_speeds_cumulative']
-    nodes_cumulative = data[key]['nodes_searched_cumulative']
-    pawn_moves_cumulative = data[key]['pawn_moves_cumulative']
+    wins = float(d['wins'])
+    games_played = float(d['games_played'])
+    fences_cumulative = d['fences_remaining_cumulative']
+    moves_cumulative = d['moves_made_cumulative']
+    move_speeds_cumulative = d['move_speeds_cumulative']
+    nodes_cumulative = d['nodes_searched_cumulative']
+    pawn_moves_cumulative = d['pawn_moves_cumulative']
     
     total_moves = sum(moves_cumulative)
-    total_moves_speed = sum(move_speeds_cumulative)
+    total_move_speed = sum(move_speeds_cumulative)
     total_nodes = sum(nodes_cumulative)
     total_pawn_moves = sum(pawn_moves_cumulative)
-    
+
     average_win_rate = wins / games_played if games_played > 0 else 0
-    average_move_speed = total_moves_speed / total_moves if total_moves > 0 else 0
-    average_nodes = total_nodes / games_played if games_played > 0 else 0
-    average_pawn_moves = total_pawn_moves / games_played if games_played > 0 else 0
+    average_move_speed = total_move_speed / total_moves if total_moves > 0 else 0
+    average_nodes_total = total_nodes / games_played if games_played > 0 else 0
+    average_pawn_moves_total = total_pawn_moves / games_played if games_played > 0 else 0
     average_game_length = total_moves / games_played if games_played > 0 else 0
-    
+
+    # Per-turn averages
     average_fences_remaining = [
         round(f / m, 2) if m > 0 else 0
         for f, m in zip(fences_cumulative, moves_cumulative)
@@ -85,21 +98,28 @@ def parse_data(key: str):
         for s, m in zip(move_speeds_cumulative, moves_cumulative)
     ]
     
+    # Store for final output
     processed_data[key] = {
         'win_rate': average_win_rate,
         'move_speed': average_move_speed,
-        'nodes': average_nodes,
-        'pawn_moves': average_pawn_moves,
+        'nodes': average_nodes_total,
+        'pawn_moves': average_pawn_moves_total,
         'game_length': average_game_length
     }
-    
-    graph_data(average_fences_remaining, 'Fences Remaining')
-    graph_data(average_nodes, 'Nodes')
-    graph_data(average_pawn_moves, 'Pawn Moves')
-    graph_data(average_speeds, 'Move Speeds')
+
+    # Store for global graphing
+    metric_lines['Fences Remaining'][key] = average_fences_remaining
+    metric_lines['Nodes'][key] = average_nodes
+    metric_lines['Pawn Moves'][key] = average_pawn_moves
+    metric_lines['Move Speeds'][key] = average_speeds
 
 if __name__ == '__main__':
     load_data()
     for key in data:
         parse_data(key)
+
+    # Plot each metric with all algorithms
+    for metric_name, algo_data in metric_lines.items():
+        graph_data_all_algorithms(algo_data, metric_name)
+
     save_data()
