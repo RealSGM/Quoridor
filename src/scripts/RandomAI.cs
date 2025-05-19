@@ -27,10 +27,10 @@ public partial class RandomAI : Node
 			.SelectMany(dir => Helper.GetOnesInBitBoard(fences[dir])
 			.Select(i => Helper.GetMoveCodeAsString(currentPlayer, "f", dir, i)))]; // Get all fence moves
 
-		string[] chosenMoveList = Helper.Random.Next() > 0.5f && board.HasFences(currentPlayer) ? pawnMoves : fenceMoves;
+		bool isFence = Helper.Random.NextDouble() > 0.5f && board.HasFences(currentPlayer);
+		string[] chosenMoveList = isFence ? fenceMoves : pawnMoves;
 		int randomIndex = Helper.Random.Next(chosenMoveList.Length);
 		string bestMove = chosenMoveList[randomIndex];
-
 		int isPawn = bestMove.Contains('m') ? 1 : 0;
 
 		SignalManager.EmitSignal("move_selected", bestMove);
