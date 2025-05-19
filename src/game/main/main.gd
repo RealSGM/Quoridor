@@ -46,7 +46,7 @@ extends Control
 
 @export_category("Game Settings")
 @export var board_dimensions: float = 800
-@export var algorithm_names: Array[String] = ["Minimax", "MCTS"]
+@export var algorithm_names: Array[String] = ["Minimax", "MCTS", "QLearning", "Random"]
 
 @export var global_options: Array[BoxContainer] = [board_container]
 @export var player_containers: Array[VBoxContainer] = [player_one_container, player_two_container, bot_one_container, bot_two_container]
@@ -110,8 +110,8 @@ func setup_algorithm_names() -> void:
 		bot_two_algorithms.add_item(algo)
 
 	# Set the option to the latest added algorithm
-	bot_one_algorithms.selected = algorithm_names.size() - 1
-	bot_two_algorithms.selected = algorithm_names.size() - 1
+	bot_one_algorithms.selected = 0
+	bot_two_algorithms.selected = 0
 	bot_one_algorithms.clear_radio_boxes()
 	bot_two_algorithms.clear_radio_boxes()
 

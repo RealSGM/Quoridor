@@ -51,6 +51,8 @@ func _on_undo_button_pressed() -> void:
 func update_winner(player: int) -> void:
 	var winning_algorithm: Node = AlgorithmManager.chosen_algorithms[player]
 	var losing_algorithm: Node = AlgorithmManager.chosen_algorithms[1 - player]
+	print("Game Over! Winner: %s" % AlgorithmManager.algorithm_nodes[winning_algorithm])
+	print("Game Over! Loser: %s" % AlgorithmManager.algorithm_nodes[losing_algorithm])
 	SignalManager.data_collected.emit(winning_algorithm, "wins", 1)
 	SignalManager.data_collected.emit(winning_algorithm, "games_played", 1)
 	SignalManager.data_collected.emit(losing_algorithm, "games_played", 1)

@@ -1,19 +1,21 @@
-[gd_scene load_steps=5 format=3 uid="uid://bq0o2o8w6hrap"]
+[gd_scene load_steps=6 format=3 uid="uid://bq0o2o8w6hrap"]
 
 [ext_resource type="Script" uid="uid://clbj6blkswnxv" path="res://src/scripts/minimax/MiniMaxAlgorithm.cs" id="1_qqd8t"]
 [ext_resource type="Script" uid="uid://cjucp315derrl" path="res://src/autoload/algorithm_manager/algorithm_manager.gd" id="1_vlcab"]
 [ext_resource type="Script" uid="uid://om5t0k3ij6np" path="res://src/scripts/mcts/MCTSAlgorithm.cs" id="2_vlcab"]
 [ext_resource type="Script" uid="uid://b2rhsdhrxmqjt" path="res://src/scripts/q_learning/QLearningAlgorithm.cs" id="3_qmstv"]
+[ext_resource type="Script" uid="uid://o0x2oka8d600" path="res://src/scripts/RandomAI.cs" id="5_qmstv"]
 
-[node name="AlgorithmManager" type="Node" node_paths=PackedStringArray("algorithms", "minimax", "mcts", "qlearning")]
+[node name="AlgorithmManager" type="Node" node_paths=PackedStringArray("algorithms", "minimax", "mcts", "qlearning", "random_ai")]
 process_thread_group = 2
 process_thread_group_order = 0
 process_thread_messages = 0
 script = ExtResource("1_vlcab")
-algorithms = [NodePath("AI/MiniMax"), NodePath("AI/MCTS"), NodePath("AI/QLearning")]
+algorithms = [NodePath("AI/MiniMax"), NodePath("AI/MCTS"), NodePath("AI/QLearning"), NodePath("AI/RandomAI")]
 minimax = NodePath("AI/MiniMax")
 mcts = NodePath("AI/MCTS")
 qlearning = NodePath("AI/QLearning")
+random_ai = NodePath("AI/RandomAI")
 
 [node name="AI" type="Node" parent="."]
 
@@ -28,3 +30,6 @@ process_thread_group = 2
 process_thread_group_order = 0
 process_thread_messages = 0
 script = ExtResource("3_qmstv")
+
+[node name="RandomAI" type="Node" parent="AI"]
+script = ExtResource("5_qmstv")

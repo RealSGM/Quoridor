@@ -23,6 +23,7 @@ const TOTAL_LIST: Array = [
 @export var minimax: MiniMaxAlgorithm
 @export var mcts: MCTSAlgorithm
 @export var qlearning: QLearningAlgorithm
+@export var random_ai: RandomAI
 
 var chosen_algorithms: Array = [null, null]
 var algorithm_nodes: Dictionary[Node, String] = {}
@@ -37,6 +38,7 @@ func _ready() -> void:
 	algorithm_nodes[minimax] = "minimax"
 	algorithm_nodes[mcts] = "mcts"
 	algorithm_nodes[qlearning] = "qlearning"
+	algorithm_nodes[random_ai] = "randomai"
 
 
 func set_chosen_algorithm(arr_index: int, algo_index: int) -> void:
@@ -52,7 +54,8 @@ func save_algorithm_data() -> void:
 	var json_ready: Dictionary[String, Dictionary] = {
 		"minimax": algorithm_data[minimax],
 		"mcts": algorithm_data[mcts],
-		"qlearning": algorithm_data[qlearning]
+		"qlearning": algorithm_data[qlearning],
+		"randomai": algorithm_data[random_ai],
 	}
 
 	var file: FileAccess = FileAccess.open(FILE_PATH, FileAccess.WRITE)
@@ -71,6 +74,7 @@ func load_algorithm_data() -> void:
 	algorithm_data[minimax] = DATA.duplicate(true)
 	algorithm_data[mcts] = DATA.duplicate(true)
 	algorithm_data[qlearning] = DATA.duplicate(true)
+	algorithm_data[random_ai] = DATA.duplicate(true)
 
 	if not content:
 		return
@@ -81,6 +85,8 @@ func load_algorithm_data() -> void:
 		algorithm_data[mcts] = content["mcts"]
 	if content.has("qlearning"):
 		algorithm_data[qlearning] = content["qlearning"]
+	if content.has("randomai"):
+		algorithm_data[random_ai] = content["qlearning"]
 
 
 func start_new_game() -> void:
@@ -88,6 +94,7 @@ func start_new_game() -> void:
 		mcts: DATA.duplicate(true),
 		minimax: DATA.duplicate(true),
 		qlearning: DATA.duplicate(true),
+		random_ai: DATA.duplicate(true)
 	}
 
 	for key in current_algorithm_data.keys():
