@@ -1,23 +1,30 @@
 {
     "mcts": {
-        "win_rate": 0.0,
-        "move_speed": 12297.90243902439,
-        "nodes": 19680.0,
-        "pawn_moves": 13.46,
-        "game_length": 19.68
+        "win_rate": 0.015267175572519083,
+        "move_speed": 12565.173110893033,
+        "nodes": 19446.564885496184,
+        "pawn_moves": 12.816793893129772,
+        "game_length": 19.446564885496183
     },
     "minimax": {
-        "win_rate": 0.625,
-        "move_speed": 735.9726999140155,
-        "nodes": 249389.91666666666,
-        "pawn_moves": 22.555555555555557,
-        "game_length": 32.30555555555556
+        "win_rate": 0.8453038674033149,
+        "move_speed": 918.5597245309903,
+        "nodes": 228460.94198895028,
+        "pawn_moves": 14.566298342541437,
+        "game_length": 23.265193370165747
     },
     "qlearning": {
-        "win_rate": 0.55,
+        "win_rate": 0.8053892215568862,
         "move_speed": 0.0,
         "nodes": 0.0,
-        "pawn_moves": 23.928571428571427,
-        "game_length": 33.707142857142856
+        "pawn_moves": 16.494011976047904,
+        "game_length": 25.71556886227545
+    },
+    "randomai": {
+        "win_rate": 0.0,
+        "move_speed": 0.0,
+        "nodes": 0.0,
+        "pawn_moves": 8.84,
+        "game_length": 16.61
     }
 }
