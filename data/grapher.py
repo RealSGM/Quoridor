@@ -158,5 +158,6 @@ if __name__ == '__main__':
         graph_data_all_algorithms(algo_data, metric_name)
     
     graph_single_metric_bar(processed_data, 'win_rate')
+    graph_single_metric_bar(processed_data, 'game_length')
 
     save_data()
