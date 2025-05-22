@@ -14,13 +14,11 @@ var fence_buttons: Array[FenceButton] = []
 var move_history: String = ""
 var board_wrapper: BoardWrapper = BoardWrapper.new()
 
-
 ## Update board when the player is changed
 @onready var current_player: int:
 	set(val):
 		current_player = val
 		set_current_player(val)
-
 
 ## Handle updated move_code
 ## If new move_code, clear previous move
@@ -155,7 +153,7 @@ func undo_move() -> String:
 	board_wrapper.SetLastMove(new_last_move)
 
 	# Update the move history
-	move_history = ";" .join(split_history)
+	move_history = ";".join(split_history)
 
 	return last_move
 

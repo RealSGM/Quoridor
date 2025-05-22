@@ -29,6 +29,7 @@ var global_methods: Array
 
 @onready var expression: Expression = Expression.new()
 
+
 func _ready() -> void:
 	hide()
 

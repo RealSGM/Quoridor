@@ -56,11 +56,9 @@ var menu_stack: Array = []
 var game_type: String
 
 @onready var game_type_dict: Dictionary[String, Array] = {
-	"Singleplayer": [player_one_container, bot_two_container],
-	"Multiplayer": [player_one_container, player_two_container],
-	"BotVBot": [bot_one_container, bot_two_container],
-	"QLearning": []
-	}
+	"Singleplayer": [player_one_container, bot_two_container], "Multiplayer": [player_one_container, player_two_container], "BotVBot": [bot_one_container, bot_two_container], "QLearning": []
+}
+
 
 func _input(event: InputEvent) -> void:
 	if event.is_action_pressed("toggle_console"):
@@ -216,7 +214,6 @@ func _on_colour_selected(index: int, prev_index: int, other_button: OptionButton
 	other_button.set_item_disabled(prev_index, false)
 	# Disable the selected colour in the other option button
 	other_button.set_item_disabled(index, true)
-
 
 
 func _on_colour_toggle_toggled(toggled_on: bool) -> void:

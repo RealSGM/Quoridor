@@ -1,6 +1,5 @@
 class_name SingleplayerGame extends BaseGame
 
-
 @export var bot_cover: Control
 
 

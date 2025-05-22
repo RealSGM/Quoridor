@@ -7,6 +7,7 @@ class_name QLearningTraining extends BaseGame
 var is_running: bool = false
 var wait_time: float = waits[2]
 
+
 func _ready() -> void:
 	SignalManager.training_finished.connect(_on_training_finished)
 	SignalManager.move_selected.connect(_on_move_selected)
@@ -80,7 +81,7 @@ func _on_training_finished(winner: int) -> void:
 		user_interface.update_win(winner)
 	else:
 		user_interface.win_label.text = "Error / Draw"
-		is_running = false # NOTE This is for debugging
+		is_running = false  # NOTE This is for debugging
 	if is_running:
 		await get_tree().create_timer(wait_time).timeout
 		user_interface._on_reset_button_pressed()

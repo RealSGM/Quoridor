@@ -18,6 +18,7 @@ var game: BaseGame
 
 var is_outputting: bool = true
 
+
 func help() -> String:
 	Console.show_help()
 	return ""

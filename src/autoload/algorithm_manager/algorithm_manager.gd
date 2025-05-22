@@ -6,11 +6,11 @@ const USER_PATH := "user://algorithm_data.json"
 const DATA: Dictionary = {
 	"games_played": 0,
 	"wins": 0,
-	"move_speeds_cumulative": [], # Sum of move speeds done per each round
-	"fences_remaining_cumulative": [], # Sum of fences remaining per each round
-	"nodes_searched_cumulative": [], # Sum of nodes searched per each round (Minimax only)
-	"moves_made_cumulative": [], # Sum of moves made per each round
-	"pawn_moves_cumulative": [], # Sum of pawn moves per each round
+	"move_speeds_cumulative": [],  # Sum of move speeds done per each round
+	"fences_remaining_cumulative": [],  # Sum of fences remaining per each round
+	"nodes_searched_cumulative": [],  # Sum of nodes searched per each round (Minimax only)
+	"moves_made_cumulative": [],  # Sum of moves made per each round
+	"pawn_moves_cumulative": [],  # Sum of pawn moves per each round
 }
 
 const TOTAL_LIST: Array = [
@@ -19,13 +19,11 @@ const TOTAL_LIST: Array = [
 	"current_turn",
 ]
 
-
 @export var minimax: MiniMaxAlgorithm
 @export var mcts: MCTSAlgorithm
 @export var qlearning: QLearningAlgorithm
 @export var random_ai: RandomAI
 @export var ai_node: Node
-
 
 var chosen_algorithms: Array = [null, null]
 var algorithm_nodes: Dictionary[Node, String] = {}
@@ -99,12 +97,7 @@ func load_algorithm_data() -> void:
 
 
 func start_new_game() -> void:
-	current_algorithm_data = {
-		mcts: DATA.duplicate(true),
-		minimax: DATA.duplicate(true),
-		qlearning: DATA.duplicate(true),
-		random_ai: DATA.duplicate(true)
-	}
+	current_algorithm_data = {mcts: DATA.duplicate(true), minimax: DATA.duplicate(true), qlearning: DATA.duplicate(true), random_ai: DATA.duplicate(true)}
 
 	for key in current_algorithm_data.keys():
 		current_algorithm_data[key]["current_turn"] = 0
