@@ -1,6 +1,7 @@
 extends Node
 
 const FILE_PATH := "data/algorithm_data.json"
+const USER_PATH := "user://algorithm_data.json"
 
 const DATA: Dictionary = {
 	"games_played": 0,
@@ -19,16 +20,19 @@ const TOTAL_LIST: Array = [
 ]
 
 
-@export var algorithms: Array[Node]
 @export var minimax: MiniMaxAlgorithm
 @export var mcts: MCTSAlgorithm
 @export var qlearning: QLearningAlgorithm
 @export var random_ai: RandomAI
+@export var ai_node: Node
+
 
 var chosen_algorithms: Array = [null, null]
 var algorithm_nodes: Dictionary[Node, String] = {}
 var current_algorithm_data: Dictionary[Node, Dictionary] = {}
 var algorithm_data: Dictionary[Node, Dictionary] = {}
+
+@onready var algorithms = ai_node.get_children()
 
 
 func _ready() -> void:
@@ -62,6 +66,11 @@ func save_algorithm_data() -> void:
 	file.store_string(JSON.stringify(json_ready, "\t"))
 	file.close()
 	file = null
+
+	var user_file: FileAccess = FileAccess.open(USER_PATH, FileAccess.WRITE)
+	user_file.store_string(JSON.stringify(json_ready, "\t"))
+	user_file.close()
+	user_file = null
 
 
 func load_algorithm_data() -> void:
@@ -110,13 +119,13 @@ func end_game() -> void:
 				continue
 			if stat in TOTAL_LIST:
 				algorithm_data[key][stat] += current_algorithm_data[key][stat]
-			else:
-				for i in range(current_algorithm_data[key][stat].size()):
-					if algorithm_data[key][stat].size() <= i:
-						algorithm_data[key][stat].append(current_algorithm_data[key][stat][i])
-					else:
-						# Add the current algorithm data to the algorithm data
-						algorithm_data[key][stat][i] += current_algorithm_data[key][stat][i]
+				continue
+			for i in range(current_algorithm_data[key][stat].size()):
+				if algorithm_data[key][stat].size() <= i:
+					algorithm_data[key][stat].append(current_algorithm_data[key][stat][i])
+					continue
+				# Add the current algorithm data to the algorithm data
+				algorithm_data[key][stat][i] += current_algorithm_data[key][stat][i]
 	save_algorithm_data()
 
 
