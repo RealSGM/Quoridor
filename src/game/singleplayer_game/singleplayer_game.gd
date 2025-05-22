@@ -8,6 +8,7 @@ func _ready() -> void:
 	super._ready()
 	bot_cover.hide()
 	SignalManager.move_selected.connect(_on_move_selected)
+	AlgorithmManager.start_new_game()
 
 
 func set_current_player(val: int) -> void:
@@ -46,3 +47,8 @@ func _on_undo_button_pressed() -> void:
 func _on_move_selected(code: String) -> void:
 	move_code = code
 	_on_confirm_pressed()
+
+
+func reset_board() -> void:
+	super.reset_board()
+	AlgorithmManager.start_new_game()
