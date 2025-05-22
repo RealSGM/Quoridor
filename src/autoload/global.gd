@@ -29,12 +29,12 @@ func clear() -> String:
 
 
 func evaluate_board(player: int = 0) -> String:
-	var evaluation = game.board.EvaluateBoard(player)
+	var evaluation = game.board_wrapper.EvaluateBoard(player)
 	return "Evaluation: " + str(evaluation)
 
 
 func get_fences(direction: int = 0) -> String:
-	var fence_bitboard = game.board.GetFencesAsArray(direction)
+	var fence_bitboard = game.board_wrapper.GetFencesAsArray(direction)
 	var bb_string: String = ""
 
 	for i: int in range(fence_bitboard.size()):
@@ -67,23 +67,6 @@ func get_fence_corners(tile: int = 0) -> String:
 	return msg
 
 
-func get_adjacent_tiles(tile: int = 0) -> String:
-	var adjacent_tiles = game.board.GetAdjacentTiles(tile)
-	var msg: String = ""
-
-	for i: int in range(adjacent_tiles.size()):
-		msg += str(adjacent_tiles[i]) + " "
-
-	return msg
-
-
 func toggle_output() -> String:
 	is_outputting = !is_outputting
 	return "Outputting to Console is %s" % ["enabled" if is_outputting else "disabled"]
-
-
-func orphan(id: int) -> String:
-	var foo: Object = instance_from_id(id)
-	if foo:
-		return "Orphan: " + foo.get_class()
-	return "Orphan does not exist"

@@ -52,5 +52,7 @@ public partial class BoardWrapper : Node
 		return [.. bits];
 	}
 
+	public int EvaluateBoard(int player = 0) => State.EvaluateBoard(player);
+
 	#endregion
 }
