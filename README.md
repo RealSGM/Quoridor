@@ -12,9 +12,9 @@ This project features the implementation of the board game **Quoridor**, develop
    git clone https://github.com/RealSGM/Quoridor.git
    cd quoridor-ai
    ```
-2. Run the application doing either of the following:
-    - Run `Quoridor.exe`
-    - Launch Godot Mono and run the main scene (Press `F5`)
+2. To run the application, do the following:
+    - Launch Godot Mono
+    - Run the main scene (Press `F5`)
 
 ## Requirements
 - Godot Engine (C# version)
