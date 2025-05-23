@@ -91,6 +91,8 @@ func reset_board() -> void:
 	tile_buttons[board_wrapper.GetPawnTile(1)].pawns[1].show()
 
 	update_fence_direction()
+	move_history = ""
+	
 
 
 ## Setup the board with the selected size

@@ -75,3 +75,5 @@ func _on_reset_button_pressed() -> void:
 	SignalManager.reset_board_requested.emit()
 	chat_container.get_children().map(func(x: Control): x.queue_free())
 	win_label.text = "Game In Progress"
+	undo_button.disabled = true
+	confirm_button.disabled = true
