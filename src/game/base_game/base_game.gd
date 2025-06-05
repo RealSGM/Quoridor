@@ -92,7 +92,7 @@ func reset_board() -> void:
 
 	update_fence_direction()
 	move_history = ""
-	
+
 
 
 ## Setup the board with the selected size

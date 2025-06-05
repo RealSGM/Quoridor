@@ -46,6 +46,7 @@ func _on_undo_button_pressed() -> void:
 	undo_board_ui()
 	finish_undo_board()
 	current_player = 1 - current_player
+	next_move_button.disabled = false
 
 
 func update_winner(player: int) -> void:
@@ -62,6 +63,8 @@ func update_winner(player: int) -> void:
 
 	if autoplay_button.is_pressed():
 		user_interface._on_reset_button_pressed()
+
+	next_move_button.disabled = true
 
 
 func play_turn() -> void:
