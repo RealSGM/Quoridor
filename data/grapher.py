@@ -1,7 +1,6 @@
 import json
 import matplotlib.pyplot as plt
 import os
-import numpy as np
 
 data = {}
 FILE_NAME = 'data/algorithm_data.json'

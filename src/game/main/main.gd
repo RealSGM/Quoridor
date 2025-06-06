@@ -90,6 +90,7 @@ func setup_menus() -> void:
 	# Setup colour option buttons
 	p_one_colours.item_selected.connect(_on_colour_selected.bind(p_one_colours.selected, p_two_colours))
 	p_two_colours.item_selected.connect(_on_colour_selected.bind(p_two_colours.selected, p_one_colours))
+	bot_one_colours.item_selected.connect(_on_colour_selected.bind(bot_one_colours.selected, bot_two_colours))
 	bot_two_colours.item_selected.connect(_on_colour_selected.bind(bot_two_colours.selected, p_one_colours))
 
 	p_one_colours.select(0)
